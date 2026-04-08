@@ -23,14 +23,15 @@ services:
     ports:
       - "8180:8080"
     volumes:
-      - ./keycloak/feature-toggle-realm.json:/opt/keycloak/data/import/feature-toggle-realm.json:ro
-      - ./keycloak/themes/feature-toggle:/opt/keycloak/themes/feature-toggle:ro
+      - ./sso/keycloak/feature-toggle-realm.json:/opt/keycloak/data/import/feature-toggle-realm.json:ro
+      - ./sso/keycloak/themes/feature-toggle:/opt/keycloak/themes/feature-toggle:ro
     depends_on:
       postgres:
         condition: service_healthy
     restart: unless-stopped
 
   backend:
+    build: ./backend
     image: zaytsevdv/homni-feature-toggle:latest
     ports:
       - "8080:8080"

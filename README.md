@@ -38,7 +38,7 @@ Most feature toggle solutions are either SaaS-only or lack proper access control
 
 ## Features
 
-- &#x1F512; **OIDC Authentication** &mdash; Keycloak out of the box, compatible with any OpenID Connect provider. OAuth 2.1 + PKCE
+- &#x1F512; **OIDC Authentication** &mdash; Keycloak out of the box with a custom login page, compatible with any OpenID Connect provider. OAuth 2.1 + PKCE
 - &#x1F4C1; **Project Isolation** &mdash; each project is a self-contained workspace with its own toggles, environments, members, and API keys
 - &#x1F6E1; **Granular RBAC** &mdash; Platform Admin, Project Admin, Editor, Reader with a fine-grained permissions matrix
 - &#x1F30D; **Multi-Environment Control** &mdash; create and manage custom deployment targets per project
@@ -224,6 +224,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 - [ ] Authentik support &mdash; out-of-the-box integration as an alternative OIDC provider
 - [ ] Quarkus backend &mdash; alternative lightweight runtime, ready to use out of the box
 - [ ] Observability &mdash; built-in metrics, tracing, and health checks for the backend
+- [ ] Frontend theming &mdash; customizable colors, logo, and branding via configuration
 
 ---
 
