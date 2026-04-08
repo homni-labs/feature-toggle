@@ -3,102 +3,14 @@
 
 # Homni Feature Toggle Backend
 
-[![Build](https://github.com/homni-labs/feature-toggle-backend-spring/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/homni-labs/feature-toggle-backend-spring/actions/workflows/docker-publish.yml)
-[![GitHub Release](https://img.shields.io/github/v/release/homni-labs/feature-toggle-backend-spring)](https://github.com/homni-labs/feature-toggle-backend-spring/releases)
-[![Pre-release](https://img.shields.io/github/v/release/homni-labs/feature-toggle-backend-spring?include_prereleases&label=pre-release)](https://github.com/homni-labs/feature-toggle-backend-spring/releases)
+[![Build](https://github.com/homni-labs/feature-toggle/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/homni-labs/feature-toggle/actions/workflows/docker-publish.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](../LICENSE)
 
-> Self-hosted платформа для управления feature-тоглами с RBAC на уровне проектов, мульти-средами и аутентификацией по API-ключам.
----
+> REST API для Homni Feature Toggle &mdash; Spring Boot 3.4, гексагональная архитектура, PostgreSQL, OpenAPI 3.0, OIDC + API-ключи.
+
+**[English documentation](README.md)** &middot; **[README проекта](../README_RU.md)**
+
 </div>
-
-## Почему Homni?
-
-Большинство решений для feature-тоглов либо только SaaS, либо не имеют нормального контроля доступа. Homni даёт:
-
-- **Полный контроль** &mdash; разворачивайте на своей инфраструктуре, по своим правилам
-- **Изоляция по проектам** &mdash; у каждого проекта свои тоглы, среды и участники
-- **Гранулярный RBAC** &mdash; роли Admin / Editor / Reader на уровне проекта + платформенные администраторы
-- **Среды** &mdash; включайте фичу на STAGING, не трогая PROD
-- **Машинный доступ** &mdash; API-ключи с ограниченным сроком для SDK и CI/CD
-- **Contract-first API** &mdash; спецификация OpenAPI 3.0 с генерацией клиентов и Swagger UI
-
----
-
-## Быстрый старт
-
-### Docker Compose
-
-```bash
-  docker compose up -d
-```
-
-Запускает PostgreSQL + Keycloak + приложение. Swagger UI доступен по адресу [localhost:8080/docs](http://localhost:8080/docs).
-
-> В директории [`keycloak/`](keycloak/) находится пример конфигурации realm ([`feature-toggle-realm.json`](keycloak/feature-toggle-realm.json)) и кастомная тема логина ([`themes/`](keycloak/themes/)).
-
-### Docker Hub
-
-```bash
-  docker pull zaytsevdv/homni-feature-toggle:latest   # или любой конкретный тег
-```
-
-### Из исходников
-
-```bash
-  mvn spring-boot:run
-```
-
----
-
-## Ключевые понятия
-
-| Понятие | Описание |
-|---------|----------|
-| **Проект** | Изолированное рабочее пространство со своими тоглами, средами и участниками |
-| **Тогл** | Фича-флаг, привязанный к одной или нескольким средам, может быть включён/выключен |
-| **Среда** | Полностью настраиваемое окружение &mdash; создавайте, переименовывайте или удаляйте любые среды в рамках проекта (не ограничено DEV/STAGING/PROD) |
-| **Участник** | Пользователь с ролью (Admin, Editor, Reader) внутри проекта |
-| **API-ключ** | Токен только для чтения для SDK/машинного доступа, привязанный к проекту |
-
----
-
-## Права доступа
-
-| Действие | Platform Admin | Project Admin | Editor | Reader | API Key |
-|----------|:-:|:-:|:-:|:-:|:-:|
-| Создание / архивация проектов | + | | | | |
-| Управление пользователями платформы | + | | | | |
-| Управление участниками | + | + | | | |
-| Управление API-ключами | + | + | | | |
-| Управление средами | + | + | | | |
-| Создание / обновление / удаление тоглов | + | + | + | | |
-| Включение / выключение тоглов | + | + | + | | |
-| Чтение тоглов | + | + | + | + | + |
-
-> **Platform Admin** имеет неограниченный доступ ко всем проектам. Остальные роли действуют в рамках проекта. **API Key** предоставляет доступ только на чтение для SDK / машинной интеграции.
-
----
-
-## API
-
-Аутентификация: **Bearer JWT** (OIDC) или заголовок **`X-API-Key`**.
-
-Полный контракт: [`api.yaml`](src/main/resources/openapi/api.yaml) &middot; Интерактивная документация доступна по `/docs` (Swagger UI) при запущенном приложении.
-
----
-
-## Конфигурация
-
-| Переменная | По умолчанию | Описание |
-|------------|-------------|----------|
-| `DB_HOST` | `localhost` | Хост PostgreSQL |
-| `DB_PORT` | `5432` | Порт PostgreSQL |
-| `DB_NAME` | `homni_feature_toggle` | Имя базы данных |
-| `DB_USER` | `homni` | Пользователь БД |
-| `DB_PASSWORD` | `homni` | Пароль БД |
-| `OIDC_ISSUER_URI` | `http://localhost:8180/realms/feature-toggle` | URI издателя OIDC |
-| `OIDC_ADMIN_EMAIL` | `admin@homni.local` | Email первого администратора (назначается при первом входе) |
-| `CORS_ORIGINS` | `http://localhost:3000` | Разрешённые CORS-источники (`*` для разрешения всех) |
 
 ---
 
@@ -123,6 +35,68 @@ infrastructure/   Spring, JDBC-адаптеры, REST-контроллеры, б
 
 ---
 
+## Структура проекта
+
+```
+src/main/java/com/homni/featuretoggle/
+├── domain/
+│   ├── model/          Агрегаты, value objects, enum-ы
+│   └── exception/      Доменные исключения (NotFound, AccessDenied, Conflict, Validation)
+├── application/
+│   ├── usecase/        Один класс на операцию (CreateToggle, ListToggles, ...)
+│   └── port/out/       Интерфейсы репозиториев, CallerPort, CallerProjectAccessPort
+└── infrastructure/
+    ├── adapter/
+    │   ├── inbound/rest/         Контроллеры + презентеры (domain → API)
+    │   └── outbound/persistence/ JDBC-адаптеры (JdbcClient, нативный SQL)
+    ├── security/                  Auth-фильтры, JWT-конвертер, OIDC авто-регистрация
+    ├── exception/                 GlobalExceptionHandler
+    └── config/                    CompositionRootConfig, SecurityConfig, CORS
+```
+
+---
+
+## Обработка ошибок
+
+Доменные исключения маппятся на HTTP-коды через `GlobalExceptionHandler`:
+
+| Исключение | HTTP | Код |
+|------------|------|-----|
+| `DomainNotFoundException` | 404 | `NOT_FOUND` |
+| `DomainAccessDeniedException` | 403 | `FORBIDDEN` |
+| `DomainConflictException` | 409 | `CONFLICT` |
+| `DomainValidationException` | 422 | `VALIDATION_ERROR` |
+
+Ошибки безопасности: `TOKEN_EXPIRED` (401), `UNAUTHORIZED` (401), `FORBIDDEN` (403).
+
+Все ответы об ошибках имеют единый формат:
+
+```json
+{
+  "payload": {
+    "code": "NOT_FOUND",
+    "message": "Toggle not found"
+  },
+  "meta": {
+    "timestamp": "2026-04-09T12:00:00Z"
+  }
+}
+```
+
+---
+
+## Безопасность
+
+Двойная цепочка аутентификации:
+
+1. **API Key Filter** &mdash; `ApiKeyAuthFilter` извлекает заголовок `X-API-Key`, хеширует SHA-256, ищет активный ключ в БД. Устанавливает `ApiKeyAuthentication` (привязан к проекту, всегда READER). При совпадении остальные фильтры пропускаются.
+
+2. **JWT / OIDC** &mdash; fallback на OAuth2 Resource Server. Валидирует JWT, извлекает claims `sub`, `email`, `name`. Автоматически создаёт пользователя при первом входе через `FindOrCreateUserUseCase`. Первый пользователь с `OIDC_ADMIN_EMAIL` повышается до Platform Admin.
+
+3. **Авторизация на уровне домена** &mdash; use-cases вызывают `callerAccess.resolve(projectId).ensure(Permission.WRITE_TOGGLES)`. Platform Admin обходит проверки ролей проекта.
+
+---
+
 ## Стек технологий
 
 | | Технология |
@@ -133,54 +107,6 @@ infrastructure/   Spring, JDBC-адаптеры, REST-контроллеры, б
 | Auth-провайдер | Keycloak (или любой OIDC-провайдер) |
 | API | OpenAPI 3.0, кодогенерация контроллеров |
 | CI/CD | GitHub Actions &rarr; Docker Hub |
-
----
-
-## Планы
-
-- [ ] Web UI &mdash; полноценный фронтенд для управления тоглами
-- [ ] Java SDK &mdash; нативная клиентская библиотека без зависимостей
-- [ ] Бэкенд на Quarkus &mdash; альтернативный легковесный runtime
-- [ ] Аудит действий &mdash; логирование всех действий пользователей и SDK
-- [ ] Графы зависимостей тоглов &mdash; визуализация связей между тоглами
-- [ ] Вебхуки &mdash; уведомление внешних систем об изменении состояния тоглов
-- [ ] Тоглы по расписанию &mdash; автоматическое включение/выключение в заданное время
-- [ ] Обнаружение устаревших тоглов &mdash; поиск тоглов без изменений за N дней
-- [ ] Дашборд метрик &mdash; статистика использования тоглов, SDK, латенси
-- [ ] Python & Go SDK &mdash; мультиязычная поддержка клиентов
-
----
-
-## Участие в разработке
-
-Мы рады любому вкладу! Будь то баг-репорт, предложение фичи или pull request &mdash; всё ценно.
-
-1. Форкните репозиторий
-2. Создайте ветку (`git checkout -b feature/amazing-feature`)
-3. Закоммитьте изменения
-4. Запушьте и откройте Pull Request
-
-Для крупных изменений сначала откройте [issue](https://github.com/homni-labs/feature-toggle-backend-spring/issues), чтобы обсудить что вы хотите улучшить.
-
----
-
-## Безопасность
-
-Если вы обнаружили уязвимость, пожалуйста, **не** создавайте публичный issue. Вместо этого свяжитесь напрямую через [Telegram](https://t.me/zaytsev_dv) или по email zaytsev.dmitry9228@gmail.com.
-
----
-
-## Контакты
-
-| Канал | Ссылка |
-|-------|--------|
-| GitHub Discussions | [discussions](https://github.com/homni-labs/feature-toggle-backend-spring/discussions) |
-| Telegram | [@zaytsev_dv](https://t.me/zaytsev_dv) |
-| Email | zaytsev.dmitry9228@gmail.com |
-
-## Лицензия
-
-Проект лицензирован под [MIT License](LICENSE).
 
 ---
 

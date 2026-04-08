@@ -3,66 +3,22 @@
 
 # Feature Toggle Frontend
 
-Панель управления для платформы [Homni Feature Toggle](https://github.com/homni-labs/feature-toggle-backend-spring) — self-hosted платформа фича-флагов с RBAC по проектам, мульти-окружениями и API-ключами.
+Панель управления для [Homni Feature Toggle](https://github.com/homni-labs/feature-toggle) &mdash; Flutter Web, Clean Architecture, BLoC/Cubit, OIDC/PKCE.
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.x-blue?logo=flutter)](https://flutter.dev)
 [![BLoC](https://img.shields.io/badge/State-BLoC-blueviolet)](https://bloclibrary.dev)
 [![Architecture](https://img.shields.io/badge/Architecture-Clean-teal)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](../LICENSE)
 
-**[English documentation](README.md)**
+**[English documentation](README.md)** &middot; **[README проекта](../README_RU.md)**
 
 </div>
 
 ---
 
-<!-- TODO: заменить на реальные скриншоты -->
-<p align="center">
-  <img src="docs/screenshots/dashboard.png" width="80%" alt="Dashboard">
-</p>
-
-<p align="center">
-  <img src="docs/screenshots/toggles.png" width="49%" alt="Toggles">&nbsp;
-  <img src="docs/screenshots/members.png" width="49%" alt="Members">
-</p>
-
----
-
-## Начало работы
-
-### Предусловия
-
-- Flutter SDK >= 3.2 ([установка](https://docs.flutter.dev/get-started/install))
-- Запущенный бэкенд с Keycloak ([инструкция](https://github.com/homni-labs/feature-toggle-backend-spring#quick-start))
-
-### Запуск
-
-```bash
-flutter pub get
-flutter run -d chrome --web-port 3000
-```
-
-Откройте [localhost:3000](http://localhost:3000). Учётные данные по умолчанию: `admin` / `admin`.
-
----
-
-## Возможности
-
-| | |
-|-|-|
-| **Изоляция проектов** | У каждого проекта свои тогглы, окружения, участники и API-ключи |
-| **Управление тогглами** | Создание, включение/выключение, фильтрация по статусу и окружению, пагинация |
-| **Контроль окружений** | Произвольные окружения деплоя — не ограничены DEV/STAGING/PROD |
-| **Командный доступ** | Приглашение участников с ролями Admin, Editor, Reader на уровне проекта |
-| **API-ключи** | Выпуск токенов со сроком действия для SDK и CI/CD |
-| **Администрирование** | Управление пользователями и ролями на уровне платформы |
-| **OIDC-авторизация** | OAuth 2.1 с PKCE, автоматическое обновление токенов, управление сессией |
-
----
-
 ## Архитектура
 
-Фронтенд построен на **Clean Architecture** с модульной структурой по фичам. Каждый из 7 модулей полностью изолирован и содержит собственные слои: domain, application, infrastructure, presentation.
+Clean Architecture с модульной структурой по фичам. Каждый из 7 модулей полностью изолирован и содержит собственные слои: domain, application, infrastructure, presentation.
 
 ```
 lib/
@@ -80,10 +36,10 @@ lib/
 
 | Решение | Обоснование |
 |---------|-------------|
-| **Clean Architecture** | Строгое разделение слоёв — фичи тестируются и заменяются независимо |
-| **BLoC/Cubit** | Предсказуемый state management с sealed-классами — без булевых флагов, без неоднозначных состояний |
-| **Either&lt;Failure, T&gt;** | Ошибки — значения, не исключения. Каждый сбой типизирован, ничего не теряется |
-| **Value Objects** | `UserId`, `Email`, `ProjectRole` вместо строк — невалидное состояние невозможно |
+| **Clean Architecture** | Строгое разделение слоёв &mdash; фичи тестируются и заменяются независимо |
+| **BLoC/Cubit** | Предсказуемый state management с sealed-классами &mdash; без булевых флагов, без неоднозначных состояний |
+| **Either&lt;Failure, T&gt;** | Ошибки &mdash; значения, не исключения. Каждый сбой типизирован, ничего не теряется |
+| **Value Objects** | `UserId`, `Email`, `ProjectRole` вместо строк &mdash; невалидное состояние невозможно |
 | **Один use-case = один класс** | Единственная ответственность, инъекция через конструктор, максимум 15 строк |
 | **UI не знает об инфраструктуре** | Presentation-слой не имеет ни одного импорта HTTP, JSON или хранилища |
 
@@ -103,56 +59,37 @@ Domain ни от чего не зависит. Infrastructure реализует
 |------|-----------|--------|
 | Фреймворк | Flutter 3.x (Web) | Единая кодовая база, быстрая итерация, web-first |
 | State | flutter_bloc | Cubit + Dart 3 sealed states, предсказуемые rebuild-ы |
-| Ошибки | fpdart | `Either<Failure, T>` — функциональная обработка без исключений |
+| Ошибки | fpdart | `Either<Failure, T>` &mdash; функциональная обработка без исключений |
 | DI | get_it | Легковесный, без кодогенерации, lazy singletons |
 | Авторизация | OIDC/PKCE | Стандартный протокол, работает с Keycloak или любым провайдером |
 | HTTP | package:http | Минимальная зависимость, достаточная для REST |
 
 ---
 
-## Структура проекта
+## Auth Flow
 
-```
-features/
-├── auth/            OIDC-авторизация, жизненный цикл токенов, сессия
-├── projects/        CRUD проектов, настройки, архивация
-├── toggles/         CRUD фича-флагов, фильтрация, пагинация
-├── environments/    Управление окружениями деплоя
-├── members/         RBAC на уровне проекта (Admin/Editor/Reader)
-├── api_keys/        Выпуск и отзыв токенов
-└── users/           Администрирование пользователей платформы
-```
+OIDC Authorization Code с PKCE (S256):
 
-Каждая фича содержит 19 use-cases, 8 cubit-ов, 7 доменных моделей с value objects, 6 портов репозиториев с инфраструктурными реализациями.
+1. **Discovery** &mdash; загружает `.well-known/openid-configuration`, валидирует issuer
+2. **PKCE** &mdash; генерирует 32-байтный случайный verifier, создаёт S256 challenge
+3. **State & Nonce** &mdash; хранятся в `sessionStorage` для защиты от CSRF и replay-атак
+4. **Обмен токенов** &mdash; authorization code + code verifier &rarr; access token + refresh token
+5. **Refresh** &mdash; guard от конкурентных вызовов через общий `Future`
+6. **Хранение** &mdash; browser `sessionStorage` (очищается при закрытии вкладки)
 
 ---
 
-## Дорожная карта
+## Паттерн состояний
 
-- [ ] Мобильная поддержка (Android, iOS)
-- [ ] Десктоп поддержка (macOS, Windows, Linux)
-- [ ] Локализация (i18n)
-- [ ] Типобезопасная навигация (go_router)
-- [ ] Просмотр журнала аудита
-- [ ] Поиск и массовые операции над тогглами
+Sealed-состояния и `Either<Failure, T>` работают вместе:
 
----
-
-## Участие в разработке
-
-1. Форкните репозиторий
-2. Создайте feature-ветку
-3. Зафиксируйте изменения
-4. Откройте Pull Request
-
-Для крупных изменений сначала [создайте issue](https://github.com/homni-labs/feature-toggle-app/issues).
-
-**Безопасность** — уязвимости сообщайте напрямую через [Telegram](https://t.me/zaytsev_dv) или zaytsev.dmitry9228@gmail.com. Не используйте публичные issues.
+1. **Use-case** возвращает `Either<Failure, T>` из репозитория
+2. **Cubit** преобразует результат в sealed-состояние:
+   - `Loading` &rarr; `Loaded(data)` при успехе
+   - `Loading` &rarr; `Error(failure)` при ошибке
+3. **UI** использует `BlocConsumer` &mdash; `listener` для побочных эффектов (snackbar, навигация), `builder` для рендеринга
+4. **Exhaustive switch** &mdash; компилятор Dart отлавливает необработанные состояния
 
 ---
 
-## Лицензия
-
-[MIT](LICENSE)
-
-<p align="center"><a href="https://github.com/homni-labs">Homni Labs</a></p>
+<p align="center">Сделано с заботой в <a href="https://github.com/homni-labs">Homni Labs</a></p>

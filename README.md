@@ -241,6 +241,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 - [ ] Webhooks &mdash; notify external systems on toggle state changes
 - [ ] Scheduled toggles &mdash; auto-enable/disable at a specific time
 - [ ] Stale toggle detection &mdash; find toggles that haven't changed in N days
+- [ ] Authentik support &mdash; out-of-the-box integration as an alternative OIDC provider
+- [ ] Quarkus backend &mdash; alternative lightweight runtime, ready to use out of the box
+- [ ] Observability &mdash; built-in metrics, tracing, and health checks for the backend
 
 ---
 

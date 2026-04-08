@@ -3,104 +3,14 @@
 
 # Homni Feature Toggle Backend
 
-[![Build](https://github.com/homni-labs/feature-toggle-backend-spring/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/homni-labs/feature-toggle-backend-spring/actions/workflows/docker-publish.yml)
-[![GitHub Release](https://img.shields.io/github/v/release/homni-labs/feature-toggle-backend-spring)](https://github.com/homni-labs/feature-toggle-backend-spring/releases)
-[![Pre-release](https://img.shields.io/github/v/release/homni-labs/feature-toggle-backend-spring?include_prereleases&label=pre-release)](https://github.com/homni-labs/feature-toggle-backend-spring/releases)
+[![Build](https://github.com/homni-labs/feature-toggle/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/homni-labs/feature-toggle/actions/workflows/docker-publish.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](../LICENSE)
 
-> Self-hosted feature toggle platform with per-project RBAC, multi-environment control, and API key authentication.
+> REST API powering Homni Feature Toggle &mdash; Spring Boot 3.4, Hexagonal Architecture, PostgreSQL, OpenAPI 3.0, OIDC + API key auth.
 
-**[Russian documentation](README_RU.md)**
----
+**[Russian documentation](README_RU.md)** &middot; **[Project README](../README.md)**
+
 </div>
-
-## Why Homni?
-
-Most feature toggle solutions are either SaaS-only or lack proper access control. Homni gives you:
-
-- **Full ownership** &mdash; deploy on your infrastructure, your rules
-- **Per-project isolation** &mdash; each project has its own toggles, environments, and team members
-- **Granular RBAC** &mdash; Admin / Editor / Reader roles at project level + platform-wide admins
-- **Environment-aware toggles** &mdash; enable a feature in STAGING without touching PROD
-- **Machine-to-machine access** &mdash; scoped API keys with expiration for SDKs and CI/CD
-- **Contract-first API** &mdash; OpenAPI 3.0 spec with generated clients and Swagger UI
-
----
-
-## Quick Start
-
-### Docker Compose
-
-```bash
-  docker compose up -d
-```
-
-Starts PostgreSQL + Keycloak + App. Open Swagger UI at [localhost:8080/docs](http://localhost:8080/docs).
-
-> The [`keycloak/`](keycloak/) directory contains a sample realm config ([`feature-toggle-realm.json`](keycloak/feature-toggle-realm.json)) and a custom login theme ([`themes/`](keycloak/themes/)).
-
-### Docker Hub
-
-```bash
-  docker pull zaytsevdv/homni-feature-toggle:latest   # or any specific tag
-```
-
-### From source
-
-```bash
-  mvn spring-boot:run
-```
-
----
-
-## Key Concepts
-
-| Concept | Description |
-|---------|-------------|
-| **Project** | Isolated workspace with its own toggles, environments, and members |
-| **Toggle** | Feature flag bound to one or more environments, can be enabled/disabled |
-| **Environment** | Fully customizable deployment target &mdash; create, rename, or delete any environment per project (not limited to DEV/STAGING/PROD) |
-| **Member** | User with a role (Admin, Editor, Reader) within a project |
-| **API Key** | Read-only token for SDK/machine access, scoped to a project |
-
----
-
-## Permissions
-
-| Action | Platform Admin | Project Admin | Editor | Reader | API Key |
-|--------|:-:|:-:|:-:|:-:|:-:|
-| Create / archive projects | + | | | | |
-| Manage platform users | + | | | | |
-| Manage members | + | + | | | |
-| Manage API keys | + | + | | | |
-| Manage environments | + | + | | | |
-| Create / update / delete toggles | + | + | + | | |
-| Enable / disable toggles | + | + | + | | |
-| Read toggles | + | + | + | + | + |
-
-> **Platform Admin** has unrestricted access to all projects. Other roles are scoped per project. **API Key** grants read-only access for SDK / machine integration.
-
----
-
-## API
-
-Authentication: **Bearer JWT** (OIDC) or **`X-API-Key`** header.
-
-Full contract: [`api.yaml`](src/main/resources/openapi/api.yaml) &middot; Interactive docs available at `/docs` (Swagger UI) when the application is running.
-
----
-
-## Configuration
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DB_HOST` | `localhost` | PostgreSQL host |
-| `DB_PORT` | `5432` | PostgreSQL port |
-| `DB_NAME` | `homni_feature_toggle` | Database name |
-| `DB_USER` | `homni` | Database user |
-| `DB_PASSWORD` | `homni` | Database password |
-| `OIDC_ISSUER_URI` | `http://localhost:8180/realms/feature-toggle` | OIDC issuer URI |
-| `OIDC_ADMIN_EMAIL` | `admin@homni.local` | First admin email (bootstrapped on first login) |
-| `CORS_ORIGINS` | `http://localhost:3000` | Allowed CORS origins (`*` to allow all) |
 
 ---
 
@@ -125,6 +35,68 @@ infrastructure/   Spring, JDBC adapters, REST controllers, security
 
 ---
 
+## Project Structure
+
+```
+src/main/java/com/homni/featuretoggle/
+├── domain/
+│   ├── model/          Aggregates, value objects, enums
+│   └── exception/      Domain exceptions (NotFound, AccessDenied, Conflict, Validation)
+├── application/
+│   ├── usecase/        One class per operation (CreateToggle, ListToggles, ...)
+│   └── port/out/       Repository interfaces, CallerPort, CallerProjectAccessPort
+└── infrastructure/
+    ├── adapter/
+    │   ├── inbound/rest/         Controllers + presenters (domain → API mapping)
+    │   └── outbound/persistence/ JDBC adapters (JdbcClient, raw SQL)
+    ├── security/                  Auth filters, JWT converter, OIDC auto-registration
+    ├── exception/                 GlobalExceptionHandler
+    └── config/                    CompositionRootConfig, SecurityConfig, CORS
+```
+
+---
+
+## Error Handling
+
+Domain exceptions map to HTTP status codes via `GlobalExceptionHandler`:
+
+| Exception | HTTP | Code |
+|-----------|------|------|
+| `DomainNotFoundException` | 404 | `NOT_FOUND` |
+| `DomainAccessDeniedException` | 403 | `FORBIDDEN` |
+| `DomainConflictException` | 409 | `CONFLICT` |
+| `DomainValidationException` | 422 | `VALIDATION_ERROR` |
+
+Security errors: `TOKEN_EXPIRED` (401), `UNAUTHORIZED` (401), `FORBIDDEN` (403).
+
+All error responses follow a consistent format:
+
+```json
+{
+  "payload": {
+    "code": "NOT_FOUND",
+    "message": "Toggle not found"
+  },
+  "meta": {
+    "timestamp": "2026-04-09T12:00:00Z"
+  }
+}
+```
+
+---
+
+## Security
+
+Dual authentication chain:
+
+1. **API Key Filter** &mdash; `ApiKeyAuthFilter` extracts `X-API-Key` header, hashes with SHA-256, looks up active key in DB. Sets `ApiKeyAuthentication` (project-scoped, always READER). Short-circuits if found.
+
+2. **JWT / OIDC** &mdash; falls back to OAuth2 Resource Server. Validates JWT, extracts `sub`, `email`, `name` claims. Auto-creates user on first login via `FindOrCreateUserUseCase`. First user matching `OIDC_ADMIN_EMAIL` is promoted to Platform Admin.
+
+3. **Domain-level authorization** &mdash; use-cases call `callerAccess.resolve(projectId).ensure(Permission.WRITE_TOGGLES)`. Platform Admins bypass project role checks.
+
+---
+
 ## Tech Stack
 
 | | Technology |
@@ -135,54 +107,6 @@ infrastructure/   Spring, JDBC adapters, REST controllers, security
 | Auth Provider | Keycloak (or any OIDC provider) |
 | API | OpenAPI 3.0, code-generated controllers |
 | CI/CD | GitHub Actions &rarr; Docker Hub |
-
----
-
-## Roadmap
-
-- [ ] Web UI &mdash; full-featured frontend for toggle management
-- [ ] Java SDK &mdash; native client library, zero dependencies
-- [ ] Quarkus backend &mdash; alternative lightweight runtime
-- [ ] Audit log &mdash; track all user and SDK actions
-- [ ] Toggle dependency graphs &mdash; visualize relationships between toggles
-- [ ] Webhooks &mdash; notify external systems on toggle state changes
-- [ ] Scheduled toggles &mdash; auto-enable/disable at a specific date and time
-- [ ] Stale toggle detection &mdash; find toggles that haven't changed in N days
-- [ ] Metrics dashboard &mdash; toggle evaluation stats, SDK usage, latency
-- [ ] Python & Go SDKs &mdash; multi-language client support
-
----
-
-## Contributing
-
-Contributions are welcome! Whether it's a bug report, feature request, or pull request &mdash; all input is valued.
-
-1. Fork the repo
-2. Create your branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes
-4. Push and open a Pull Request
-
-Please open an [issue](https://github.com/homni-labs/feature-toggle-backend-spring/issues) first for major changes to discuss what you'd like to improve.
-
----
-
-## Security
-
-If you discover a security vulnerability, please **do not** open a public issue. Instead, reach out directly via [Telegram](https://t.me/zaytsev_dv) or email at zaytsev.dmitry9228@gmail.com.
-
----
-
-## Contact
-
-| Channel | Link |
-|---------|------|
-| GitHub Discussions | [discussions](https://github.com/homni-labs/feature-toggle-backend-spring/discussions) |
-| Telegram | [@zaytsev_dv](https://t.me/zaytsev_dv) |
-| Email | zaytsev.dmitry9228@gmail.com |
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
 
 ---
 
