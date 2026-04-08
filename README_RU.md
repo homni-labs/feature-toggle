@@ -8,7 +8,7 @@
 
 **[English documentation](README.md)**
 
-[![Build](https://github.com/homni-labs/feature-toggle/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/homni-labs/feature-toggle/actions/workflows/docker-publish.yml)
+[![Build](https://github.com/homni-labs/feature-toggle/actions/workflows/ci.yml/badge.svg)](https://github.com/homni-labs/feature-toggle/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![GitHub Release](https://img.shields.io/github/v/release/homni-labs/feature-toggle)](https://github.com/homni-labs/feature-toggle/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/homni-labs/feature-toggle?style=social)](https://github.com/homni-labs/feature-toggle)

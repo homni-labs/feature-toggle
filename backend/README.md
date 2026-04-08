@@ -3,7 +3,7 @@
 
 # Homni Feature Toggle Backend
 
-[![Build](https://github.com/homni-labs/feature-toggle/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/homni-labs/feature-toggle/actions/workflows/docker-publish.yml)
+[![Build](https://github.com/homni-labs/feature-toggle/actions/workflows/ci.yml/badge.svg)](https://github.com/homni-labs/feature-toggle/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](../LICENSE)
 
 > REST API powering Homni Feature Toggle &mdash; Spring Boot 3.4, Hexagonal Architecture, PostgreSQL, OpenAPI 3.0, OIDC + API key auth.
