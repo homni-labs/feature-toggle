@@ -1,0 +1,22 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# macOS
+.DS_Store
+
+# Java / Maven
+backend/target/
+
+# Flutter
+frontend/build/
+frontend/.dart_tool/
+frontend/.flutter-plugins-dependencies
+
+# Claude
+.claude/
+CLAUDE.md
+
+# Env
+.env

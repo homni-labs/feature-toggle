@@ -1,0 +1,150 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
+import 'package:feature_toggle_app/features/toggles/application/bloc/toggles_state.dart';
+import 'package:feature_toggle_app/features/toggles/application/usecase/create_toggle_usecase.dart';
+import 'package:feature_toggle_app/features/toggles/application/usecase/delete_toggle_usecase.dart';
+import 'package:feature_toggle_app/features/toggles/application/usecase/load_toggles_usecase.dart';
+import 'package:feature_toggle_app/features/toggles/application/usecase/update_toggle_usecase.dart';
+
+class TogglesCubit extends Cubit<TogglesState> {
+  final LoadTogglesUseCase _loadToggles;
+  final CreateToggleUseCase _createToggle;
+  final UpdateToggleUseCase _updateToggle;
+  final DeleteToggleUseCase _deleteToggle;
+
+  static const _pageSize = 6;
+
+  TogglesCubit({
+    required LoadTogglesUseCase loadToggles,
+    required CreateToggleUseCase createToggle,
+    required UpdateToggleUseCase updateToggle,
+    required DeleteToggleUseCase deleteToggle,
+  })  : _loadToggles = loadToggles,
+        _createToggle = createToggle,
+        _updateToggle = updateToggle,
+        _deleteToggle = deleteToggle,
+        super(const TogglesInitial());
+
+  Future<void> load({
+    required String accessToken,
+    required ProjectId projectId,
+    int page = 0,
+    bool? enabled,
+    String? environment,
+  }) async {
+    emit(const TogglesLoading());
+    final result = await _loadToggles(
+      accessToken: accessToken,
+      projectId: projectId,
+      page: page,
+      size: _pageSize,
+      enabled: enabled,
+      environment: environment,
+    );
+    result.fold(
+      (f) => emit(TogglesError(f)),
+      (paged) => emit(TogglesLoaded(
+        toggles: paged.items,
+        totalElements: paged.totalElements,
+        page: paged.page,
+        totalPages: paged.totalPages,
+        filterEnabled: enabled,
+        filterEnvironment: environment,
+      )),
+    );
+  }
+
+  Future<void> create({
+    required String accessToken,
+    required ProjectId projectId,
+    required String name,
+    String? description,
+    required List<String> environments,
+  }) async {
+    final result = await _createToggle(
+      accessToken: accessToken,
+      projectId: projectId,
+      name: name,
+      description: description,
+      environments: environments,
+    );
+    result.fold(
+      (f) => emit(TogglesError(f)),
+      (created) {
+        final current = state;
+        if (current is TogglesLoaded) {
+          final list = [created, ...current.toggles];
+          if (list.length > _pageSize) list.removeLast();
+          emit(current.copyWith(
+            toggles: list,
+            totalElements: current.totalElements + 1,
+            totalPages: ((current.totalElements + 1) / _pageSize).ceil(),
+          ));
+        }
+      },
+    );
+  }
+
+  Future<void> update({
+    required String accessToken,
+    required ProjectId projectId,
+    required ToggleId toggleId,
+    String? name,
+    String? description,
+    List<String>? environments,
+    bool? enabled,
+  }) async {
+    final result = await _updateToggle(
+      accessToken: accessToken,
+      projectId: projectId,
+      toggleId: toggleId,
+      name: name,
+      description: description,
+      environments: environments,
+      enabled: enabled,
+    );
+    result.fold(
+      (f) => emit(TogglesError(f)),
+      (updated) {
+        final current = state;
+        if (current is TogglesLoaded) {
+          final list = current.toggles
+              .map((t) => t.id == updated.id ? updated : t)
+              .toList();
+          emit(current.copyWith(toggles: list));
+        }
+      },
+    );
+  }
+
+  Future<void> delete({
+    required String accessToken,
+    required ProjectId projectId,
+    required ToggleId toggleId,
+  }) async {
+    final result = await _deleteToggle(
+      accessToken: accessToken,
+      projectId: projectId,
+      toggleId: toggleId,
+    );
+    result.fold(
+      (f) => emit(TogglesError(f)),
+      (_) {
+        final current = state;
+        if (current is TogglesLoaded) {
+          final list = current.toggles
+              .where((t) => t.id != toggleId)
+              .toList();
+          emit(current.copyWith(
+            toggles: list,
+            totalElements: current.totalElements - 1,
+            totalPages: (current.totalElements - 1) > 0
+                ? ((current.totalElements - 1) / _pageSize).ceil()
+                : 0,
+          ));
+        }
+      },
+    );
+  }
+}

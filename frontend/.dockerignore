@@ -1,0 +1,9 @@
+.dart_tool/
+.idea/
+.claude/
+build/
+previews/
+.DS_Store
+*.md
+.git
+.gitignore

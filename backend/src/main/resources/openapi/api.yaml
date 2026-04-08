@@ -1,0 +1,1205 @@
+openapi: 3.0.1
+
+info:
+  title: Homni Feature Toggle API
+  version: '2.0.0'
+  description: Per-project feature toggle management with RBAC and API key authentication.
+
+servers:
+  - url: 'http://localhost:8080'
+    description: local
+
+security:
+  - apiKey: []
+  - oidc: []
+
+tags:
+  - name: Projects
+    description: Project management (PLATFORM_ADMIN creates, members access)
+  - name: Feature Toggles
+    description: Feature toggle CRUD within a project
+  - name: Environments
+    description: Deployment environment management within a project
+  - name: API Keys
+    description: API key management within a project
+  - name: Members
+    description: Project membership management
+  - name: Users
+    description: Platform user administration (PLATFORM_ADMIN)
+
+paths:
+
+  # ========== Projects ==========
+
+  /projects:
+    post:
+      tags: [Projects]
+      operationId: createProject
+      summary: Create a new project
+      description: Requires PLATFORM_ADMIN role.
+      security:
+        - oidc: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSingleResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '409':
+          $ref: '#/components/responses/409'
+        '500':
+          $ref: '#/components/responses/500'
+
+    get:
+      tags: [Projects]
+      operationId: listProjects
+      summary: List projects
+      description: PLATFORM_ADMIN sees all projects. Regular users see only projects they are a member of.
+      security:
+        - oidc: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectListResponse'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /projects/{projectId}:
+    parameters:
+      - $ref: '#/components/parameters/projectId'
+
+    patch:
+      tags: [Projects]
+      operationId: updateProject
+      summary: Update project fields (name, description, archived status)
+      description: Requires MANAGE_MEMBERS permission. Set archived=true to freeze the project (readonly), archived=false to unfreeze.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSingleResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # ========== Feature Toggles ==========
+
+  /projects/{projectId}/toggles:
+    parameters:
+      - $ref: '#/components/parameters/projectId'
+
+    get:
+      tags: [Feature Toggles]
+      operationId: listToggles
+      summary: List feature toggles in a project
+      description: Requires READ_TOGGLES permission (READER+).
+      parameters:
+        - name: enabled
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: environment
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureToggleListResponse'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '500':
+          $ref: '#/components/responses/500'
+
+    post:
+      tags: [Feature Toggles]
+      operationId: createToggle
+      summary: Create a new feature toggle
+      description: Requires WRITE_TOGGLES permission (EDITOR+). Project must not be archived.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFeatureToggleRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureToggleSingleResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '409':
+          $ref: '#/components/responses/409'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /projects/{projectId}/toggles/{toggleId}:
+    parameters:
+      - $ref: '#/components/parameters/projectId'
+      - name: toggleId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    get:
+      tags: [Feature Toggles]
+      operationId: getToggle
+      summary: Get toggle by ID
+      description: Requires READ_TOGGLES permission (READER+).
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureToggleSingleResponse'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+
+    patch:
+      tags: [Feature Toggles]
+      operationId: updateToggle
+      summary: Update a feature toggle
+      description: Partial update. Requires WRITE_TOGGLES permission (EDITOR+).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateFeatureToggleRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeatureToggleSingleResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+
+    delete:
+      tags: [Feature Toggles]
+      operationId: deleteToggle
+      summary: Delete a feature toggle
+      description: Requires WRITE_TOGGLES permission (EDITOR+).
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # ========== Environments ==========
+
+  /projects/{projectId}/environments:
+    parameters:
+      - $ref: '#/components/parameters/projectId'
+
+    get:
+      tags: [Environments]
+      operationId: listEnvironments
+      summary: List environments in a project
+      description: Requires READ_TOGGLES permission (READER+).
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentListResponse'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '500':
+          $ref: '#/components/responses/500'
+
+    post:
+      tags: [Environments]
+      operationId: createEnvironment
+      summary: Create a new environment
+      description: Requires WRITE_TOGGLES permission (EDITOR+). Project must not be archived.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnvironmentRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentSingleResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '409':
+          $ref: '#/components/responses/409'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /projects/{projectId}/environments/{environmentId}:
+    parameters:
+      - $ref: '#/components/parameters/projectId'
+      - name: environmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    delete:
+      tags: [Environments]
+      operationId: deleteEnvironment
+      summary: Delete an environment
+      description: Requires WRITE_TOGGLES permission (EDITOR+). Cannot delete if in use by toggles.
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # ========== API Keys ==========
+
+  /projects/{projectId}/api-keys:
+    parameters:
+      - $ref: '#/components/parameters/projectId'
+
+    get:
+      tags: [API Keys]
+      operationId: listApiKeys
+      summary: List API keys (tokens are masked)
+      description: Requires MANAGE_MEMBERS permission (ADMIN).
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyListResponse'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '500':
+          $ref: '#/components/responses/500'
+
+    post:
+      tags: [API Keys]
+      operationId: issueApiKey
+      summary: Issue a new read-only API key
+      description: Requires MANAGE_MEMBERS permission (ADMIN). API keys always grant READER role (read-only). The raw token is returned only once.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueApiKeyRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyCreatedSingleResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /projects/{projectId}/api-keys/{apiKeyId}:
+    parameters:
+      - $ref: '#/components/parameters/projectId'
+      - name: apiKeyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    delete:
+      tags: [API Keys]
+      operationId: revokeApiKey
+      summary: Revoke an API key
+      description: Requires MANAGE_MEMBERS permission (ADMIN).
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # ========== Members ==========
+
+  /projects/{projectId}/members:
+    parameters:
+      - $ref: '#/components/parameters/projectId'
+
+    get:
+      tags: [Members]
+      operationId: listMembers
+      summary: List project members
+      description: Requires MANAGE_MEMBERS permission (ADMIN).
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipListResponse'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /projects/{projectId}/members/{userId}:
+    parameters:
+      - $ref: '#/components/parameters/projectId'
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    put:
+      tags: [Members]
+      operationId: upsertMember
+      summary: Add or update a project member
+      description: Adds the user to the project with the specified role, or updates the role if already a member. Requires MANAGE_MEMBERS permission (ADMIN).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeMemberRoleRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipSingleResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+
+    delete:
+      tags: [Members]
+      operationId: removeMember
+      summary: Remove a member from the project
+      description: Requires MANAGE_MEMBERS permission (ADMIN). Project must not be archived.
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # ========== Users ==========
+
+  /users/me:
+    get:
+      tags: [Users]
+      operationId: getCurrentUser
+      summary: Get current authenticated user
+      description: Returns the profile of the currently authenticated OIDC user.
+      security:
+        - oidc: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSingleResponse'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /users:
+    get:
+      tags: [Users]
+      operationId: listUsers
+      summary: List all platform users
+      description: Requires PLATFORM_ADMIN role.
+      security:
+        - oidc: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /users/search:
+    get:
+      tags: [Users]
+      operationId: searchUsers
+      summary: Search users by email or name
+      description: Returns up to 20 users matching the query. Available to any authenticated user (for member assignment).
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+          description: Search query (matches email or name, case-insensitive)
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /users/{userId}:
+    parameters:
+      - name: userId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+
+    patch:
+      tags: [Users]
+      operationId: updateUser
+      summary: Update user platform role or status
+      description: Requires PLATFORM_ADMIN role. Use to promote/demote or disable/activate users.
+      security:
+        - oidc: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSingleResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '500':
+          $ref: '#/components/responses/500'
+
+components:
+  parameters:
+    projectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    '204':
+      description: No content
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '404':
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '409':
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    '500':
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+
+    # ---------- Common ----------
+
+    ResponseMeta:
+      type: object
+      required: [timestamp]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+
+    Pagination:
+      type: object
+      required: [page, size, totalElements, totalPages]
+      properties:
+        page:
+          type: integer
+        size:
+          type: integer
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+
+    ErrorResponse:
+      type: object
+      required: [payload, meta]
+      properties:
+        payload:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: string
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    # ---------- Project ----------
+
+    CreateProjectRequest:
+      type: object
+      required: [slug, name]
+      properties:
+        slug:
+          type: string
+          minLength: 2
+          maxLength: 50
+          pattern: '^[A-Za-z][A-Za-z0-9_-]*$'
+          example: MY_PROJECT
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: My Project
+        description:
+          type: string
+          maxLength: 1000
+
+    UpdateProjectRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+        archived:
+          type: boolean
+          description: Set to true to archive (readonly), false to unarchive
+
+    Project:
+      type: object
+      required: [id, slug, name, archived, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        slug:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        archived:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        myRole:
+          type: string
+          enum: [ADMIN, EDITOR, READER]
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    ProjectSingleResponse:
+      type: object
+      required: [payload, meta]
+      properties:
+        payload:
+          $ref: '#/components/schemas/Project'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    ProjectListResponse:
+      type: object
+      required: [payload, meta]
+      properties:
+        payload:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    # ---------- Feature Toggle ----------
+
+    CreateFeatureToggleRequest:
+      type: object
+      required: [name, environments]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: dark-mode
+        description:
+          type: string
+          maxLength: 1000
+        environments:
+          type: array
+          items:
+            type: string
+          example: [DEV, PROD]
+
+    UpdateFeatureToggleRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+        environments:
+          type: array
+          items:
+            type: string
+        enabled:
+          type: boolean
+
+    FeatureToggle:
+      type: object
+      required: [id, projectId, name, enabled, environments, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        enabled:
+          type: boolean
+        environments:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    FeatureToggleSingleResponse:
+      type: object
+      required: [payload, meta]
+      properties:
+        payload:
+          $ref: '#/components/schemas/FeatureToggle'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    FeatureToggleListResponse:
+      type: object
+      required: [payload, pagination, meta]
+      properties:
+        payload:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeatureToggle'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    # ---------- Environment ----------
+
+    CreateEnvironmentRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: STAGING
+
+    Environment:
+      type: object
+      required: [id, projectId, name, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    EnvironmentSingleResponse:
+      type: object
+      required: [payload, meta]
+      properties:
+        payload:
+          $ref: '#/components/schemas/Environment'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    EnvironmentListResponse:
+      type: object
+      required: [payload, meta]
+      properties:
+        payload:
+          type: array
+          items:
+            $ref: '#/components/schemas/Environment'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    # ---------- API Key ----------
+
+    IssueApiKeyRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: ci-cd-pipeline
+        expiresAt:
+          type: string
+          format: date-time
+
+    ApiKey:
+      type: object
+      required: [id, projectId, name, role, maskedToken, active, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        role:
+          type: string
+          enum: [ADMIN, EDITOR, READER]
+        maskedToken:
+          type: string
+          example: 'hft_****abcd'
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    ApiKeyCreated:
+      type: object
+      required: [id, name, role, rawToken, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        role:
+          type: string
+          enum: [ADMIN, EDITOR, READER]
+        rawToken:
+          type: string
+          example: 'hft_a1b2c3d4e5f6g7h8i9j0'
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    ApiKeyListResponse:
+      type: object
+      required: [payload, pagination, meta]
+      properties:
+        payload:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiKey'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    ApiKeyCreatedSingleResponse:
+      type: object
+      required: [payload, meta]
+      properties:
+        payload:
+          $ref: '#/components/schemas/ApiKeyCreated'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    # ---------- Members ----------
+
+    ChangeMemberRoleRequest:
+      type: object
+      required: [role]
+      properties:
+        role:
+          type: string
+          enum: [ADMIN, EDITOR, READER]
+
+    ProjectMembership:
+      type: object
+      required: [id, projectId, userId, role, grantedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum: [ADMIN, EDITOR, READER]
+        email:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+        grantedAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    MembershipSingleResponse:
+      type: object
+      required: [payload, meta]
+      properties:
+        payload:
+          $ref: '#/components/schemas/ProjectMembership'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    MembershipListResponse:
+      type: object
+      required: [payload, pagination, meta]
+      properties:
+        payload:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectMembership'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    # ---------- User ----------
+
+    User:
+      type: object
+      required: [id, email, platformRole, active, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        oidcSubject:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        platformRole:
+          type: string
+          enum: [PLATFORM_ADMIN, USER]
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        platformRole:
+          type: string
+          enum: [PLATFORM_ADMIN, USER]
+        active:
+          type: boolean
+
+    UserSingleResponse:
+      type: object
+      required: [payload, meta]
+      properties:
+        payload:
+          $ref: '#/components/schemas/User'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    UserListResponse:
+      type: object
+      required: [payload, pagination, meta]
+      properties:
+        payload:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    oidc:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
