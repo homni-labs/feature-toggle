@@ -180,6 +180,28 @@ curl http://localhost:8080/actuator/health
 | `OIDC_REDIRECT_URI` | `http://localhost:3000/callback` | URI редиректа OIDC |
 | `OIDC_POST_LOGOUT_REDIRECT_URI` | `http://localhost:3000/` | URI редиректа после выхода |
 
+### Свой SSO-провайдер
+
+Если вы используете собственный OIDC-провайдер вместо встроенного Keycloak, убедитесь, что в нём создан пользователь с email, который вы хотите назначить первым администратором платформы. Укажите этот email в конфигурации бэкенда:
+
+```yaml
+# docker-compose.yml
+backend:
+  environment:
+    OIDC_ISSUER_URI: https://your-sso.example.com/realms/your-realm
+    OIDC_ADMIN_EMAIL: your-admin@example.com
+```
+
+Или через переменные окружения при запуске из исходников:
+
+```bash
+OIDC_ISSUER_URI=https://your-sso.example.com/realms/your-realm \
+OIDC_ADMIN_EMAIL=your-admin@example.com \
+mvn spring-boot:run
+```
+
+При первом входе с этим email пользователь автоматически получает роль **Администратор платформы**.
+
 ---
 
 ## Разрешения

@@ -180,6 +180,28 @@ Compile-time constants passed via `--dart-define`. Defaults work out of the box 
 | `OIDC_REDIRECT_URI` | `http://localhost:3000/callback` | OIDC redirect URI |
 | `OIDC_POST_LOGOUT_REDIRECT_URI` | `http://localhost:3000/` | Post-logout redirect URI |
 
+### Bring Your Own SSO
+
+If you use your own OIDC provider instead of the bundled Keycloak, make sure the provider has a user with the email you want as the first platform administrator. Then set that email in the backend environment:
+
+```yaml
+# docker-compose.yml
+backend:
+  environment:
+    OIDC_ISSUER_URI: https://your-sso.example.com/realms/your-realm
+    OIDC_ADMIN_EMAIL: your-admin@example.com
+```
+
+Or as an environment variable when running from source:
+
+```bash
+OIDC_ISSUER_URI=https://your-sso.example.com/realms/your-realm \
+OIDC_ADMIN_EMAIL=your-admin@example.com \
+mvn spring-boot:run
+```
+
+On first login with that email, the user is automatically promoted to **Platform Admin**.
+
 ---
 
 ## Permissions
