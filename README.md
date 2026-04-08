@@ -32,7 +32,7 @@ Most feature toggle solutions are either SaaS-only or lack proper access control
 - **Per-project isolation** &mdash; each project has its own toggles, environments, team members, and API keys
 - **Granular RBAC** &mdash; Platform Admin, Project Admin, Editor, Reader &mdash; clear permission boundaries at every level
 - **Environment-aware toggles** &mdash; create custom environments per project, not limited to DEV / STAGING / PROD
-- **Contract-first API** &mdash; OpenAPI 3.0 spec with code-generated controllers, Swagger UI, and scoped API keys for SDK integration
+- **Contract-first API** &mdash; OpenAPI 3.0 spec with code-generated controllers, Swagger UI, and scoped API keys
 
 ---
 
@@ -42,7 +42,7 @@ Most feature toggle solutions are either SaaS-only or lack proper access control
 - &#x1F4C1; **Project Isolation** &mdash; each project is a self-contained workspace with its own toggles, environments, members, and API keys
 - &#x1F6E1; **Granular RBAC** &mdash; Platform Admin, Project Admin, Editor, Reader with a fine-grained permissions matrix
 - &#x1F30D; **Multi-Environment Control** &mdash; create and manage custom deployment targets per project
-- &#x1F511; **API Key Authentication** &mdash; scoped read-only tokens with optional expiration for SDKs and CI/CD pipelines
+- &#x1F511; **API Key Authentication** &mdash; scoped read-only tokens with optional expiration for CI/CD pipelines and external services
 - &#x1F4D6; **OpenAPI 3.0** &mdash; full API contract with interactive Swagger UI at `/docs`
 - &#x1F5A5; **Admin Dashboard** &mdash; full-featured Flutter Web UI for managing projects, toggles, environments, members, and API keys
 
@@ -137,7 +137,7 @@ curl http://localhost:8080/actuator/health
 
 ```mermaid
 graph TB
-    User["&#x1F468; User / SDK"]
+    User["&#x1F468; User"]
 
     Frontend["Frontend<br/>Flutter Web<br/>:3000"]
 
@@ -215,7 +215,7 @@ Compile-time constants passed via `--dart-define`. Defaults work out of the box 
 | Enable / disable toggles | + | + | + | | |
 | Read toggles | + | + | + | + | + |
 
-> **Platform Admin** has unrestricted access to all projects. Other roles are scoped per project. **API Key** grants read-only access for SDK / machine integration.
+> **Platform Admin** has unrestricted access to all projects. Other roles are scoped per project. **API Key** grants read-only access for machine integration.
 
 ---
 
@@ -237,7 +237,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 ## Roadmap
 
 - [ ] Java SDK &mdash; native client library
-- [ ] Audit log &mdash; track all user and SDK actions
+- [ ] Audit log &mdash; track all user actions
 - [ ] Webhooks &mdash; notify external systems on toggle state changes
 - [ ] Scheduled toggles &mdash; auto-enable/disable at a specific time
 - [ ] Stale toggle detection &mdash; find toggles that haven't changed in N days
