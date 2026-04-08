@@ -135,26 +135,6 @@ curl http://localhost:8080/actuator/health
 
 ## Architecture
 
-```mermaid
-graph TB
-    User["&#x1F468; User"]
-
-    Frontend["Frontend<br/>Flutter Web<br/>:3000"]
-
-    subgraph docker ["Docker Compose"]
-        Backend["Backend<br/>Spring Boot<br/>:8080"]
-        Keycloak["Keycloak<br/>OIDC Provider<br/>:8180"]
-        Postgres[("PostgreSQL<br/>:5432")]
-    end
-
-    User --> Frontend
-    User -->|"X-API-Key"| Backend
-    Frontend -->|REST API| Backend
-    Frontend -->|"OIDC / PKCE"| Keycloak
-    Backend -->|JWT validation| Keycloak
-    Backend -->|JDBC| Postgres
-```
-
 - **Backend** &mdash; Hexagonal Architecture (Ports & Adapters) with strict DDD. The domain layer has zero framework dependencies. See [backend/README.md](backend/README.md) for details.
 - **Frontend** &mdash; Clean Architecture with feature-based modules (auth, projects, toggles, environments, members, API keys, users). BLoC/Cubit state management with sealed states. See [frontend/README.md](frontend/README.md) for details.
 
