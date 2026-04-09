@@ -7,7 +7,7 @@
     <title>Feature Toggle — Sign In</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${url.resourcesPath}/css/styles.css">
 </head>
 <body>
@@ -39,8 +39,17 @@
                     <img src="${url.resourcesPath}/img/logo.jpeg" alt="Feature Toggle" class="logo-img">
                 </div>
             </div>
-            <h1 class="brand-title">Feature Toggle</h1>
-            <p class="brand-subtitle">Control your features with confidence</p>
+            <div class="tagline" aria-label="feature plus toggle is togli">
+                <div class="tagline-row">
+                    <span class="word word-feature">feature</span>
+                    <span class="word word-plus">+</span>
+                    <span class="word word-toggle">toggle</span>
+                </div>
+                <div class="tagline-row tagline-row-2">
+                    <span class="word word-is">is</span>
+                    <span class="word word-togli">togli</span>
+                </div>
+            </div>
         </div>
 
         <!-- Login card -->
