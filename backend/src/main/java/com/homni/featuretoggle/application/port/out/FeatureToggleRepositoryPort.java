@@ -65,4 +65,13 @@ public interface FeatureToggleRepositoryPort {
      * @param id toggle identity
      */
     void deleteById(FeatureToggleId id);
+
+    /**
+     * Disables every enabled toggle in a project in a single bulk update.
+     * Used when archiving a project so no toggle can remain switched on.
+     *
+     * @param projectId owning project identity
+     * @return number of toggles that were disabled
+     */
+    int disableAllByProject(ProjectId projectId);
 }

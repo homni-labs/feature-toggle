@@ -158,13 +158,15 @@ class CompositionRootConfig {
      * Wires the UpdateProjectUseCase.
      *
      * @param projects     project persistence port
+     * @param toggles      toggle persistence port (for bulk-disable on archive)
      * @param callerAccess caller project access port
      * @return the wired use case
      */
     @Bean
     UpdateProjectUseCase updateProjectUseCase(ProjectRepositoryPort projects,
+                                              FeatureToggleRepositoryPort toggles,
                                               CallerProjectAccessPort callerAccess) {
-        return new UpdateProjectUseCase(projects, callerAccess);
+        return new UpdateProjectUseCase(projects, toggles, callerAccess);
     }
 
     // --- User use-cases ---

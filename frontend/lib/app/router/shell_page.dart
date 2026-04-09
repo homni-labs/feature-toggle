@@ -38,6 +38,19 @@ class _ShellPageState extends State<ShellPage> {
   int _selectedIndex = 0;
 
   List<_NavItem> _buildNavItems(AuthAuthenticated auth) {
+    // Archived projects can only be unarchived. The unarchive action lives on
+    // the Settings page, so when the project is archived we collapse navigation
+    // down to just Settings and hide every other tab.
+    if (auth.isProjectArchived) {
+      return const [
+        _NavItem(
+          icon: Icons.settings_outlined,
+          label: 'Settings',
+          pageId: _PageId.settings,
+        ),
+      ];
+    }
+
     final bool canManage = auth.canManageMembers;
     return [
       const _NavItem(

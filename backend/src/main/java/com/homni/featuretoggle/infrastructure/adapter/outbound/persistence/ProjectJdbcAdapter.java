@@ -102,7 +102,9 @@ public class ProjectJdbcAdapter implements ProjectRepositoryPort {
     }
 
     /**
-     * Returns non-archived projects the user belongs to.
+     * Returns projects the user belongs to. Archived projects are only included
+     * when the user has the ADMIN role on them, so non-admins never see archived
+     * projects.
      *
      * @param userId the user identity
      * @return the user's projects
@@ -113,7 +115,8 @@ public class ProjectJdbcAdapter implements ProjectRepositoryPort {
                 SELECT p.id, p.slug, p.name, p.description, p.archived, p.created_at, p.updated_at
                 FROM project p
                 JOIN project_membership pm ON pm.project_id = p.id
-                WHERE pm.user_id = ? AND p.archived = false
+                WHERE pm.user_id = ?
+                  AND (p.archived = false OR pm.role = 'ADMIN')
                 ORDER BY p.name
                 """)
                 .param(userId.value)
@@ -122,7 +125,9 @@ public class ProjectJdbcAdapter implements ProjectRepositoryPort {
     }
 
     /**
-     * Returns non-archived projects with the user's role.
+     * Returns projects with the user's role. Archived projects are only included
+     * when the user has the ADMIN role on them, so non-admins never see archived
+     * projects.
      *
      * @param userId the user identity
      * @return the projects with role
@@ -134,7 +139,8 @@ public class ProjectJdbcAdapter implements ProjectRepositoryPort {
                        pm.role AS my_role
                 FROM project p
                 JOIN project_membership pm ON pm.project_id = p.id
-                WHERE pm.user_id = ? AND p.archived = false
+                WHERE pm.user_id = ?
+                  AND (p.archived = false OR pm.role = 'ADMIN')
                 ORDER BY p.name
                 """)
                 .param(userId.value)

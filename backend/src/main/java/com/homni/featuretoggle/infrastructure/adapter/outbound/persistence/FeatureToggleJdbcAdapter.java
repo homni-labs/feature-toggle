@@ -131,6 +131,25 @@ public class FeatureToggleJdbcAdapter implements FeatureToggleRepositoryPort {
                 .update();
     }
 
+    /**
+     * Disables every enabled toggle for the given project in a single SQL update.
+     *
+     * @param projectId the owning project identity
+     * @return number of toggles that were disabled
+     */
+    @Override
+    public int disableAllByProject(ProjectId projectId) {
+        return jdbc.sql("""
+                UPDATE feature_toggle
+                   SET enabled = false,
+                       updated_at = NOW()
+                 WHERE project_id = ?
+                   AND enabled = true
+                """)
+                .param(projectId.value)
+                .update();
+    }
+
     private void upsertToggle(FeatureToggle t) {
         try {
             jdbc.sql("""

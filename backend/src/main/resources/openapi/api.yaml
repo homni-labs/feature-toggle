@@ -67,7 +67,9 @@ paths:
       tags: [Projects]
       operationId: listProjects
       summary: List projects
-      description: PLATFORM_ADMIN sees all projects. Regular users see only projects they are a member of.
+      description: |
+        PLATFORM_ADMIN sees all projects (including archived). Regular users see projects
+        they are a member of, but archived projects only when they have the ADMIN role on them.
       security:
         - oidc: []
       responses:
@@ -90,7 +92,11 @@ paths:
       tags: [Projects]
       operationId: updateProject
       summary: Update project fields (name, description, archived status)
-      description: Requires MANAGE_MEMBERS permission. Set archived=true to freeze the project (readonly), archived=false to unfreeze.
+      description: |
+        Requires MANAGE_MEMBERS permission. Set archived=true to freeze the project
+        (which also bulk-disables every enabled feature toggle inside it). Once a project
+        is archived, the only allowed change is unarchive (archived=false): any attempt
+        to update name or description on an archived project is rejected with 409.
       requestBody:
         required: true
         content:
@@ -112,6 +118,8 @@ paths:
           $ref: '#/components/responses/403'
         '404':
           $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
         '500':
           $ref: '#/components/responses/500'
 

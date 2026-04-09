@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:feature_toggle_app/app/di/injection.dart';
 import 'package:feature_toggle_app/app/theme/app_colors.dart';
 import 'package:feature_toggle_app/core/domain/failure.dart';
+import 'package:feature_toggle_app/core/domain/value_objects/project_role.dart';
 import 'package:feature_toggle_app/core/presentation/widgets/app_snackbar.dart';
 import 'package:feature_toggle_app/features/auth/application/bloc/auth_cubit.dart';
 import 'package:feature_toggle_app/features/auth/application/bloc/auth_state.dart';
@@ -183,18 +184,18 @@ class _LoadedBody extends StatelessWidget {
                         itemCount: projects.length,
                         itemBuilder: (BuildContext context, int index) {
                           final Project project = projects[index];
+                          final bool canManage = isPlatformAdmin ||
+                              project.myRole == ProjectRole.admin;
                           return ProjectCard(
                             key: ValueKey(project.id),
                             project: project,
                             onTap: () => _onTap(context, project),
-                            onArchive:
-                                isPlatformAdmin && !project.archived
-                                    ? () => _onArchive(context, project)
-                                    : null,
-                            onUnarchive:
-                                isPlatformAdmin && project.archived
-                                    ? () => _onUnarchive(context, project)
-                                    : null,
+                            onArchive: canManage && !project.archived
+                                ? () => _onArchive(context, project)
+                                : null,
+                            onUnarchive: canManage && project.archived
+                                ? () => _onUnarchive(context, project)
+                                : null,
                           );
                         },
                       ),
@@ -234,7 +235,9 @@ class _LoadedBody extends StatelessWidget {
       context: context,
       builder: (_) => _ConfirmDialog(
         title: 'Archive Project',
-        message: 'Are you sure you want to archive "${project.name}"?',
+        message: 'Are you sure you want to archive "${project.name}"? '
+            'All feature toggles in this project will be disabled and the '
+            'project will become read-only.',
         confirmLabel: 'Archive',
       ),
     );

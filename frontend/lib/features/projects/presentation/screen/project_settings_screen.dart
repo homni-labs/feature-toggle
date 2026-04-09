@@ -100,14 +100,18 @@ class _ProjectSettingsViewState extends State<_ProjectSettingsView> {
     if (current == null) return;
 
     final bool newArchived = !current.archived;
-    final String action = newArchived ? 'archive' : 'unarchive';
+
+    final String message = newArchived
+        ? 'Are you sure you want to archive "${current.name}"? '
+            'All feature toggles in this project will be disabled and the '
+            'project will become read-only.'
+        : 'Are you sure you want to unarchive "${current.name}"?';
 
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => _ConfirmDialog(
         title: '${newArchived ? 'Archive' : 'Unarchive'} Project',
-        message:
-            'Are you sure you want to $action "${current.name}"?',
+        message: message,
         confirmLabel: newArchived ? 'Archive' : 'Unarchive',
       ),
     );
@@ -155,6 +159,10 @@ class _ProjectSettingsViewState extends State<_ProjectSettingsView> {
     final AuthState authState = context.watch<AuthCubit>().state;
     final bool isPlatformAdmin = authState is AuthAuthenticated &&
         (authState.currentUser?.isPlatformAdmin ?? false);
+    final bool canManageProject = authState is AuthAuthenticated &&
+        authState.canManageMembers;
+    final bool isArchived =
+        authState is AuthAuthenticated && authState.isProjectArchived;
     final Project? project = authState is AuthAuthenticated
         ? authState.currentProject
         : null;
@@ -179,99 +187,212 @@ class _ProjectSettingsViewState extends State<_ProjectSettingsView> {
                 constraints: const BoxConstraints(maxWidth: 500),
                 child: ListView(
                   children: [
-                    // ── Project Details ─────────────────────────
-                    Text(
-                      'Project Details',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white.withOpacity(0.8),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Name field
-                    _SettingsField(
-                      controller: _nameController,
-                      hint: 'Project name',
-                      icon: Icons.folder_outlined,
-                    ),
-                    const SizedBox(height: 14),
-
-                    // Description field
-                    _SettingsField(
-                      controller: _descController,
-                      hint: 'Description (optional)',
-                      icon: Icons.notes_rounded,
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Save button
-                    SizedBox(
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: _onSave,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.coral,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        child: const Text(
-                          'Save',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // ── Danger Zone ─────────────────────────────
-                    if (isPlatformAdmin) ...[
-                      const SizedBox(height: 32),
-                      Divider(color: Colors.white.withOpacity(0.1)),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Danger Zone',
+                    if (isArchived)
+                      _ArchivedProjectPanel(
+                        project: project,
+                        canUnarchive: canManageProject,
+                        onUnarchive: _onArchiveToggle,
+                      )
+                    else ...[
+                      // ── Project Details ─────────────────────────
+                      Text(
+                        'Project Details',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.coral,
+                          color: Colors.white.withOpacity(0.8),
                         ),
                       ),
                       const SizedBox(height: 16),
+
+                      // Name field
+                      _SettingsField(
+                        controller: _nameController,
+                        hint: 'Project name',
+                        icon: Icons.folder_outlined,
+                      ),
+                      const SizedBox(height: 14),
+
+                      // Description field
+                      _SettingsField(
+                        controller: _descController,
+                        hint: 'Description (optional)',
+                        icon: Icons.notes_rounded,
+                        maxLines: 3,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Save button
                       SizedBox(
                         height: 48,
-                        child: OutlinedButton(
-                          onPressed: _onArchiveToggle,
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.coral,
-                            side:
-                                const BorderSide(color: AppColors.coral),
+                        child: ElevatedButton(
+                          onPressed: _onSave,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.coral,
+                            foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          child: Text(
-                            project?.archived == true
-                                ? 'Unarchive Project'
-                                : 'Archive Project',
-                            style: const TextStyle(
+                          child: const Text(
+                            'Save',
+                            style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                       ),
+
+                      // ── Danger Zone ─────────────────────────────
+                      if (isPlatformAdmin) ...[
+                        const SizedBox(height: 32),
+                        Divider(color: Colors.white.withOpacity(0.1)),
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Danger Zone',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.coral,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 48,
+                          child: OutlinedButton(
+                            onPressed: _onArchiveToggle,
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.coral,
+                              side:
+                                  const BorderSide(color: AppColors.coral),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            child: const Text(
+                              'Archive Project',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ],
                 ),
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Archived project panel ─────────────────────────────────────
+
+class _ArchivedProjectPanel extends StatelessWidget {
+  const _ArchivedProjectPanel({
+    required this.project,
+    required this.canUnarchive,
+    required this.onUnarchive,
+  });
+
+  final Project? project;
+  final bool canUnarchive;
+  final Future<void> Function() onUnarchive;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: Colors.white.withOpacity(0.04),
+        border: Border.all(color: Colors.white.withOpacity(0.10)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.archive_rounded,
+                  size: 22, color: Colors.white.withOpacity(0.6)),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  project?.name ?? 'Project',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                  color: Colors.white.withOpacity(0.08),
+                ),
+                child: Text(
+                  'Archived',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withOpacity(0.4),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'This project is archived. All feature toggles inside it are '
+            'disabled and cannot be edited. You can unarchive the project to '
+            'restore access.',
+            style: TextStyle(
+              fontSize: 13,
+              height: 1.4,
+              color: Colors.white.withOpacity(0.5),
+            ),
+          ),
+          const SizedBox(height: 20),
+          if (canUnarchive)
+            SizedBox(
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: onUnarchive,
+                icon: const Icon(Icons.unarchive_outlined, size: 18),
+                label: const Text(
+                  'Unarchive Project',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.coral,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            )
+          else
+            Text(
+              'You do not have permission to unarchive this project.',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white.withOpacity(0.4),
+              ),
+            ),
         ],
       ),
     );
