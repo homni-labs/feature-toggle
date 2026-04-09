@@ -41,7 +41,7 @@ Most feature toggle solutions are either SaaS-only or lack proper access control
 - &#x1F512; **OIDC Authentication** &mdash; Keycloak out of the box with a custom login page, compatible with any OpenID Connect provider. OAuth 2.1 + PKCE
 - &#x1F4C1; **Project Isolation** &mdash; each project is a self-contained workspace with its own toggles, environments, members, and API keys
 - &#x1F6E1; **Granular RBAC** &mdash; Platform Admin, Project Admin, Editor, Reader with a fine-grained permissions matrix
-- &#x1F30D; **Multi-Environment Control** &mdash; create and manage custom deployment targets per project
+- &#x1F30D; **Multi-Environment Control** &mdash; platform-wide default environments configured at startup; pick which ones to bootstrap into each new project, and add custom ones per project later
 - &#x1F511; **API Key Authentication** &mdash; scoped read-only tokens with optional expiration for CI/CD pipelines and external services
 - &#x1F4D6; **OpenAPI 3.0** &mdash; full API contract with interactive Swagger UI at `/docs`
 - &#x1F5A5; **Admin Dashboard** &mdash; full-featured Flutter Web UI for managing projects, toggles, environments, members, and API keys
@@ -165,8 +165,11 @@ All variables have sensible defaults for local development.
 | `DB_PASSWORD` | `homni` | Database password |
 | `OIDC_ISSUER_URI` | `http://localhost:8180/realms/feature-toggle` | OIDC issuer URI |
 | `OIDC_ADMIN_EMAIL` | `admin@homni.local` | First admin email (bootstrapped on first login) |
+| `APP_DEFAULT_ENVIRONMENTS` | `DEV,TEST,PROD` | Comma-separated list of default environment names that can be bootstrapped into a new project at creation. Each name must match `^[A-Z][A-Z0-9_]*$` (max 50 chars). Set to an empty string to disable defaults entirely. The list is validated on startup &mdash; the application refuses to boot if any name is invalid or duplicated. |
 | `CORS_ORIGINS` | `*` | Allowed CORS origins |
 | `LOG_LEVEL` | `DEBUG` | Application log level |
+
+> **Default environments**: when a Platform Admin creates a project, the UI shows checkboxes for each name from `APP_DEFAULT_ENVIRONMENTS`. The selected ones are materialized as independent rows inside the new project &mdash; deleting `DEV` from one project does not affect any other project. Defaults live only in config (the single source of truth); they are never duplicated as table rows.
 
 ### Frontend
 

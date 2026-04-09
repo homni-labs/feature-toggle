@@ -10,6 +10,7 @@
 package com.homni.featuretoggle.infrastructure.adapter.inbound.rest.presenter;
 
 import com.homni.featuretoggle.domain.model.Environment;
+import com.homni.generated.model.DefaultEnvironmentListResponse;
 import com.homni.generated.model.EnvironmentListResponse;
 import com.homni.generated.model.EnvironmentSingleResponse;
 import com.homni.generated.model.ResponseMeta;
@@ -46,6 +47,18 @@ public class EnvironmentPresenter {
         List<com.homni.generated.model.Environment> items = environments.stream()
                 .map(this::toDto).toList();
         return new EnvironmentListResponse(items, meta());
+    }
+
+    /**
+     * Wraps the platform-wide list of default environment names in a typed
+     * response envelope. The list is read straight from application config and
+     * does not touch the database.
+     *
+     * @param defaultNames default environment names from config
+     * @return the typed default environment list response
+     */
+    public DefaultEnvironmentListResponse defaults(List<String> defaultNames) {
+        return new DefaultEnvironmentListResponse(List.copyOf(defaultNames), meta());
     }
 
     private com.homni.generated.model.Environment toDto(Environment e) {

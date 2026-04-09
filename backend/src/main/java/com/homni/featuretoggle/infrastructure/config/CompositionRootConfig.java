@@ -9,6 +9,7 @@
 
 package com.homni.featuretoggle.infrastructure.config;
 
+import com.homni.featuretoggle.domain.model.EnvironmentDefaults;
 import com.homni.featuretoggle.application.port.out.ApiKeyRepositoryPort;
 import com.homni.featuretoggle.application.port.out.AppUserRepositoryPort;
 import com.homni.featuretoggle.application.port.out.CallerPort;
@@ -131,14 +132,31 @@ class CompositionRootConfig {
     // --- Project use-cases ---
 
     /**
+     * Wires the platform-wide {@link EnvironmentDefaults} value object from the
+     * raw config properties. Validation happens in the constructor — invalid
+     * config fails the application startup here.
+     *
+     * @param properties raw config properties
+     * @return the validated defaults
+     */
+    @Bean
+    EnvironmentDefaults environmentDefaults(EnvironmentDefaultsProperties properties) {
+        return new EnvironmentDefaults(properties.defaultsOrEmpty());
+    }
+
+    /**
      * Wires the CreateProjectUseCase.
      *
-     * @param projects project persistence port
+     * @param projects             project persistence port
+     * @param environments         environment persistence port (for bootstrapping defaults)
+     * @param environmentDefaults  platform-wide default environments policy
      * @return the wired use case
      */
     @Bean
-    CreateProjectUseCase createProjectUseCase(ProjectRepositoryPort projects) {
-        return new CreateProjectUseCase(projects);
+    CreateProjectUseCase createProjectUseCase(ProjectRepositoryPort projects,
+                                              EnvironmentRepositoryPort environments,
+                                              EnvironmentDefaults environmentDefaults) {
+        return new CreateProjectUseCase(projects, environments, environmentDefaults);
     }
 
     /**

@@ -18,6 +18,8 @@ app:
     default-admin-email: ${OIDC_ADMIN_EMAIL:admin@homni.local}
   cors:
     allowed-origins: ${CORS_ORIGINS:*}
+  environments:
+    defaults: ${APP_DEFAULT_ENVIRONMENTS:DEV,TEST,PROD}
 
 springdoc:
   swagger-ui:

@@ -19,4 +19,9 @@ abstract class EnvironmentRepository {
     required ProjectId projectId,
     required EnvironmentId environmentId,
   });
+
+  /// Returns the platform-wide list of default environment names that the
+  /// project-creation UI uses to render checkboxes. Read-only, lives in
+  /// backend config (not in the database).
+  FutureEither<List<String>> getDefaults({required String accessToken});
 }

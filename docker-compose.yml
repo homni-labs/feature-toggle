@@ -42,6 +42,7 @@ services:
       OIDC_ISSUER_URI: http://keycloak:8080/realms/feature-toggle
       OIDC_ADMIN_EMAIL: admin@homni.local
       CORS_ORIGINS: http://localhost:3000
+      APP_DEFAULT_ENVIRONMENTS: DEV,TEST,PROD
     depends_on:
       postgres:
         condition: service_healthy

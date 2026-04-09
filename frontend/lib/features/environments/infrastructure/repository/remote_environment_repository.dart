@@ -110,6 +110,29 @@ class RemoteEnvironmentRepository implements EnvironmentRepository {
     }
   }
 
+  @override
+  FutureEither<List<String>> getDefaults({required String accessToken}) async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse('${ApiConfig.baseUrl}/environments/defaults'),
+            headers: _headers(accessToken),
+          )
+          .timeout(_timeout);
+
+      if (response.statusCode != 200) {
+        return Left(_mapError(response));
+      }
+
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      final payload = json['payload'] as List<dynamic>;
+      final names = payload.map((e) => e as String).toList();
+      return Right(names);
+    } on Exception {
+      return const Left(NetworkFailure());
+    }
+  }
+
   Map<String, String> _headers(String token) => {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',

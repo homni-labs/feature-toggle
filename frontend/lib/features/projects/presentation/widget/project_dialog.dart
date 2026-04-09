@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
+
+import 'package:feature_toggle_app/app/di/injection.dart';
 import 'package:feature_toggle_app/app/theme/app_colors.dart';
+import 'package:feature_toggle_app/features/auth/application/bloc/auth_cubit.dart';
+import 'package:feature_toggle_app/features/environments/application/usecase/load_default_environments_usecase.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ProjectDialogResult {
   final String slug;
   final String name;
   final String? description;
 
+  /// Subset of platform default environments to bootstrap inside the new
+  /// project. `null` means "use whatever the server treats as default", an
+  /// empty list means "create no environments at all" (explicit opt-out),
+  /// and a non-empty list bootstraps exactly those names. Always `null`
+  /// for edit mode.
+  final List<String>? environments;
+
   ProjectDialogResult({
     required this.slug,
     required this.name,
     this.description,
+    this.environments,
   });
 }
 
@@ -34,6 +47,12 @@ class _ProjectDialogState extends State<ProjectDialog> {
   late TextEditingController _nameController;
   late TextEditingController _descController;
 
+  // Defaults loading state — only meaningful in create mode.
+  bool _defaultsLoading = false;
+  bool _defaultsFailed = false;
+  List<String> _availableDefaults = const [];
+  final Set<String> _selectedDefaults = <String>{};
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +60,48 @@ class _ProjectDialogState extends State<ProjectDialog> {
     _nameController = TextEditingController(text: widget.initialName ?? '');
     _descController =
         TextEditingController(text: widget.initialDescription ?? '');
+
+    if (!widget.isEdit) {
+      _loadDefaults();
+    }
+  }
+
+  Future<void> _loadDefaults() async {
+    setState(() {
+      _defaultsLoading = true;
+      _defaultsFailed = false;
+    });
+    final auth = context.read<AuthCubit>();
+    final token = await auth.getValidAccessToken();
+    if (!mounted) return;
+    if (token == null) {
+      setState(() {
+        _defaultsLoading = false;
+        _defaultsFailed = true;
+      });
+      return;
+    }
+    final result = await sl<LoadDefaultEnvironmentsUseCase>()(
+      accessToken: token,
+    );
+    if (!mounted) return;
+    result.fold(
+      (_) => setState(() {
+        _defaultsLoading = false;
+        _defaultsFailed = true;
+        _availableDefaults = const [];
+        _selectedDefaults.clear();
+      }),
+      (defaults) => setState(() {
+        _defaultsLoading = false;
+        _defaultsFailed = false;
+        _availableDefaults = defaults;
+        // Preselect everything — the common case is "I want all defaults".
+        _selectedDefaults
+          ..clear()
+          ..addAll(defaults);
+      }),
+    );
   }
 
   @override
@@ -55,16 +116,34 @@ class _ProjectDialogState extends State<ProjectDialog> {
     final String name = _nameController.text.trim();
     if (name.isEmpty) return;
 
-    final String slug = widget.isEdit ? '' : _slugController.text.trim().toUpperCase();
+    final String slug =
+        widget.isEdit ? '' : _slugController.text.trim().toUpperCase();
     if (!widget.isEdit && slug.isEmpty) return;
 
     final String descText = _descController.text.trim();
     final String? description = descText.isEmpty ? null : descText;
 
+    // Compute the environments payload semantics:
+    //   - edit mode → never sent
+    //   - defaults failed to load → send null (let server pick its defaults)
+    //   - all defaults selected (or none configured) → send null (server default)
+    //   - any subset (including empty) → send the explicit list
+    List<String>? environments;
+    if (!widget.isEdit && !_defaultsFailed && _availableDefaults.isNotEmpty) {
+      final allSelected = _selectedDefaults.length == _availableDefaults.length;
+      if (!allSelected) {
+        // Preserve the order from _availableDefaults so the API call is stable.
+        environments = _availableDefaults
+            .where(_selectedDefaults.contains)
+            .toList(growable: false);
+      }
+    }
+
     Navigator.of(context).pop(ProjectDialogResult(
       slug: slug,
       name: name,
       description: description,
+      environments: environments,
     ));
   }
 
@@ -130,6 +209,24 @@ class _ProjectDialogState extends State<ProjectDialog> {
               icon: Icons.notes_rounded,
               maxLines: 2,
             ),
+
+            // Default environments section (create mode only)
+            if (!widget.isEdit) ...[
+              const SizedBox(height: 18),
+              _DefaultEnvironmentsSection(
+                loading: _defaultsLoading,
+                failed: _defaultsFailed,
+                available: _availableDefaults,
+                selected: _selectedDefaults,
+                onToggle: (env) => setState(() {
+                  if (_selectedDefaults.contains(env)) {
+                    _selectedDefaults.remove(env);
+                  } else {
+                    _selectedDefaults.add(env);
+                  }
+                }),
+              ),
+            ],
 
             const SizedBox(height: 24),
 
@@ -209,6 +306,118 @@ class _ProjectDialogState extends State<ProjectDialog> {
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
+      ),
+    );
+  }
+}
+
+// ── Default environments section ───────────────────────────────
+
+class _DefaultEnvironmentsSection extends StatelessWidget {
+  const _DefaultEnvironmentsSection({
+    required this.loading,
+    required this.failed,
+    required this.available,
+    required this.selected,
+    required this.onToggle,
+  });
+
+  final bool loading;
+  final bool failed;
+  final List<String> available;
+  final Set<String> selected;
+  final ValueChanged<String> onToggle;
+
+  static Color _envColor(String env) {
+    switch (env) {
+      case 'DEV':
+        return AppColors.teal;
+      case 'TEST':
+        return AppColors.yellow;
+      case 'PROD':
+        return AppColors.coral;
+      default:
+        return AppColors.purple;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Default environments',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: Colors.white.withOpacity(0.6),
+          ),
+        ),
+        const SizedBox(height: 6),
+        if (loading)
+          _buildHelperText('Loading defaults...')
+        else if (failed)
+          _buildHelperText(
+            'Could not load defaults. Project will be created without environments — you can add them later.',
+          )
+        else if (available.isEmpty)
+          _buildHelperText(
+            'No default environments configured. You can add them after creating the project.',
+          )
+        else ...[
+          _buildHelperText(
+            'Pick which platform defaults to bootstrap. You can add custom environments later.',
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: available.map((env) {
+              final isSelected = selected.contains(env);
+              return GestureDetector(
+                onTap: () => onToggle(env),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: isSelected
+                        ? _envColor(env).withOpacity(0.20)
+                        : Colors.white.withOpacity(0.06),
+                    border: Border.all(
+                      color: isSelected
+                          ? _envColor(env).withOpacity(0.5)
+                          : Colors.white.withOpacity(0.12),
+                    ),
+                  ),
+                  child: Text(
+                    env,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w400,
+                      color: isSelected
+                          ? _envColor(env)
+                          : Colors.white.withOpacity(0.4),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildHelperText(String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 11,
+        color: Colors.white.withOpacity(0.35),
       ),
     );
   }

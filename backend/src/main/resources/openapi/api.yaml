@@ -362,6 +362,30 @@ paths:
         '500':
           $ref: '#/components/responses/500'
 
+  /environments/defaults:
+    get:
+      tags: [Environments]
+      operationId: listDefaultEnvironments
+      summary: List configured default environment names
+      description: |
+        Returns the platform-configured list of default environment names that
+        can be bootstrapped into a new project at creation time. The list is
+        platform-wide, read-only, and lives in application config — not in
+        the database. Used by the project-creation UI to render checkboxes.
+      security:
+        - oidc: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultEnvironmentListResponse'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+
   # ========== API Keys ==========
 
   /projects/{projectId}/api-keys:
@@ -796,6 +820,18 @@ components:
         description:
           type: string
           maxLength: 1000
+        environments:
+          type: array
+          description: |
+            Subset of the platform-configured default environments to bootstrap
+            in the new project. Omit the field entirely to create the project
+            with all configured defaults; pass an empty array to opt out
+            and create the project without any environments. Names that are
+            not in the configured defaults are rejected with 422.
+          items:
+            type: string
+            maxLength: 50
+          example: [DEV, PROD]
 
     UpdateProjectRequest:
       type: object
@@ -990,6 +1026,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    DefaultEnvironmentListResponse:
+      type: object
+      required: [payload, meta]
+      properties:
+        payload:
+          type: array
+          items:
+            type: string
+          example: [DEV, TEST, PROD]
         meta:
           $ref: '#/components/schemas/ResponseMeta'
 

@@ -64,7 +64,17 @@ public final class Environment {
         return this.name;
     }
 
-    private String validateAndNormalize(String name) {
+    /**
+     * Validates and normalizes an environment name. Trimmed, uppercased, must be
+     * 1-50 characters, must match {@code ^[A-Z][A-Z0-9_]*$}. Exposed as a static
+     * helper so other domain types (e.g. {@link EnvironmentDefaults}) can reuse
+     * the same rules without constructing a throwaway Environment instance.
+     *
+     * @param name raw input name
+     * @return normalized name
+     * @throws DomainValidationException if invalid
+     */
+    public static String validateAndNormalize(String name) {
         if (name == null || name.isBlank()) {
             throw new DomainValidationException("Invalid environment name '%s': must not be blank".formatted(name));
         }

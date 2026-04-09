@@ -30,6 +30,16 @@ public interface EnvironmentRepositoryPort {
     void save(Environment environment);
 
     /**
+     * Saves a batch of environments atomically. Either all rows are persisted
+     * or none — used when bootstrapping default environments at project
+     * creation, where partial creation would leave the project in a
+     * confusing state.
+     *
+     * @param environments the environments to save
+     */
+    void saveAll(List<Environment> environments);
+
+    /**
      * Finds an environment by identity.
      *
      * @param id environment identity

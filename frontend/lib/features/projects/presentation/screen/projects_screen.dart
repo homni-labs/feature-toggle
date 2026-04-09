@@ -227,6 +227,7 @@ class _LoadedBody extends StatelessWidget {
           slug: result.slug,
           name: result.name,
           description: result.description,
+          environments: result.environments,
         );
   }
 

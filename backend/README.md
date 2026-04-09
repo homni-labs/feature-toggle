@@ -97,6 +97,18 @@ Dual authentication chain:
 
 ---
 
+## Default Environments
+
+The platform exposes a configurable list of "default" environment names (`DEV`, `TEST`, `PROD`, ...) that can be bootstrapped into a new project at creation time. The list lives in `application.yml` under `app.environments.defaults` (overridable via the `APP_DEFAULT_ENVIRONMENTS` env variable).
+
+- **Single source of truth** &mdash; defaults live only in config, never in the database. Each project that selects them gets its own independent rows in the `environment` table, so deleting `DEV` from one project does not affect any other. Names sharing a string across projects are independent entities scoped to `(project_id, name)`.
+- **Fail-fast validation** &mdash; `EnvironmentDefaultsValidator` (an `ApplicationRunner`) validates each name on startup using the same `Environment.validateAndNormalize` rules as user-created envs &mdash; we never duplicate the regex. The application refuses to boot if any name violates `^[A-Z][A-Z0-9_]*$`, exceeds 50 characters, or duplicates another entry.
+- **API surface** &mdash; `GET /environments/defaults` returns the configured list to the UI. `POST /projects` accepts an optional `environments` array which must be a subset of the configured defaults; custom names at creation are rejected with `422 VALIDATION_ERROR`. Custom envs can still be added after creation via `POST /projects/{projectId}/environments`.
+- **Field semantics** &mdash; on `POST /projects`: omitting `environments` bootstraps **all** configured defaults (backward-compatible behaviour); passing an empty array explicitly opts out and creates the project with no environments; passing a non-empty subset bootstraps exactly those names.
+- **Empty list** &mdash; set `APP_DEFAULT_ENVIRONMENTS=` to disable defaults entirely; new projects will be created without any environments and the user must add them manually after creation.
+
+---
+
 ## Tech Stack
 
 | | Technology |

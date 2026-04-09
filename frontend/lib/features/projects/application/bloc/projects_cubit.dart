@@ -34,12 +34,14 @@ class ProjectsCubit extends Cubit<ProjectsState> {
     required String slug,
     required String name,
     String? description,
+    List<String>? environments,
   }) async {
     final result = await _createProject(
       accessToken: accessToken,
       slug: slug,
       name: name,
       description: description,
+      environments: environments,
     );
     result.fold(
       (f) => emit(ProjectsError(f)),

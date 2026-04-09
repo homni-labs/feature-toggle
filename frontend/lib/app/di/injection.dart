@@ -25,6 +25,7 @@ import 'package:feature_toggle_app/features/toggles/application/bloc/toggles_cub
 import 'package:feature_toggle_app/features/environments/domain/port/environment_repository.dart';
 import 'package:feature_toggle_app/features/environments/infrastructure/repository/remote_environment_repository.dart';
 import 'package:feature_toggle_app/features/environments/application/usecase/load_environments_usecase.dart';
+import 'package:feature_toggle_app/features/environments/application/usecase/load_default_environments_usecase.dart';
 import 'package:feature_toggle_app/features/environments/application/usecase/create_environment_usecase.dart';
 import 'package:feature_toggle_app/features/environments/application/usecase/delete_environment_usecase.dart';
 import 'package:feature_toggle_app/features/environments/application/bloc/environments_cubit.dart';
@@ -103,6 +104,9 @@ void configureDependencies() {
     () => RemoteEnvironmentRepository(),
   );
   sl.registerFactory(() => LoadEnvironmentsUseCase(sl<EnvironmentRepository>()));
+  sl.registerFactory(
+    () => LoadDefaultEnvironmentsUseCase(sl<EnvironmentRepository>()),
+  );
   sl.registerFactory(() => CreateEnvironmentUseCase(sl<EnvironmentRepository>()));
   sl.registerFactory(() => DeleteEnvironmentUseCase(sl<EnvironmentRepository>()));
   sl.registerFactory(

@@ -52,11 +52,17 @@ class RemoteProjectRepository implements ProjectRepository {
     required String slug,
     required String name,
     String? description,
+    List<String>? environments,
   }) async {
     try {
       final Map<String, dynamic> body = {'slug': slug, 'name': name};
       if (description != null && description.isNotEmpty) {
         body['description'] = description;
+      }
+      // null = use server defaults; non-null (incl. empty []) is sent as-is
+      // so the backend can distinguish "use defaults" from "opt out".
+      if (environments != null) {
+        body['environments'] = environments;
       }
 
       final response = await http

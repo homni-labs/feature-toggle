@@ -61,7 +61,10 @@ class ProjectsController implements ProjectsApi {
     @Override
     public ResponseEntity<ProjectSingleResponse> createProject(CreateProjectRequest req) {
         Project project = createProject.execute(
-                new ProjectSlug(req.getSlug()), req.getName(), req.getDescription());
+                new ProjectSlug(req.getSlug()),
+                req.getName(),
+                req.getDescription(),
+                req.getEnvironments());
         return ResponseEntity.ok(presenter.single(project));
     }
 

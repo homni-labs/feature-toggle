@@ -11,12 +11,14 @@ class CreateProjectUseCase {
     required String slug,
     required String name,
     String? description,
+    List<String>? environments,
   }) {
     return _repo.create(
       accessToken: accessToken,
       slug: slug,
       name: name,
       description: description,
+      environments: environments,
     );
   }
 }
