@@ -16,7 +16,6 @@ import com.homni.featuretoggle.domain.exception.EntityNotFoundException;
 import com.homni.featuretoggle.domain.exception.ProjectArchivedException;
 import com.homni.featuretoggle.domain.model.IssuedApiKey;
 import com.homni.featuretoggle.domain.model.Permission;
-import com.homni.featuretoggle.domain.model.Project;
 import com.homni.featuretoggle.domain.model.ProjectId;
 
 import java.time.Instant;
@@ -56,17 +55,11 @@ public final class IssueApiKeyUseCase {
      */
     public IssuedApiKey execute(ProjectId projectId, String name, Instant expiresAt) {
         callerAccess.resolve(projectId).ensure(Permission.MANAGE_MEMBERS);
-        ensureProjectNotArchived(projectId);
+        projects.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Project", projectId.value))
+                .ensureNotArchived();
         IssuedApiKey issued = new IssuedApiKey(projectId, name, expiresAt);
         apiKeys.save(issued.apiKey);
         return issued;
-    }
-
-    private void ensureProjectNotArchived(ProjectId projectId) {
-        Project project = projects.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Project", projectId.value));
-        if (project.isArchived()) {
-            throw new ProjectArchivedException(projectId);
-        }
     }
 }

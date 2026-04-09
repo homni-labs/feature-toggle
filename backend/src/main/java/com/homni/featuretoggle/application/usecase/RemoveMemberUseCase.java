@@ -15,7 +15,6 @@ import com.homni.featuretoggle.application.port.out.ProjectRepositoryPort;
 import com.homni.featuretoggle.domain.exception.EntityNotFoundException;
 import com.homni.featuretoggle.domain.exception.ProjectArchivedException;
 import com.homni.featuretoggle.domain.model.Permission;
-import com.homni.featuretoggle.domain.model.Project;
 import com.homni.featuretoggle.domain.model.ProjectId;
 import com.homni.featuretoggle.domain.model.UserId;
 
@@ -52,15 +51,9 @@ public final class RemoveMemberUseCase {
      */
     public void execute(ProjectId projectId, UserId userId) {
         callerAccess.resolve(projectId).ensure(Permission.MANAGE_MEMBERS);
-        ensureProjectNotArchived(projectId);
+        projects.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Project", projectId.value))
+                .ensureNotArchived();
         memberships.deleteByProjectAndUser(projectId, userId);
-    }
-
-    private void ensureProjectNotArchived(ProjectId projectId) {
-        Project project = projects.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Project", projectId.value));
-        if (project.isArchived()) {
-            throw new ProjectArchivedException(projectId);
-        }
     }
 }

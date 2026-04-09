@@ -17,8 +17,6 @@ import com.homni.featuretoggle.domain.exception.ProjectArchivedException;
 import com.homni.featuretoggle.domain.model.ApiKey;
 import com.homni.featuretoggle.domain.model.ApiKeyId;
 import com.homni.featuretoggle.domain.model.Permission;
-import com.homni.featuretoggle.domain.model.Project;
-import com.homni.featuretoggle.domain.model.ProjectId;
 
 /**
  * Revokes an API key within a project.
@@ -55,16 +53,10 @@ public final class RevokeApiKeyUseCase {
         ApiKey apiKey = apiKeys.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("ApiKey", id.value));
         callerAccess.resolve(apiKey.projectId).ensure(Permission.MANAGE_MEMBERS);
-        ensureProjectNotArchived(apiKey.projectId);
+        projects.findById(apiKey.projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Project", apiKey.projectId.value))
+                .ensureNotArchived();
         apiKey.revoke();
         apiKeys.save(apiKey);
-    }
-
-    private void ensureProjectNotArchived(ProjectId projectId) {
-        Project project = projects.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Project", projectId.value));
-        if (project.isArchived()) {
-            throw new ProjectArchivedException(projectId);
-        }
     }
 }

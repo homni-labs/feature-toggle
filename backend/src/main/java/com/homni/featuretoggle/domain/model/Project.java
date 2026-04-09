@@ -11,6 +11,7 @@ package com.homni.featuretoggle.domain.model;
 
 import com.homni.featuretoggle.domain.exception.DomainValidationException;
 import com.homni.featuretoggle.domain.exception.InvalidStateException;
+import com.homni.featuretoggle.domain.exception.ProjectArchivedException;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -118,6 +119,20 @@ public final class Project {
         }
         this.archived = false;
         this.updatedAt = Instant.now();
+    }
+
+    /**
+     * Guards any mutation against an archived project. Use cases that change
+     * resources owned by a project (toggles, members, env, api keys) call this
+     * before delegating to the relevant aggregate, so the rule lives on the
+     * project itself instead of being duplicated across the application layer.
+     *
+     * @throws com.homni.featuretoggle.domain.exception.ProjectArchivedException if this project is archived
+     */
+    public void ensureNotArchived() {
+        if (this.archived) {
+            throw new ProjectArchivedException(this.id);
+        }
     }
 
     /**

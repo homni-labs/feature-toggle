@@ -1,10 +1,23 @@
+class ToggleEnvironmentDto {
+  final String name;
+  final bool enabled;
+
+  const ToggleEnvironmentDto({required this.name, required this.enabled});
+
+  factory ToggleEnvironmentDto.fromJson(Map<String, dynamic> json) {
+    return ToggleEnvironmentDto(
+      name: json['name'] as String,
+      enabled: json['enabled'] as bool,
+    );
+  }
+}
+
 class FeatureToggleDto {
   final String id;
   final String projectId;
   final String name;
   final String description;
-  final bool enabled;
-  final List<String> environments;
+  final List<ToggleEnvironmentDto> environments;
   final String createdAt;
   final String? updatedAt;
 
@@ -13,7 +26,6 @@ class FeatureToggleDto {
     required this.projectId,
     required this.name,
     this.description = '',
-    required this.enabled,
     this.environments = const [],
     required this.createdAt,
     this.updatedAt,
@@ -25,11 +37,11 @@ class FeatureToggleDto {
       projectId: json['projectId'] as String,
       name: json['name'] as String,
       description: json['description'] as String? ?? '',
-      enabled: json['enabled'] as bool,
       environments: (json['environments'] as List<dynamic>?)
-              ?.map((e) => e as String)
+              ?.map((e) =>
+                  ToggleEnvironmentDto.fromJson(e as Map<String, dynamic>))
               .toList() ??
-          [],
+          const [],
       createdAt: json['createdAt'] as String,
       updatedAt: json['updatedAt'] as String?,
     );

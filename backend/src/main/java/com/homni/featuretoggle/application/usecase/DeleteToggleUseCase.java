@@ -17,8 +17,6 @@ import com.homni.featuretoggle.domain.exception.ProjectArchivedException;
 import com.homni.featuretoggle.domain.model.FeatureToggle;
 import com.homni.featuretoggle.domain.model.FeatureToggleId;
 import com.homni.featuretoggle.domain.model.Permission;
-import com.homni.featuretoggle.domain.model.Project;
-import com.homni.featuretoggle.domain.model.ProjectId;
 
 /**
  * Deletes a feature toggle from a project.
@@ -54,15 +52,9 @@ public final class DeleteToggleUseCase {
         FeatureToggle toggle = toggles.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Toggle", id.value));
         callerAccess.resolve(toggle.projectId).ensure(Permission.WRITE_TOGGLES);
-        ensureProjectNotArchived(toggle.projectId);
+        projects.findById(toggle.projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Project", toggle.projectId.value))
+                .ensureNotArchived();
         toggles.deleteById(id);
-    }
-
-    private void ensureProjectNotArchived(ProjectId projectId) {
-        Project project = projects.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Project", projectId.value));
-        if (project.isArchived()) {
-            throw new ProjectArchivedException(projectId);
-        }
     }
 }

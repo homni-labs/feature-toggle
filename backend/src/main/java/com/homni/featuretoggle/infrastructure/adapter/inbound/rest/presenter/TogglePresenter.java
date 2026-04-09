@@ -11,6 +11,7 @@ package com.homni.featuretoggle.infrastructure.adapter.inbound.rest.presenter;
 
 import com.homni.featuretoggle.application.usecase.TogglePage;
 import com.homni.featuretoggle.domain.model.FeatureToggle;
+import com.homni.generated.model.FeatureToggleEnvironment;
 import com.homni.generated.model.FeatureToggleListResponse;
 import com.homni.generated.model.FeatureToggleSingleResponse;
 import com.homni.generated.model.Pagination;
@@ -22,6 +23,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Maps feature toggle domain objects to generated OpenAPI response models.
@@ -55,9 +57,15 @@ public class TogglePresenter {
     }
 
     private com.homni.generated.model.FeatureToggle toDto(FeatureToggle t) {
+        // Sort by env name here so the API response is stable for the UI.
+        // The domain Map intentionally has no ordering invariant — keeping
+        // a stable rendering order is a presentation concern.
+        List<FeatureToggleEnvironment> envs = t.environmentStates().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(e -> new FeatureToggleEnvironment(e.getKey(), Boolean.TRUE.equals(e.getValue())))
+                .toList();
         com.homni.generated.model.FeatureToggle dto = new com.homni.generated.model.FeatureToggle(
-                t.id.value, t.projectId.value, t.name(), t.isEnabled(),
-                t.environments().stream().toList(), toUtc(t.createdAt));
+                t.id.value, t.projectId.value, t.name(), envs, toUtc(t.createdAt));
         dto.setDescription(t.description().orElse(null));
         dto.setUpdatedAt(JsonNullable.of(t.lastModifiedAt().map(this::toUtc).orElse(null)));
         return dto;

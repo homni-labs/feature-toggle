@@ -289,9 +289,9 @@ class _ToggleList extends StatelessWidget {
             return ToggleCard(
               key: ValueKey(toggle.id),
               toggle: toggle,
-              onToggle: canWrite
-                  ? (bool value) =>
-                      _onToggleSwitch(context, toggle, value)
+              onEnvironmentToggle: canWrite
+                  ? (envName, value) =>
+                      _onEnvSwitch(context, toggle, envName, value)
                   : null,
               onEdit: canWrite
                   ? () => _onEdit(context, toggle)
@@ -306,9 +306,10 @@ class _ToggleList extends StatelessWidget {
     );
   }
 
-  Future<void> _onToggleSwitch(
+  Future<void> _onEnvSwitch(
     BuildContext context,
     FeatureToggle toggle,
+    String envName,
     bool value,
   ) async {
     final AuthCubit authCubit = context.read<AuthCubit>();
@@ -321,10 +322,11 @@ class _ToggleList extends StatelessWidget {
     final String? token = await authCubit.getValidAccessToken();
     if (token == null || !context.mounted) return;
 
-    await context.read<TogglesCubit>().update(
+    await context.read<TogglesCubit>().setEnvironmentState(
           accessToken: token,
           projectId: projectId,
           toggleId: toggle.id,
+          environmentName: envName,
           enabled: value,
         );
   }
@@ -342,7 +344,7 @@ class _ToggleList extends StatelessWidget {
         isEdit: true,
         initialName: toggle.name,
         initialDescription: toggle.description,
-        initialEnvironments: toggle.environments,
+        initialEnvironments: toggle.environmentNames,
         availableEnvironments: availableEnvs,
       ),
     );

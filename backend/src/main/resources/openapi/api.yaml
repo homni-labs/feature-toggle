@@ -133,7 +133,11 @@ paths:
       tags: [Feature Toggles]
       operationId: listToggles
       summary: List feature toggles in a project
-      description: Requires READ_TOGGLES permission (READER+).
+      description: |
+        Requires READ_TOGGLES permission (READER+). Filter semantics:
+        - `enabled` + `environment` → toggles whose state in that specific env matches
+        - `enabled` only → toggles enabled (or disabled) in at least one env
+        - `environment` only → toggles assigned to that env regardless of state
       parameters:
         - name: enabled
           in: query
@@ -916,6 +920,13 @@ components:
 
     UpdateFeatureToggleRequest:
       type: object
+      description: |
+        Partial update for a feature toggle. Any field can be omitted. The
+        `environments` array (if present) replaces the toggle's assigned env
+        set; envs added this way start disabled, removed envs lose their state.
+        The `environmentStates` map (if present) flips the enabled flag for
+        each listed env independently — pass a one-entry map for an inline
+        switch click, a multi-entry map for bulk form-style edits.
       properties:
         name:
           type: string
@@ -928,12 +939,27 @@ components:
           type: array
           items:
             type: string
+        environmentStates:
+          type: object
+          description: Map of environment name → desired enabled flag.
+          additionalProperties:
+            type: boolean
+          example:
+            DEV: true
+            PROD: false
+
+    FeatureToggleEnvironment:
+      type: object
+      required: [name, enabled]
+      properties:
+        name:
+          type: string
         enabled:
           type: boolean
 
     FeatureToggle:
       type: object
-      required: [id, projectId, name, enabled, environments, createdAt]
+      required: [id, projectId, name, environments, createdAt]
       properties:
         id:
           type: string
@@ -945,12 +971,14 @@ components:
           type: string
         description:
           type: string
-        enabled:
-          type: boolean
         environments:
           type: array
+          description: |
+            Per-environment state of the toggle. Each entry indicates that the
+            toggle is "present" in that env, plus the independent enabled flag
+            for that env.
           items:
-            type: string
+            $ref: '#/components/schemas/FeatureToggleEnvironment'
         createdAt:
           type: string
           format: date-time

@@ -14,7 +14,7 @@ class UpdateToggleUseCase {
     String? name,
     String? description,
     List<String>? environments,
-    bool? enabled,
+    Map<String, bool>? environmentStates,
   }) {
     return _repo.update(
       accessToken: accessToken,
@@ -23,7 +23,7 @@ class UpdateToggleUseCase {
       name: name,
       description: description,
       environments: environments,
-      enabled: enabled,
+      environmentStates: environmentStates,
     );
   }
 }

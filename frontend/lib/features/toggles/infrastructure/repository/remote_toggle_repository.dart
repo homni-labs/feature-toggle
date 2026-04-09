@@ -119,14 +119,16 @@ class RemoteToggleRepository implements ToggleRepository {
     String? name,
     String? description,
     List<String>? environments,
-    bool? enabled,
+    Map<String, bool>? environmentStates,
   }) async {
     try {
       final Map<String, dynamic> body = {};
       if (name != null) body['name'] = name;
       if (description != null) body['description'] = description;
       if (environments != null) body['environments'] = environments;
-      if (enabled != null) body['enabled'] = enabled;
+      if (environmentStates != null && environmentStates.isNotEmpty) {
+        body['environmentStates'] = environmentStates;
+      }
 
       final response = await http
           .patch(

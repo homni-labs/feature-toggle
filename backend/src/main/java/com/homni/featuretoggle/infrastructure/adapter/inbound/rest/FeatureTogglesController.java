@@ -103,7 +103,7 @@ class FeatureTogglesController implements FeatureTogglesApi {
                                                                      UpdateFeatureToggleRequest req) {
         FeatureToggle toggle = updateToggle.execute(
                 new FeatureToggleId(toggleId), req.getName(), req.getDescription(),
-                toSet(req.getEnvironments()), req.getEnabled());
+                toSet(req.getEnvironments()), req.getEnvironmentStates());
         return ResponseEntity.ok(presenter.single(toggle));
     }
 

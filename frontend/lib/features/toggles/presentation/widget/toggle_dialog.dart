@@ -117,6 +117,16 @@ class _ToggleDialogState extends State<ToggleDialog> {
                     color: Colors.white.withOpacity(0.6),
                   ),
                 ),
+                const SizedBox(height: 4),
+                Text(
+                  widget.isEdit
+                      ? 'Newly added envs start disabled — flip them on the toggle card.'
+                      : 'New toggles start disabled in every env — flip them on after creating.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.white.withOpacity(0.35),
+                  ),
+                ),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 8,

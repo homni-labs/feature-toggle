@@ -17,7 +17,6 @@ import com.homni.featuretoggle.domain.exception.EntityNotFoundException;
 import com.homni.featuretoggle.domain.exception.ProjectArchivedException;
 import com.homni.featuretoggle.domain.model.AppUser;
 import com.homni.featuretoggle.domain.model.Permission;
-import com.homni.featuretoggle.domain.model.Project;
 import com.homni.featuretoggle.domain.model.ProjectId;
 import com.homni.featuretoggle.domain.model.ProjectMembership;
 import com.homni.featuretoggle.domain.model.ProjectRole;
@@ -64,7 +63,9 @@ public final class UpsertMemberUseCase {
      */
     public ProjectMembership execute(ProjectId projectId, UserId userId, ProjectRole role) {
         callerAccess.resolve(projectId).ensure(Permission.MANAGE_MEMBERS);
-        ensureProjectNotArchived(projectId);
+        projects.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Project", projectId.value))
+                .ensureNotArchived();
         AppUser user = users.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User", userId.value));
         Optional<ProjectMembership> existing = memberships.findByProjectAndUser(projectId, userId);
@@ -75,13 +76,5 @@ public final class UpsertMemberUseCase {
         memberships.save(membership);
         membership.enrichWithUserInfo(user.email.value(), user.displayName().orElse(null));
         return membership;
-    }
-
-    private void ensureProjectNotArchived(ProjectId projectId) {
-        Project project = projects.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Project", projectId.value));
-        if (project.isArchived()) {
-            throw new ProjectArchivedException(projectId);
-        }
     }
 }

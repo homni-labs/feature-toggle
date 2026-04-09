@@ -23,7 +23,8 @@ import com.homni.featuretoggle.domain.model.ProjectId;
 import java.util.Set;
 
 /**
- * Creates a feature toggle in a project.
+ * Creates a feature toggle in a project. Pure orchestration: load aggregates,
+ * delegate every business rule to the domain, then persist.
  */
 public final class CreateToggleUseCase {
 
@@ -58,32 +59,19 @@ public final class CreateToggleUseCase {
      * @return the created feature toggle
      * @throws com.homni.featuretoggle.domain.exception.InsufficientPermissionException if access lacks WRITE_TOGGLES
      * @throws ProjectArchivedException if the project is archived
-     * @throws EntityNotFoundException if any environment does not exist
+     * @throws EntityNotFoundException if the project does not exist
      */
     public FeatureToggle execute(ProjectId projectId, String name, String description,
                                  Set<String> environmentNames) {
         callerAccess.resolve(projectId).ensure(Permission.WRITE_TOGGLES);
-        ensureProjectNotArchived(projectId);
-        validateEnvironmentsExist(projectId, environmentNames);
-        FeatureToggle toggle = new FeatureToggle(projectId, name, description, environmentNames);
-        toggles.save(toggle);
-        return toggle;
-    }
 
-    private void ensureProjectNotArchived(ProjectId projectId) {
         Project project = projects.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project", projectId.value));
-        if (project.isArchived()) {
-            throw new ProjectArchivedException(projectId);
-        }
-    }
+        project.ensureNotArchived();
 
-    private void validateEnvironmentsExist(ProjectId projectId, Set<String> requested) {
-        Set<String> existing = environments.findNamesByProjectId(projectId);
-        for (String name : requested) {
-            if (!existing.contains(name)) {
-                throw new EntityNotFoundException("Environment", name + " in project " + projectId.value);
-            }
-        }
+        Set<String> projectEnvs = environments.findNamesByProjectId(projectId);
+        FeatureToggle toggle = new FeatureToggle(projectId, name, description, environmentNames, projectEnvs);
+        toggles.save(toggle);
+        return toggle;
     }
 }

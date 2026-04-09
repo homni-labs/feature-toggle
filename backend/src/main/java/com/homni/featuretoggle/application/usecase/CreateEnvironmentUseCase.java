@@ -16,7 +16,6 @@ import com.homni.featuretoggle.domain.exception.EntityNotFoundException;
 import com.homni.featuretoggle.domain.exception.ProjectArchivedException;
 import com.homni.featuretoggle.domain.model.Environment;
 import com.homni.featuretoggle.domain.model.Permission;
-import com.homni.featuretoggle.domain.model.Project;
 import com.homni.featuretoggle.domain.model.ProjectId;
 
 /**
@@ -53,17 +52,11 @@ public final class CreateEnvironmentUseCase {
      */
     public Environment execute(ProjectId projectId, String name) {
         callerAccess.resolve(projectId).ensure(Permission.WRITE_TOGGLES);
-        ensureProjectNotArchived(projectId);
+        projects.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Project", projectId.value))
+                .ensureNotArchived();
         Environment environment = new Environment(projectId, name);
         environments.save(environment);
         return environment;
-    }
-
-    private void ensureProjectNotArchived(ProjectId projectId) {
-        Project project = projects.findById(projectId)
-                .orElseThrow(() -> new EntityNotFoundException("Project", projectId.value));
-        if (project.isArchived()) {
-            throw new ProjectArchivedException(projectId);
-        }
     }
 }
