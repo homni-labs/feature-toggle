@@ -68,7 +68,7 @@ public final class UpdateToggleUseCase {
                 .orElseThrow(() -> new EntityNotFoundException("Toggle", id.value));
         callerAccess.resolve(toggle.projectId).ensure(Permission.WRITE_TOGGLES);
         ensureProjectNotArchived(toggle.projectId);
-        if (environmentNames != null) {
+        if (environmentNames != null && !environmentNames.isEmpty()) {
             validateEnvironmentsExist(toggle.projectId, environmentNames);
         }
         toggle.update(name, description, environmentNames);

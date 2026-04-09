@@ -128,7 +128,7 @@ public final class FeatureToggle {
         if (newDescription != null) {
             this.description = newDescription;
         }
-        if (newEnvironments != null) {
+        if (newEnvironments != null && !newEnvironments.isEmpty()) {
             LinkedHashSet<String> validated = validateEnvironments(this.name, newEnvironments);
             this.environments.clear();
             this.environments.addAll(validated);

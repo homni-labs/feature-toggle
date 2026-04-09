@@ -118,6 +118,7 @@
                             <apiPackage>com.homni.generated.api</apiPackage>
                             <modelPackage>com.homni.generated.model</modelPackage>
                             <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
                                 <delegatePattern>true</delegatePattern>
                                 <useTags>true</useTags>
                                 <useSpringBoot3>true</useSpringBoot3>

@@ -59,9 +59,12 @@ public final class UpdateProjectUseCase {
     }
 
     private void applyArchivedChange(Project project, Boolean archived) {
-        if (Boolean.TRUE.equals(archived) && !project.isArchived()) {
+        if (archived == null || archived == project.isArchived()) {
+            return;
+        }
+        if (archived) {
             project.archive();
-        } else if (Boolean.FALSE.equals(archived) && project.isArchived()) {
+        } else {
             project.unarchive();
         }
     }

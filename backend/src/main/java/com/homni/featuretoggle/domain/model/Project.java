@@ -72,18 +72,25 @@ public final class Project {
     }
 
     /**
-     * Updates name and description; no-op if unchanged.
+     * Partially updates name and/or description. {@code null} arguments are ignored.
+     * No-op if nothing actually changes.
      *
-     * @param newName        the new name (1-255 chars)
-     * @param newDescription optional new description
+     * @param newName        the new name (1-255 chars), or {@code null} to keep current
+     * @param newDescription the new description, or {@code null} to keep current
      * @throws DomainValidationException if name is invalid
      */
     public void update(String newName, String newDescription) {
-        if (this.name.equals(newName) && Objects.equals(this.description, newDescription)) {
+        boolean nameChanged = newName != null && !newName.equals(this.name);
+        boolean descriptionChanged = newDescription != null && !Objects.equals(newDescription, this.description);
+        if (!nameChanged && !descriptionChanged) {
             return;
         }
-        this.name = validateName(newName);
-        this.description = newDescription;
+        if (nameChanged) {
+            this.name = validateName(newName);
+        }
+        if (descriptionChanged) {
+            this.description = newDescription;
+        }
         this.updatedAt = Instant.now();
     }
 
