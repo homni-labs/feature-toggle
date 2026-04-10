@@ -70,8 +70,44 @@ paths:
       description: |
         PLATFORM_ADMIN sees all projects (including archived). Regular users see projects
         they are a member of, but archived projects only when they have the ADMIN role on them.
+        Each item carries pre-aggregated `togglesCount`, `environmentsCount` and `membersCount`
+        for the project list UI; the `pagination` envelope reflects the filtered query, while
+        `totalCount` / `archivedCount` reflect the workspace-wide visible totals (independent
+        of the search/archived query parameters) so the page header can show "N projects · M
+        archived" without an extra round-trip.
       security:
         - oidc: []
+      parameters:
+        - name: q
+          in: query
+          required: false
+          description: Case-insensitive substring match against project name and slug.
+          schema:
+            type: string
+        - name: archived
+          in: query
+          required: false
+          description: |
+            Tri-state filter applied on top of the visibility rules above. Omit
+            (or pass `null`) to return both active and archived projects, `true`
+            to return only archived ones, `false` to return only active ones.
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
       responses:
         '200':
           description: OK
@@ -853,7 +889,7 @@ components:
 
     Project:
       type: object
-      required: [id, slug, name, archived, createdAt]
+      required: [id, slug, name, archived, createdAt, togglesCount, environmentsCount, membersCount]
       properties:
         id:
           type: string
@@ -877,6 +913,18 @@ components:
           type: string
           format: date-time
           nullable: true
+        togglesCount:
+          type: integer
+          format: int64
+          description: Number of feature toggles in this project.
+        environmentsCount:
+          type: integer
+          format: int64
+          description: Number of environments in this project.
+        membersCount:
+          type: integer
+          format: int64
+          description: Number of members in this project.
 
     ProjectSingleResponse:
       type: object
@@ -889,12 +937,27 @@ components:
 
     ProjectListResponse:
       type: object
-      required: [payload, meta]
+      required: [payload, pagination, totalCount, archivedCount, meta]
       properties:
         payload:
           type: array
           items:
             $ref: '#/components/schemas/Project'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        totalCount:
+          type: integer
+          format: int64
+          description: |
+            Total number of projects visible to the caller in the workspace,
+            ignoring the `q` and `archived` query parameters. Used by the
+            page header subtitle ("N projects · M archived").
+        archivedCount:
+          type: integer
+          format: int64
+          description: |
+            Number of archived projects visible to the caller in the workspace,
+            ignoring the `q` and `archived` query parameters.
         meta:
           $ref: '#/components/schemas/ResponseMeta'
 

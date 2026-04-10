@@ -3,7 +3,22 @@ import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
 import 'package:feature_toggle_app/features/projects/domain/model/project.dart';
 
 abstract class ProjectRepository {
-  FutureEither<List<Project>> getAll({required String accessToken});
+  /// Returns a page of projects visible to the caller. Filters compose:
+  /// - [searchText] case-insensitive substring against name and slug
+  /// - [archived] tri-state — null (both), true (only archived), false (only active)
+  /// - [page] / [size] zero-based pagination
+  ///
+  /// The returned [ProjectsPage] also carries workspace-wide subtitle counters
+  /// ([ProjectsPage.totalCount] / [ProjectsPage.archivedCount]) that ignore
+  /// the active filters and let the page header stay stable when the user
+  /// searches or switches between All / Archived.
+  FutureEither<ProjectsPage> getAll({
+    required String accessToken,
+    String? searchText,
+    bool? archived,
+    int page = 0,
+    int size = 6,
+  });
 
   /// Creates a project. The optional [environments] parameter selects which
   /// platform-default environments to bootstrap inside the new project:

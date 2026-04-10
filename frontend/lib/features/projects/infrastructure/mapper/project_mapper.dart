@@ -15,6 +15,21 @@ class ProjectMapper {
       createdAt: DateTime.parse(dto.createdAt),
       updatedAt: dto.updatedAt != null ? DateTime.parse(dto.updatedAt!) : null,
       myRole: dto.myRole != null ? ProjectRole.from(dto.myRole!) : null,
+      togglesCount: dto.togglesCount,
+      environmentsCount: dto.environmentsCount,
+      membersCount: dto.membersCount,
+    );
+  }
+
+  ProjectsPage toDomainPage(ProjectsPageDto dto) {
+    return ProjectsPage(
+      items: dto.items.map(toDomain).toList(),
+      page: dto.page,
+      size: dto.size,
+      totalElements: dto.totalElements,
+      totalPages: dto.totalPages,
+      totalCount: dto.totalCount,
+      archivedCount: dto.archivedCount,
     );
   }
 }

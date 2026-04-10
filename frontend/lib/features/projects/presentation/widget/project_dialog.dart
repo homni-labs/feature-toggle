@@ -123,20 +123,11 @@ class _ProjectDialogState extends State<ProjectDialog> {
     final String descText = _descController.text.trim();
     final String? description = descText.isEmpty ? null : descText;
 
-    // Compute the environments payload semantics:
-    //   - edit mode → never sent
-    //   - defaults failed to load → send null (let server pick its defaults)
-    //   - all defaults selected (or none configured) → send null (server default)
-    //   - any subset (including empty) → send the explicit list
+    // Send exactly what the user has checked in the UI.
     List<String>? environments;
-    if (!widget.isEdit && !_defaultsFailed && _availableDefaults.isNotEmpty) {
-      final allSelected = _selectedDefaults.length == _availableDefaults.length;
-      if (!allSelected) {
-        // Preserve the order from _availableDefaults so the API call is stable.
-        environments = _availableDefaults
-            .where(_selectedDefaults.contains)
-            .toList(growable: false);
-      }
+    if (!widget.isEdit) {
+      environments = _selectedDefaults.toList();
+      if (environments.isEmpty) environments = null;
     }
 
     Navigator.of(context).pop(ProjectDialogResult(

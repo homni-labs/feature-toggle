@@ -6,7 +6,19 @@ class LoadProjectsUseCase {
   final ProjectRepository _repo;
   const LoadProjectsUseCase(this._repo);
 
-  FutureEither<List<Project>> call({required String accessToken}) {
-    return _repo.getAll(accessToken: accessToken);
+  FutureEither<ProjectsPage> call({
+    required String accessToken,
+    String? searchText,
+    bool? archived,
+    int page = 0,
+    int size = 6,
+  }) {
+    return _repo.getAll(
+      accessToken: accessToken,
+      searchText: searchText,
+      archived: archived,
+      page: page,
+      size: size,
+    );
   }
 }

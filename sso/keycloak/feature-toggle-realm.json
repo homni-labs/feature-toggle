@@ -8,7 +8,7 @@
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
   "bruteForceProtected": true,
-  "loginTheme": "feature-toggle",
+  "loginTheme": "light-theme",
   "clients": [
     {
       "clientId": "feature-toggle-frontend",
@@ -16,7 +16,7 @@
       "enabled": true,
       "publicClient": true,
       "attributes": {
-        "login_theme": "feature-toggle"
+        "login_theme": "light-theme"
       },
       "directAccessGrantsEnabled": true,
       "standardFlowEnabled": true,
@@ -167,6 +167,37 @@
           "temporary": false
         }
       ]
+    },
+    {
+      "username": "reader2",
+      "email": "reader2@homni.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Reader2",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "reader2",
+          "temporary": false
+        }
+      ]
+    },
+    {
+      "username": "reader3",
+      "email": "reader3@homni.local",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "Reader3",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "reader3",
+          "temporary": false
+        }
+      ]
     }
+
   ]
 }

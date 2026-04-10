@@ -20,13 +20,28 @@ class RemoteProjectRepository implements ProjectRepository {
   final ProjectMapper _mapper;
 
   @override
-  FutureEither<List<Project>> getAll({required String accessToken}) async {
+  FutureEither<ProjectsPage> getAll({
+    required String accessToken,
+    String? searchText,
+    bool? archived,
+    int page = 0,
+    int size = 6,
+  }) async {
     try {
+      final Map<String, String> params = {
+        'page': '$page',
+        'size': '$size',
+      };
+      if (searchText != null && searchText.isNotEmpty) {
+        params['q'] = searchText;
+      }
+      if (archived != null) params['archived'] = '$archived';
+
+      final uri = Uri.parse('${ApiConfig.baseUrl}/projects')
+          .replace(queryParameters: params);
+
       final response = await http
-          .get(
-            Uri.parse('${ApiConfig.baseUrl}/projects'),
-            headers: _headers(accessToken),
-          )
+          .get(uri, headers: _headers(accessToken))
           .timeout(_timeout);
 
       if (response.statusCode != 200) {
@@ -34,13 +49,8 @@ class RemoteProjectRepository implements ProjectRepository {
       }
 
       final json = jsonDecode(response.body) as Map<String, dynamic>;
-      final payload = json['payload'] as List<dynamic>;
-      final projects = payload
-          .map((e) => ProjectDto.fromJson(e as Map<String, dynamic>))
-          .map(_mapper.toDomain)
-          .toList();
-
-      return Right(projects);
+      final pageDto = ProjectsPageDto.fromJson(json);
+      return Right(_mapper.toDomainPage(pageDto));
     } on Exception {
       return const Left(NetworkFailure());
     }

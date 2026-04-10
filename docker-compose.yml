@@ -25,7 +25,8 @@ services:
       - "8180:8080"
     volumes:
       - ./sso/keycloak/feature-toggle-realm.json:/opt/keycloak/data/import/feature-toggle-realm.json:ro
-      - ./sso/keycloak/themes/feature-toggle:/opt/keycloak/themes/feature-toggle:ro
+      - ./sso/keycloak/themes/dark-theme:/opt/keycloak/themes/dark-theme:ro
+      - ./sso/keycloak/themes/light-theme:/opt/keycloak/themes/light-theme:ro
     restart: unless-stopped
 
   backend:

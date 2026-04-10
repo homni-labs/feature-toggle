@@ -1,6 +1,6 @@
 import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/slug.dart';
 import 'package:feature_toggle_app/core/domain/value_objects/project_role.dart';
+import 'package:feature_toggle_app/core/domain/value_objects/slug.dart';
 
 class Project {
   final ProjectId id;
@@ -11,6 +11,9 @@ class Project {
   final DateTime createdAt;
   final DateTime? updatedAt;
   final ProjectRole? myRole;
+  final int togglesCount;
+  final int environmentsCount;
+  final int membersCount;
 
   const Project({
     required this.id,
@@ -21,6 +24,9 @@ class Project {
     required this.createdAt,
     this.updatedAt,
     this.myRole,
+    this.togglesCount = 0,
+    this.environmentsCount = 0,
+    this.membersCount = 0,
   });
 
   @override
@@ -29,4 +35,27 @@ class Project {
 
   @override
   int get hashCode => id.hashCode;
+}
+
+/// Result of a paged projects query: the matching items together with the
+/// pagination envelope and the workspace-wide subtitle counters that are
+/// independent of the active filters.
+class ProjectsPage {
+  final List<Project> items;
+  final int page;
+  final int size;
+  final int totalElements;
+  final int totalPages;
+  final int totalCount;
+  final int archivedCount;
+
+  const ProjectsPage({
+    required this.items,
+    required this.page,
+    required this.size,
+    required this.totalElements,
+    required this.totalPages,
+    required this.totalCount,
+    required this.archivedCount,
+  });
 }
