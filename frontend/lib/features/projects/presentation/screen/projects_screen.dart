@@ -3,12 +3,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:feature_toggle_app/app/di/injection.dart';
 import 'package:feature_toggle_app/app/theme/app_colors.dart';
 import 'package:feature_toggle_app/core/domain/failure.dart';
 import 'package:feature_toggle_app/core/domain/value_objects/project_role.dart';
 import 'package:feature_toggle_app/core/presentation/widgets/app_snackbar.dart';
+import 'package:feature_toggle_app/core/presentation/widgets/comic_button.dart';
+import 'package:go_router/go_router.dart';
+import 'package:feature_toggle_app/app/router/app_router.dart';
 import 'package:feature_toggle_app/features/auth/application/bloc/auth_cubit.dart';
 import 'package:feature_toggle_app/features/auth/application/bloc/auth_state.dart';
 import 'package:feature_toggle_app/features/projects/application/bloc/projects_cubit.dart';
@@ -112,6 +116,8 @@ class _ProjectsViewState extends State<_ProjectsView> {
           );
         }
       },
+      buildWhen: (previous, current) =>
+          current is! ProjectsError || previous is! ProjectsLoaded,
       builder: (BuildContext context, ProjectsState state) {
         final ProjectsLoaded? loaded =
             state is ProjectsLoaded ? state : null;
@@ -126,10 +132,10 @@ class _ProjectsViewState extends State<_ProjectsView> {
                 children: [
                   Text(
                     'Projects',
-                    style: TextStyle(
+                    style: GoogleFonts.fredoka(
                       fontSize: 26,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white.withOpacity(0.92),
+                      color: AppColors.navy,
                     ),
                   ),
                   const Spacer(),
@@ -144,7 +150,7 @@ class _ProjectsViewState extends State<_ProjectsView> {
                 _subtitle(loaded, isPlatformAdmin),
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.white.withOpacity(0.35),
+                  color: AppColors.navy.withOpacity(0.35),
                 ),
               ),
               const SizedBox(height: 20),
@@ -160,17 +166,6 @@ class _ProjectsViewState extends State<_ProjectsView> {
 
               // ── Body ──────────────────────────────────────────────
               Expanded(child: _Body(state: state)),
-
-              // ── Pagination ────────────────────────────────────────
-              if (loaded != null && loaded.totalPages > 1) ...[
-                const SizedBox(height: 16),
-                _Pagination(
-                  page: loaded.page,
-                  totalPages: loaded.totalPages,
-                  totalElements: loaded.totalElements,
-                  pageSize: loaded.projects.length,
-                ),
-              ],
             ],
           ),
         );
@@ -227,7 +222,7 @@ class _Body extends StatelessWidget {
       ProjectsLoaded(:final List<Project> projects) =>
         projects.isEmpty
             ? const _EmptyState()
-            : _ProjectsGrid(projects: projects),
+            : _ProjectsGrid(state: state as ProjectsLoaded),
     };
   }
 }
@@ -245,13 +240,13 @@ class _ErrorBody extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.cloud_off_rounded,
-              size: 48, color: Colors.white.withOpacity(0.2)),
+              size: 48, color: AppColors.navy.withOpacity(0.2)),
           const SizedBox(height: 16),
           Text(
             failure.message,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.white.withOpacity(0.5),
+              color: AppColors.navy.withOpacity(0.5),
             ),
           ),
           const SizedBox(height: 16),
@@ -282,9 +277,9 @@ class _ErrorBody extends StatelessWidget {
 // ── Projects grid ──────────────────────────────────────────────
 
 class _ProjectsGrid extends StatelessWidget {
-  const _ProjectsGrid({required this.projects});
+  const _ProjectsGrid({required this.state});
 
-  final List<Project> projects;
+  final ProjectsLoaded state;
 
   @override
   Widget build(BuildContext context) {
@@ -294,44 +289,65 @@ class _ProjectsGrid extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Use the same 2-column 16px-gap grid as the mockup. The 720 cap
-        // matches the toggles list cap so the two screens feel related.
         final int columns = constraints.maxWidth >= 800 ? 2 : 1;
+        final double gap = 16;
+        final double cardWidth = columns == 1
+            ? constraints.maxWidth.clamp(0, 1100)
+            : ((constraints.maxWidth.clamp(0, 1100) - gap) / 2);
+
+        final List<Project> projects = state.projects;
         return Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1100),
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: columns,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                mainAxisExtent: 320,
-              ),
-              itemCount: projects.length,
-              itemBuilder: (BuildContext context, int index) {
-                final Project project = projects[index];
-                final bool userIsAdmin =
-                    project.myRole == ProjectRole.admin;
-                final bool canEdit = isPlatformAdmin || userIsAdmin;
-                final bool canArchive = isPlatformAdmin;
-                final bool canUnarchive = isPlatformAdmin || userIsAdmin;
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Wrap(
+                    spacing: gap,
+                    runSpacing: gap,
+                    children: [
+                      for (final project in projects)
+                        SizedBox(
+                          width: cardWidth,
+                          child: Builder(builder: (context) {
+                            final bool userIsAdmin =
+                                project.myRole == ProjectRole.admin;
+                            final bool canEdit =
+                                isPlatformAdmin || userIsAdmin;
+                            final bool canArchive = isPlatformAdmin;
+                            final bool canUnarchive =
+                                isPlatformAdmin || userIsAdmin;
 
-                return ProjectCard(
-                  key: ValueKey(project.id),
-                  project: project,
-                  showRoleBadge: !isPlatformAdmin,
-                  onTap: () => _onTap(context, project),
-                  onEdit: canEdit && !project.archived
-                      ? () => _onEdit(context, project)
-                      : null,
-                  onArchive: canArchive && !project.archived
-                      ? () => _onArchive(context, project)
-                      : null,
-                  onUnarchive: canUnarchive && project.archived
-                      ? () => _onUnarchive(context, project)
-                      : null,
-                );
-              },
+                            return ProjectCard(
+                              key: ValueKey(project.id),
+                              project: project,
+                              showRoleBadge: !isPlatformAdmin,
+                              onTap: () => _onTap(context, project),
+                              onEdit: canEdit && !project.archived
+                                  ? () => _onEdit(context, project)
+                                  : null,
+                              onArchive: canArchive && !project.archived
+                                  ? () => _onArchive(context, project)
+                                  : null,
+                              onUnarchive: canUnarchive && project.archived
+                                  ? () => _onUnarchive(context, project)
+                                  : null,
+                            );
+                          }),
+                        ),
+                    ],
+                  ),
+                  if (state.totalPages > 1) ...[
+                    const SizedBox(height: 20),
+                    _Pagination(
+                      page: state.page,
+                      totalPages: state.totalPages,
+                      totalElements: state.totalElements,
+                      pageSize: projects.length,
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         );
@@ -341,6 +357,7 @@ class _ProjectsGrid extends StatelessWidget {
 
   void _onTap(BuildContext context, Project project) {
     context.read<AuthCubit>().selectProject(project, project.myRole);
+    context.go(AppRoutes.projectToggles(project.slug.value));
   }
 
   Future<void> _onEdit(BuildContext context, Project project) async {
@@ -419,14 +436,14 @@ class _EmptyState extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.folder_outlined,
-              size: 64, color: Colors.white.withOpacity(0.15)),
+              size: 64, color: AppColors.navy.withOpacity(0.15)),
           const SizedBox(height: 16),
           Text(
             'No projects found',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
-              color: Colors.white.withOpacity(0.4),
+              color: AppColors.navy.withOpacity(0.4),
             ),
           ),
           const SizedBox(height: 8),
@@ -436,7 +453,7 @@ class _EmptyState extends StatelessWidget {
                 : "You're not a member of any project",
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white.withOpacity(0.25),
+              color: AppColors.navy.withOpacity(0.25),
             ),
           ),
         ],
@@ -504,25 +521,25 @@ class _SearchField extends StatelessWidget {
       width: 480,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E2040),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
+        color: const Color(0xFFFFFFFF),
+        border: Border.all(color: AppColors.navy.withOpacity(0.12)),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         children: [
           Icon(Icons.search_rounded,
-              size: 18, color: Colors.white.withOpacity(0.35)),
+              size: 18, color: AppColors.navy.withOpacity(0.35)),
           const SizedBox(width: 12),
           Expanded(
             child: TextField(
               controller: controller,
               onChanged: onChanged,
-              style: const TextStyle(fontSize: 14, color: Colors.white),
+              style: const TextStyle(fontSize: 14, color: AppColors.navy),
               decoration: InputDecoration(
                 hintText: 'Search projects by name or slug…',
                 hintStyle: TextStyle(
                   fontSize: 14,
-                  color: Colors.white.withOpacity(0.35),
+                  color: AppColors.navy.withOpacity(0.35),
                 ),
                 isCollapsed: true,
                 border: InputBorder.none,
@@ -537,7 +554,7 @@ class _SearchField extends StatelessWidget {
                 onChanged('');
               },
               child: Icon(Icons.close_rounded,
-                  size: 16, color: Colors.white.withOpacity(0.35)),
+                  size: 16, color: AppColors.navy.withOpacity(0.35)),
             ),
         ],
       ),
@@ -568,11 +585,11 @@ class _FilterPill extends StatelessWidget {
         decoration: BoxDecoration(
           color: active
               ? AppColors.teal.withOpacity(0.15)
-              : const Color(0xFF1E2040),
+              : const Color(0xFFFFFFFF),
           border: Border.all(
             color: active
                 ? AppColors.teal.withOpacity(0.4)
-                : Colors.white.withOpacity(0.12),
+                : AppColors.navy.withOpacity(0.12),
           ),
           borderRadius: BorderRadius.circular(12),
         ),
@@ -581,7 +598,7 @@ class _FilterPill extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: active ? AppColors.teal : Colors.white.withOpacity(0.7),
+            color: active ? AppColors.teal : AppColors.navy.withOpacity(0.7),
           ),
         ),
       ),
@@ -606,73 +623,28 @@ class _Pagination extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int from = totalElements == 0 ? 0 : page * pageSize + 1;
-    final int to = totalElements == 0
-        ? 0
-        : (page * pageSize + pageSize).clamp(0, totalElements);
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          'Showing $from–$to of $totalElements',
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.white.withOpacity(0.5),
-          ),
+        _PagerButton(
+          text: '\u00AB',
+          enabled: page > 0,
+          active: false,
+          onTap: () => _goToPage(context, page - 1),
         ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _PaginationArrow(
-              icon: Icons.chevron_left_rounded,
-              enabled: page > 0,
-              onTap: () => _goToPage(context, page - 1),
-            ),
-            const SizedBox(width: 8),
-            ...List.generate(totalPages, (int i) {
-              final bool isActive = i == page;
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 3),
-                child: GestureDetector(
-                  onTap: () => _goToPage(context, i),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    width: 36,
-                    height: 36,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: isActive
-                          ? AppColors.coral.withOpacity(0.25)
-                          : Colors.white.withOpacity(0.06),
-                      border: Border.all(
-                        color: isActive
-                            ? AppColors.coral.withOpacity(0.4)
-                            : Colors.white.withOpacity(0.08),
-                      ),
-                    ),
-                    child: Text(
-                      '${i + 1}',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight:
-                            isActive ? FontWeight.w600 : FontWeight.w400,
-                        color: isActive
-                            ? AppColors.coral
-                            : Colors.white.withOpacity(0.5),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-            const SizedBox(width: 8),
-            _PaginationArrow(
-              icon: Icons.chevron_right_rounded,
-              enabled: page < totalPages - 1,
-              onTap: () => _goToPage(context, page + 1),
-            ),
-          ],
+        ...List.generate(totalPages, (int i) {
+          return _PagerButton(
+            text: '${i + 1}',
+            enabled: true,
+            active: i == page,
+            onTap: () => _goToPage(context, i),
+          );
+        }),
+        _PagerButton(
+          text: '\u00BB',
+          enabled: page < totalPages - 1,
+          active: false,
+          onTap: () => _goToPage(context, page + 1),
         ),
       ],
     );
@@ -689,36 +661,53 @@ class _Pagination extends StatelessWidget {
   }
 }
 
-class _PaginationArrow extends StatelessWidget {
-  const _PaginationArrow({
-    required this.icon,
+class _PagerButton extends StatelessWidget {
+  const _PagerButton({
+    required this.text,
     required this.enabled,
+    required this.active,
     required this.onTap,
   });
 
-  final IconData icon;
+  final String text;
   final bool enabled;
+  final bool active;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: enabled ? onTap : null,
-      child: Container(
-        width: 36,
-        height: 36,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.white.withOpacity(0.06),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
-        ),
-        child: Icon(
-          icon,
-          size: 18,
-          color: enabled
-              ? Colors.white.withOpacity(0.7)
-              : Colors.white.withOpacity(0.2),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: GestureDetector(
+        onTap: enabled ? onTap : null,
+        child: Container(
+          width: 34,
+          height: 34,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: active
+                ? AppColors.coral.withOpacity(0.1)
+                : Colors.white,
+            border: Border.all(
+              width: 2,
+              color: active
+                  ? AppColors.coral
+                  : const Color(0xFFDDD8CC),
+            ),
+          ),
+          child: Text(
+            text,
+            style: GoogleFonts.fredoka(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: !enabled
+                  ? AppColors.navy.withOpacity(0.2)
+                  : active
+                      ? AppColors.coral
+                      : AppColors.navy.withOpacity(0.5),
+            ),
+          ),
         ),
       ),
     );
@@ -727,53 +716,16 @@ class _PaginationArrow extends StatelessWidget {
 
 // ── Create button ──────────────────────────────────────────────
 
-class _CreateButton extends StatefulWidget {
+class _CreateButton extends StatelessWidget {
   final VoidCallback onPressed;
   const _CreateButton({required this.onPressed});
 
   @override
-  State<_CreateButton> createState() => _CreateButtonState();
-}
-
-class _CreateButtonState extends State<_CreateButton> {
-  bool _hovering = false;
-
-  @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
-      child: GestureDetector(
-        onTap: widget.onPressed,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            gradient: const LinearGradient(
-                colors: [AppColors.coral, Color(0xFFE8585A)]),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.coral.withOpacity(_hovering ? 0.4 : 0.2),
-                blurRadius: _hovering ? 16 : 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.add_rounded, size: 18, color: Colors.white),
-              SizedBox(width: 6),
-              Text('New project',
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white)),
-            ],
-          ),
-        ),
-      ),
+    return ComicButton(
+      label: 'New Project',
+      icon: Icons.add_rounded,
+      onPressed: onPressed,
     );
   }
 }
@@ -799,8 +751,8 @@ class _ConfirmDialog extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: const Color(0xFF1E2040),
-          border: Border.all(color: Colors.white.withOpacity(0.12)),
+          color: const Color(0xFFFFFFFF),
+          border: Border.all(color: AppColors.navy.withOpacity(0.12)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -812,12 +764,12 @@ class _ConfirmDialog extends StatelessWidget {
                 style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white)),
+                    color: AppColors.navy)),
             const SizedBox(height: 8),
             Text(message,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                    fontSize: 14, color: Colors.white.withOpacity(0.5))),
+                    fontSize: 14, color: AppColors.navy.withOpacity(0.5))),
             const SizedBox(height: 24),
             Row(
               children: [
@@ -827,11 +779,11 @@ class _ConfirmDialog extends StatelessWidget {
                     child: TextButton(
                       onPressed: () => Navigator.of(context).pop(false),
                       style: TextButton.styleFrom(
-                        foregroundColor: Colors.white.withOpacity(0.6),
+                        foregroundColor: AppColors.navy.withOpacity(0.6),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                           side: BorderSide(
-                              color: Colors.white.withOpacity(0.12)),
+                              color: AppColors.navy.withOpacity(0.12)),
                         ),
                       ),
                       child: const Text('Cancel'),

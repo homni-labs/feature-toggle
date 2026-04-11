@@ -20,18 +20,24 @@ class RemoteEnvironmentRepository implements EnvironmentRepository {
   final EnvironmentMapper _mapper;
 
   @override
-  FutureEither<List<Environment>> getAll({
+  FutureEither<PagedEnvironments> getAll({
     required String accessToken,
     required ProjectId projectId,
+    int page = 0,
+    int size = 20,
   }) async {
     try {
+      final Map<String, String> params = {
+        'page': '$page',
+        'size': '$size',
+      };
+
+      final uri = Uri.parse(
+        '${ApiConfig.baseUrl}/projects/${projectId.value}/environments',
+      ).replace(queryParameters: params);
+
       final response = await http
-          .get(
-            Uri.parse(
-              '${ApiConfig.baseUrl}/projects/${projectId.value}/environments',
-            ),
-            headers: _headers(accessToken),
-          )
+          .get(uri, headers: _headers(accessToken))
           .timeout(_timeout);
 
       if (response.statusCode != 200) {
@@ -40,12 +46,20 @@ class RemoteEnvironmentRepository implements EnvironmentRepository {
 
       final json = jsonDecode(response.body) as Map<String, dynamic>;
       final payload = json['payload'] as List<dynamic>;
-      final environments = payload
+      final pagination = json['pagination'] as Map<String, dynamic>;
+
+      final items = payload
           .map((e) => EnvironmentDto.fromJson(e as Map<String, dynamic>))
           .map(_mapper.toDomain)
           .toList();
 
-      return Right(environments);
+      return Right(PagedEnvironments(
+        items: items,
+        totalElements: pagination['totalElements'] as int,
+        page: pagination['page'] as int,
+        size: pagination['size'] as int,
+        totalPages: pagination['totalPages'] as int,
+      ));
     } on Exception {
       return const Left(NetworkFailure());
     }
@@ -111,7 +125,9 @@ class RemoteEnvironmentRepository implements EnvironmentRepository {
   }
 
   @override
-  FutureEither<List<String>> getDefaults({required String accessToken}) async {
+  FutureEither<List<String>> getDefaults({
+    required String accessToken,
+  }) async {
     try {
       final response = await http
           .get(
@@ -126,8 +142,7 @@ class RemoteEnvironmentRepository implements EnvironmentRepository {
 
       final json = jsonDecode(response.body) as Map<String, dynamic>;
       final payload = json['payload'] as List<dynamic>;
-      final names = payload.map((e) => e as String).toList();
-      return Right(names);
+      return Right(payload.cast<String>());
     } on Exception {
       return const Left(NetworkFailure());
     }

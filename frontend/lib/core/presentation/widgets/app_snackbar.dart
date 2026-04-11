@@ -21,10 +21,10 @@ void showAppSnackBar(
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: AppColors.navy.withOpacity(0.15),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: Colors.white, size: 20),
+            child: Icon(icon, color: AppColors.navy, size: 20),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -37,7 +37,7 @@ void showAppSnackBar(
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: AppColors.navy,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -45,7 +45,7 @@ void showAppSnackBar(
                   failure.message,
                   style: TextStyle(
                     fontSize: 13,
-                    color: Colors.white.withOpacity(0.85),
+                    color: AppColors.navy.withOpacity(0.85),
                   ),
                 ),
               ],
@@ -56,7 +56,7 @@ void showAppSnackBar(
                 ScaffoldMessenger.of(context).hideCurrentSnackBar(),
             child: Icon(
               Icons.close_rounded,
-              color: Colors.white.withOpacity(0.5),
+              color: AppColors.navy.withOpacity(0.5),
               size: 18,
             ),
           ),

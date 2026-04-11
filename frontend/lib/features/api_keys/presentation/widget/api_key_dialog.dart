@@ -61,7 +61,7 @@ class _ApiKeyDialogState extends State<ApiKeyDialog> {
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.dark(
               primary: AppColors.coral,
-              surface: Color(0xFF1E2040),
+              surface: Color(0xFFFFFFFF),
             ),
           ),
           child: child!,
@@ -86,8 +86,8 @@ class _ApiKeyDialogState extends State<ApiKeyDialog> {
         padding: const EdgeInsets.all(28),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          color: const Color(0xFF1E2040),
-          border: Border.all(color: Colors.white.withOpacity(0.12)),
+          color: const Color(0xFFFFFFFF),
+          border: Border.all(color: AppColors.navy.withOpacity(0.12)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -98,7 +98,7 @@ class _ApiKeyDialogState extends State<ApiKeyDialog> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: AppColors.navy,
               ),
             ),
             const SizedBox(height: 8),
@@ -106,7 +106,7 @@ class _ApiKeyDialogState extends State<ApiKeyDialog> {
               'API keys are read-only and can only be used to fetch toggle states.',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white.withOpacity(0.35),
+                color: AppColors.navy.withOpacity(0.35),
               ),
             ),
             const SizedBox(height: 24),
@@ -115,21 +115,21 @@ class _ApiKeyDialogState extends State<ApiKeyDialog> {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
-                color: Colors.white.withOpacity(0.07),
-                border: Border.all(color: Colors.white.withOpacity(0.12)),
+                color: AppColors.navy.withOpacity(0.07),
+                border: Border.all(color: AppColors.navy.withOpacity(0.12)),
               ),
               child: TextField(
                 controller: _nameController,
                 autofocus: true,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+                style: const TextStyle(color: AppColors.navy, fontSize: 14),
                 cursorColor: AppColors.coral,
                 onSubmitted: (_) => _submit(),
                 decoration: InputDecoration(
                   hintText: 'API key name',
                   hintStyle:
-                      TextStyle(color: Colors.white.withOpacity(0.3)),
+                      TextStyle(color: AppColors.navy.withOpacity(0.3)),
                   prefixIcon: Icon(Icons.key_outlined,
-                      size: 20, color: Colors.white.withOpacity(0.4)),
+                      size: 20, color: AppColors.navy.withOpacity(0.4)),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16, vertical: 14),
@@ -144,7 +144,7 @@ class _ApiKeyDialogState extends State<ApiKeyDialog> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: Colors.white.withOpacity(0.6),
+                color: AppColors.navy.withOpacity(0.6),
               ),
             ),
             const SizedBox(height: 10),
@@ -159,11 +159,11 @@ class _ApiKeyDialogState extends State<ApiKeyDialog> {
                       borderRadius: BorderRadius.circular(10),
                       color: _expiresAt != null
                           ? AppColors.teal.withOpacity(0.15)
-                          : Colors.white.withOpacity(0.06),
+                          : AppColors.navy.withOpacity(0.06),
                       border: Border.all(
                         color: _expiresAt != null
                             ? AppColors.teal.withOpacity(0.4)
-                            : Colors.white.withOpacity(0.12),
+                            : AppColors.navy.withOpacity(0.12),
                       ),
                     ),
                     child: Row(
@@ -174,7 +174,7 @@ class _ApiKeyDialogState extends State<ApiKeyDialog> {
                           size: 14,
                           color: _expiresAt != null
                               ? AppColors.teal
-                              : Colors.white.withOpacity(0.4),
+                              : AppColors.navy.withOpacity(0.4),
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -188,7 +188,7 @@ class _ApiKeyDialogState extends State<ApiKeyDialog> {
                                 : FontWeight.w400,
                             color: _expiresAt != null
                                 ? AppColors.teal
-                                : Colors.white.withOpacity(0.4),
+                                : AppColors.navy.withOpacity(0.4),
                           ),
                         ),
                       ],
@@ -203,11 +203,11 @@ class _ApiKeyDialogState extends State<ApiKeyDialog> {
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        color: Colors.white.withOpacity(0.06),
+                        color: AppColors.navy.withOpacity(0.06),
                       ),
                       child: Icon(Icons.close_rounded,
                           size: 16,
-                          color: Colors.white.withOpacity(0.4)),
+                          color: AppColors.navy.withOpacity(0.4)),
                     ),
                   ),
                 ],
@@ -220,7 +220,7 @@ class _ApiKeyDialogState extends State<ApiKeyDialog> {
                   : 'Key will expire on ${_formatDate(_expiresAt!)}',
               style: TextStyle(
                 fontSize: 11,
-                color: Colors.white.withOpacity(0.3),
+                color: AppColors.navy.withOpacity(0.3),
               ),
             ),
 
@@ -236,11 +236,11 @@ class _ApiKeyDialogState extends State<ApiKeyDialog> {
                       onPressed: () => Navigator.of(context).pop(),
                       style: TextButton.styleFrom(
                         foregroundColor:
-                            Colors.white.withOpacity(0.6),
+                            AppColors.navy.withOpacity(0.6),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                           side: BorderSide(
-                            color: Colors.white.withOpacity(0.12),
+                            color: AppColors.navy.withOpacity(0.12),
                           ),
                         ),
                       ),

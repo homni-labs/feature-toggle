@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:feature_toggle_app/app/di/injection.dart';
 import 'package:feature_toggle_app/app/theme/app_colors.dart';
 import 'package:feature_toggle_app/core/domain/failure.dart';
 import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
 import 'package:feature_toggle_app/core/presentation/widgets/app_snackbar.dart';
+import 'package:feature_toggle_app/core/presentation/widgets/comic_button.dart';
+import 'package:feature_toggle_app/core/presentation/widgets/forbidden_page.dart';
 import 'package:feature_toggle_app/features/auth/application/bloc/auth_cubit.dart';
 import 'package:feature_toggle_app/features/auth/application/bloc/auth_state.dart';
 import 'package:feature_toggle_app/features/environments/application/bloc/environments_cubit.dart';
@@ -97,6 +100,8 @@ class _TogglesView extends StatelessWidget {
         }
       },
       child: BlocBuilder<TogglesCubit, TogglesState>(
+        buildWhen: (previous, current) =>
+            current is! TogglesError || previous is! TogglesLoaded,
         builder: (BuildContext context, TogglesState state) {
           return switch (state) {
             TogglesInitial() ||
@@ -122,18 +127,21 @@ class _ErrorBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (failure is ForbiddenFailure) {
+      return const ForbiddenPage();
+    }
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.cloud_off_rounded,
-              size: 48, color: Colors.white.withOpacity(0.2)),
+              size: 48, color: AppColors.navy.withOpacity(0.2)),
           const SizedBox(height: 16),
           Text(
             failure.message,
             style: TextStyle(
               fontSize: 16,
-              color: Colors.white.withOpacity(0.5),
+              color: AppColors.navy.withOpacity(0.5),
             ),
           ),
           const SizedBox(height: 16),
@@ -193,10 +201,10 @@ class _LoadedBody extends StatelessWidget {
             children: [
               Text(
                 'Toggles',
-                style: TextStyle(
+                style: GoogleFonts.fredoka(
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white.withOpacity(0.9),
+                  color: AppColors.navy,
                 ),
               ),
               const Spacer(),
@@ -204,33 +212,28 @@ class _LoadedBody extends StatelessWidget {
                 _CreateButton(onPressed: () => _onCreate(context)),
             ],
           ).animate().fadeIn(duration: 400.ms),
-          const SizedBox(height: 16),
-
-          // Filters
-          _FiltersRow(
-            filterEnabled: state.filterEnabled,
-            filterEnvironment: state.filterEnvironment,
+          Text(
+            '${state.totalElements} toggles',
+            style: TextStyle(
+              fontSize: 13,
+              color: AppColors.navy.withOpacity(0.35),
+            ),
           ),
           const SizedBox(height: 16),
 
-          // Toggle list
+          // Search
+          _SearchBar(),
+          const SizedBox(height: 20),
+
+          // Toggle grid
           Expanded(
             child: state.toggles.isEmpty
                 ? const _EmptyState()
-                : _ToggleList(
-                    toggles: state.toggles,
+                : _ToggleGrid(
+                    state: state,
                     canWrite: canWrite,
                   ),
           ),
-
-          // Pagination
-          if (state.totalPages > 1) ...[
-            const SizedBox(height: 16),
-            _Pagination(
-              page: state.page,
-              totalPages: state.totalPages,
-            ),
-          ],
         ],
       ),
     );
@@ -266,43 +269,67 @@ class _LoadedBody extends StatelessWidget {
   }
 }
 
-// ── Toggle list ────────────────────────────────────────────────
+// ── Toggle grid ───────────────────────────────────────────────
 
-class _ToggleList extends StatelessWidget {
-  const _ToggleList({
-    required this.toggles,
+class _ToggleGrid extends StatelessWidget {
+  const _ToggleGrid({
+    required this.state,
     required this.canWrite,
   });
 
-  final List<FeatureToggle> toggles;
+  final TogglesLoaded state;
   final bool canWrite;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 700),
-        child: ListView.builder(
-          itemCount: toggles.length,
-          itemBuilder: (BuildContext context, int index) {
-            final FeatureToggle toggle = toggles[index];
-            return ToggleCard(
-              key: ValueKey(toggle.id),
-              toggle: toggle,
-              onEnvironmentToggle: canWrite
-                  ? (envName, value) =>
-                      _onEnvSwitch(context, toggle, envName, value)
-                  : null,
-              onEdit: canWrite
-                  ? () => _onEdit(context, toggle)
-                  : null,
-              onDelete: canWrite
-                  ? () => _onDelete(context, toggle)
-                  : null,
-            );
-          },
-        ),
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const double minCard = 340;
+        const double gap = 16;
+        final int columns =
+            (constraints.maxWidth / (minCard + gap)).floor().clamp(1, 3);
+        final double cardWidth = columns == 1
+            ? constraints.maxWidth
+            : (constraints.maxWidth - gap * (columns - 1)) / columns;
+
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              Wrap(
+                spacing: gap,
+                runSpacing: gap,
+                children: [
+                  for (final toggle in state.toggles)
+                    SizedBox(
+                      width: cardWidth,
+                      child: ToggleCard(
+                        key: ValueKey(toggle.id),
+                        toggle: toggle,
+                        onEnvironmentToggle: canWrite
+                            ? (envName, value) =>
+                                _onEnvSwitch(context, toggle, envName, value)
+                            : null,
+                        onEdit: canWrite
+                            ? () => _onEdit(context, toggle)
+                            : null,
+                        onDelete: canWrite
+                            ? () => _onDelete(context, toggle)
+                            : null,
+                      ),
+                    ),
+                ],
+              ),
+              if (state.totalPages > 1) ...[
+                const SizedBox(height: 20),
+                _Pagination(
+                  page: state.page,
+                  totalPages: state.totalPages,
+                ),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -410,14 +437,14 @@ class _EmptyState extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.toggle_off_outlined,
-              size: 64, color: Colors.white.withOpacity(0.15)),
+              size: 64, color: AppColors.navy.withOpacity(0.15)),
           const SizedBox(height: 16),
           Text(
             'No toggles yet',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w500,
-              color: Colors.white.withOpacity(0.4),
+              color: AppColors.navy.withOpacity(0.4),
             ),
           ),
           const SizedBox(height: 8),
@@ -425,7 +452,7 @@ class _EmptyState extends StatelessWidget {
             'Create your first feature toggle',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white.withOpacity(0.25),
+              color: AppColors.navy.withOpacity(0.25),
             ),
           ),
         ],
@@ -434,7 +461,47 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-// ── Filters row ────────────────────────────────────────────────
+// ── Search bar ────────────────────────────────────────────────
+
+class _SearchBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 400),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(width: 3, color: const Color(0xFFDDD8CC)),
+        color: Colors.white,
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.search_rounded,
+              size: 16, color: AppColors.navy.withOpacity(0.4)),
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              decoration: InputDecoration.collapsed(
+                hintText: 'Search toggles...',
+                hintStyle: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.navy.withOpacity(0.3),
+                ),
+              ),
+              style: const TextStyle(fontSize: 14, color: AppColors.navy),
+              onChanged: (_) {
+                // Client-side search — not connected to API yet
+                // Will filter displayed toggles in future iteration
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Filters row (kept for reference but not used in new design) ──
 
 class _FiltersRow extends StatelessWidget {
   const _FiltersRow({
@@ -521,10 +588,10 @@ class _FiltersRow extends StatelessWidget {
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: Colors.white.withOpacity(0.06),
+                color: AppColors.navy.withOpacity(0.06),
               ),
               child: Icon(Icons.filter_alt_off_rounded,
-                  size: 16, color: Colors.white.withOpacity(0.4)),
+                  size: 16, color: AppColors.navy.withOpacity(0.4)),
             ),
           ),
         ],
@@ -579,7 +646,7 @@ class _FiltersRow extends StatelessWidget {
   }
 }
 
-// ── Pagination ─────────────────────────────────────────────────
+// ── Pagination (mockup style) ──────────────────────────────────
 
 class _Pagination extends StatelessWidget {
   const _Pagination({
@@ -595,53 +662,24 @@ class _Pagination extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _PaginationArrow(
-          icon: Icons.chevron_left_rounded,
+        _PagerBtn(
+          text: '\u00AB',
           enabled: page > 0,
+          active: false,
           onTap: () => _goToPage(context, page - 1),
         ),
-        const SizedBox(width: 8),
         ...List.generate(totalPages, (int i) {
-          final bool isActive = i == page;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
-            child: GestureDetector(
-              onTap: () => _goToPage(context, i),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 36,
-                height: 36,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: isActive
-                      ? AppColors.coral.withOpacity(0.25)
-                      : Colors.white.withOpacity(0.06),
-                  border: Border.all(
-                    color: isActive
-                        ? AppColors.coral.withOpacity(0.4)
-                        : Colors.white.withOpacity(0.08),
-                  ),
-                ),
-                child: Text(
-                  '${i + 1}',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight:
-                        isActive ? FontWeight.w600 : FontWeight.w400,
-                    color: isActive
-                        ? AppColors.coral
-                        : Colors.white.withOpacity(0.5),
-                  ),
-                ),
-              ),
-            ),
+          return _PagerBtn(
+            text: '${i + 1}',
+            enabled: true,
+            active: i == page,
+            onTap: () => _goToPage(context, i),
           );
         }),
-        const SizedBox(width: 8),
-        _PaginationArrow(
-          icon: Icons.chevron_right_rounded,
+        _PagerBtn(
+          text: '\u00BB',
           enabled: page < totalPages - 1,
+          active: false,
           onTap: () => _goToPage(context, page + 1),
         ),
       ],
@@ -656,15 +694,6 @@ class _Pagination extends StatelessWidget {
     final ProjectId? projectId = authState.currentProject?.id;
     if (projectId == null) return;
 
-    // Preserve current filters from cubit state
-    final TogglesState togglesState = context.read<TogglesCubit>().state;
-    bool? filterEnabled;
-    String? filterEnvironment;
-    if (togglesState is TogglesLoaded) {
-      filterEnabled = togglesState.filterEnabled;
-      filterEnvironment = togglesState.filterEnvironment;
-    }
-
     final String? token = await authCubit.getValidAccessToken();
     if (token == null || !context.mounted) return;
 
@@ -672,59 +701,56 @@ class _Pagination extends StatelessWidget {
           accessToken: token,
           projectId: projectId,
           page: targetPage,
-          enabled: filterEnabled,
-          environment: filterEnvironment,
         );
   }
 }
 
-// ── Create button ──────────────────────────────────────────────
+class _PagerBtn extends StatelessWidget {
+  const _PagerBtn({
+    required this.text,
+    required this.enabled,
+    required this.active,
+    required this.onTap,
+  });
 
-class _CreateButton extends StatefulWidget {
-  final VoidCallback onPressed;
-  const _CreateButton({required this.onPressed});
-
-  @override
-  State<_CreateButton> createState() => _CreateButtonState();
-}
-
-class _CreateButtonState extends State<_CreateButton> {
-  bool _hovering = false;
+  final String text;
+  final bool enabled;
+  final bool active;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
       child: GestureDetector(
-        onTap: widget.onPressed,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        onTap: enabled ? onTap : null,
+        child: Container(
+          width: 34,
+          height: 34,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            gradient: const LinearGradient(
-                colors: [AppColors.coral, Color(0xFFE8585A)]),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.coral.withOpacity(_hovering ? 0.4 : 0.2),
-                blurRadius: _hovering ? 16 : 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(8),
+            color: active
+                ? AppColors.coral.withOpacity(0.1)
+                : Colors.white,
+            border: Border.all(
+              width: 2,
+              color: active
+                  ? AppColors.coral
+                  : const Color(0xFFDDD8CC),
+            ),
           ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.add_rounded, size: 18, color: Colors.white),
-              SizedBox(width: 6),
-              Text('New Toggle',
-                  style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white)),
-            ],
+          child: Text(
+            text,
+            style: GoogleFonts.fredoka(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: !enabled
+                  ? AppColors.navy.withOpacity(0.2)
+                  : active
+                      ? AppColors.coral
+                      : AppColors.navy.withOpacity(0.5),
+            ),
           ),
         ),
       ),
@@ -732,38 +758,18 @@ class _CreateButtonState extends State<_CreateButton> {
   }
 }
 
-// ── Pagination arrow ───────────────────────────────────────────
+// ── Create button (cartoon style) ─────────────────────────────
 
-class _PaginationArrow extends StatelessWidget {
-  final IconData icon;
-  final bool enabled;
-  final VoidCallback onTap;
-
-  const _PaginationArrow({
-    required this.icon,
-    required this.enabled,
-    required this.onTap,
-  });
+class _CreateButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  const _CreateButton({required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: enabled ? onTap : null,
-      child: Container(
-        width: 36,
-        height: 36,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.white.withOpacity(0.06),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
-        ),
-        child: Icon(icon,
-            size: 20,
-            color: enabled
-                ? Colors.white.withOpacity(0.7)
-                : Colors.white.withOpacity(0.15)),
-      ),
+    return ComicButton(
+      label: 'New Toggle',
+      icon: Icons.add_rounded,
+      onPressed: onPressed,
     );
   }
 }
@@ -794,9 +800,11 @@ class _FilterDropdown extends StatelessWidget {
     return PopupMenuButton<String>(
       onSelected: onSelected,
       offset: const Offset(0, 44),
-      color: const Color(0xFF252848),
-      shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: AppColors.navy, width: 2),
+      ),
       itemBuilder: (_) => List.generate(items.length, (int i) {
         return PopupMenuItem<String>(
           value: items[i],
@@ -816,7 +824,7 @@ class _FilterDropdown extends StatelessWidget {
                 items[i],
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.white.withOpacity(0.8),
+                  color: AppColors.navy.withOpacity(0.8),
                 ),
               ),
             ],
@@ -829,11 +837,11 @@ class _FilterDropdown extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           color: active
               ? color.withOpacity(0.15)
-              : Colors.white.withOpacity(0.06),
+              : AppColors.navy.withOpacity(0.06),
           border: Border.all(
             color: active
                 ? color.withOpacity(0.3)
-                : Colors.white.withOpacity(0.08),
+                : AppColors.navy.withOpacity(0.08),
           ),
         ),
         child: Row(
@@ -841,20 +849,20 @@ class _FilterDropdown extends StatelessWidget {
           children: [
             Icon(icon,
                 size: 15,
-                color: active ? color : Colors.white.withOpacity(0.4)),
+                color: active ? color : AppColors.navy.withOpacity(0.4)),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: active ? FontWeight.w600 : FontWeight.w400,
-                color: active ? color : Colors.white.withOpacity(0.5),
+                color: active ? color : AppColors.navy.withOpacity(0.5),
               ),
             ),
             const SizedBox(width: 6),
             Icon(Icons.keyboard_arrow_down_rounded,
                 size: 16,
-                color: active ? color : Colors.white.withOpacity(0.3)),
+                color: active ? color : AppColors.navy.withOpacity(0.3)),
           ],
         ),
       ),
@@ -877,8 +885,8 @@ class _DeleteConfirmDialog extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: const Color(0xFF1E2040),
-          border: Border.all(color: Colors.white.withOpacity(0.12)),
+          color: const Color(0xFFFFFFFF),
+          border: Border.all(color: AppColors.navy.withOpacity(0.12)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -890,13 +898,13 @@ class _DeleteConfirmDialog extends StatelessWidget {
                 style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white)),
+                    color: AppColors.navy)),
             const SizedBox(height: 8),
             Text('Are you sure you want to delete "$name"?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     fontSize: 14,
-                    color: Colors.white.withOpacity(0.5))),
+                    color: AppColors.navy.withOpacity(0.5))),
             const SizedBox(height: 24),
             Row(
               children: [
@@ -908,12 +916,12 @@ class _DeleteConfirmDialog extends StatelessWidget {
                           Navigator.of(context).pop(false),
                       style: TextButton.styleFrom(
                         foregroundColor:
-                            Colors.white.withOpacity(0.6),
+                            AppColors.navy.withOpacity(0.6),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                           side: BorderSide(
                               color:
-                                  Colors.white.withOpacity(0.12)),
+                                  AppColors.navy.withOpacity(0.12)),
                         ),
                       ),
                       child: const Text('Cancel'),

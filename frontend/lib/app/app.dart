@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:feature_toggle_app/app/di/injection.dart';
-import 'package:feature_toggle_app/app/router/app_shell.dart';
-import 'package:feature_toggle_app/app/router/shell_page.dart';
 import 'package:feature_toggle_app/app/theme/app_colors.dart';
 import 'package:feature_toggle_app/app/theme/app_theme.dart';
 import 'package:feature_toggle_app/core/presentation/widgets/animated_background.dart';
@@ -17,36 +16,36 @@ class FeatureToggleApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: sl<AuthCubit>(),
-      child: MaterialApp(
+      child: MaterialApp.router(
         title: 'Feature Toggle',
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.dark(),
-        home: BlocBuilder<AuthCubit, AuthState>(
-          builder: (context, state) => switch (state) {
-            AuthInitial() || AuthLoading() => const Scaffold(
-                backgroundColor: AppTheme.scaffoldBackground,
-                body: Center(
-                  child: CircularProgressIndicator(color: AppColors.coral),
+        theme: AppTheme.light(),
+        routerConfig: sl<GoRouter>(),
+        builder: (context, child) {
+          return BlocBuilder<AuthCubit, AuthState>(
+            builder: (context, state) => switch (state) {
+              AuthInitial() || AuthLoading() => const Scaffold(
+                  backgroundColor: AppTheme.scaffoldBackground,
+                  body: Center(
+                    child: CircularProgressIndicator(color: AppColors.coral),
+                  ),
                 ),
-              ),
-            AuthUnauthenticated() => _LoginRedirect(),
-            AuthError(:final message) => _ErrorPage(
-                message: message,
-                onRetry: () => context.read<AuthCubit>().initialize(),
-              ),
-            AuthAuthenticated(:final currentUser, :final isInProject) => () {
-                if (currentUser != null && !currentUser.active) {
-                  return _InactiveUserPage(
-                    onLogout: () => context.read<AuthCubit>().logout(),
-                  );
-                }
-                if (isInProject) {
-                  return const ShellPage();
-                }
-                return const AppShell();
-              }(),
-          },
-        ),
+              AuthUnauthenticated() => _LoginRedirect(),
+              AuthError(:final message) => _ErrorPage(
+                  message: message,
+                  onRetry: () => context.read<AuthCubit>().initialize(),
+                ),
+              AuthAuthenticated(:final currentUser) => () {
+                  if (currentUser != null && !currentUser.active) {
+                    return _InactiveUserPage(
+                      onLogout: () => context.read<AuthCubit>().logout(),
+                    );
+                  }
+                  return child!;
+                }(),
+            },
+          );
+        },
       ),
     );
   }
@@ -103,7 +102,7 @@ class _ErrorPage extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -174,16 +173,16 @@ class _InactiveUserPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: AppTheme.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Text(
+                  const Text(
                     'Your account has been deactivated. Please contact your administrator to restore access.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.white.withOpacity(0.5),
+                      color: AppTheme.textTertiary,
                       height: 1.5,
                     ),
                   ),

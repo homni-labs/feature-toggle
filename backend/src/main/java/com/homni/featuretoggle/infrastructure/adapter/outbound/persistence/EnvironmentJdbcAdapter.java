@@ -15,15 +15,12 @@ import com.homni.featuretoggle.domain.model.Environment;
 import com.homni.featuretoggle.domain.model.EnvironmentId;
 import com.homni.featuretoggle.domain.model.ProjectId;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -39,11 +36,9 @@ public class EnvironmentJdbcAdapter implements EnvironmentRepositoryPort {
     private static final String COLUMNS = "id, project_id, name, created_at";
 
     private final JdbcClient jdbc;
-    private final JdbcTemplate jdbcTemplate;
 
-    EnvironmentJdbcAdapter(JdbcClient jdbc, JdbcTemplate jdbcTemplate) {
+    EnvironmentJdbcAdapter(JdbcClient jdbc) {
         this.jdbc = jdbc;
-        this.jdbcTemplate = jdbcTemplate;
     }
 
     /** {@inheritDoc} */
@@ -66,38 +61,10 @@ public class EnvironmentJdbcAdapter implements EnvironmentRepositoryPort {
         }
     }
 
-    /**
-     * Persists a batch of environments in a single JDBC batch (one prepared
-     * statement, one round-trip), wrapped in a transaction so the caller
-     * never sees a partially-bootstrapped project.
-     *
-     * @param environments environments to save
-     */
+    /** {@inheritDoc} */
     @Override
-    @Transactional
     public void saveAll(List<Environment> environments) {
-        if (environments.isEmpty()) {
-            return;
-        }
-        List<Object[]> batchArgs = new ArrayList<>(environments.size());
-        for (Environment env : environments) {
-            batchArgs.add(new Object[] {
-                    env.id.value,
-                    env.projectId.value,
-                    env.name(),
-                    Timestamp.from(env.createdAt)
-            });
-        }
-        try {
-            jdbcTemplate.batchUpdate("""
-                    INSERT INTO environment (id, project_id, name, created_at)
-                    VALUES (?, ?, ?, ?)
-                    ON CONFLICT (id) DO UPDATE
-                        SET name = EXCLUDED.name
-                    """, batchArgs);
-        } catch (DuplicateKeyException e) {
-            throw new AlreadyExistsException("Environment", environments.get(0).name());
-        }
+        environments.forEach(this::save);
     }
 
     /** {@inheritDoc} */
@@ -116,6 +83,27 @@ public class EnvironmentJdbcAdapter implements EnvironmentRepositoryPort {
                 .param(projectId.value)
                 .query(this::mapRow)
                 .list();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public List<Environment> findAllByProject(ProjectId projectId, int offset, int limit) {
+        return jdbc.sql("SELECT " + COLUMNS
+                        + " FROM environment WHERE project_id = ? ORDER BY name LIMIT ? OFFSET ?")
+                .param(projectId.value)
+                .param(limit)
+                .param(offset)
+                .query(this::mapRow)
+                .list();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public long countByProject(ProjectId projectId) {
+        return jdbc.sql("SELECT count(*) FROM environment WHERE project_id = ?")
+                .param(projectId.value)
+                .query(Long.class)
+                .single();
     }
 
     /** {@inheritDoc} */

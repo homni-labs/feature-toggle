@@ -11,6 +11,8 @@ class EnvironmentsCubit extends Cubit<EnvironmentsState> {
   final CreateEnvironmentUseCase _createEnvironment;
   final DeleteEnvironmentUseCase _deleteEnvironment;
 
+  static const _pageSize = 20;
+
   EnvironmentsCubit({
     required LoadEnvironmentsUseCase loadEnvironments,
     required CreateEnvironmentUseCase createEnvironment,
@@ -23,15 +25,23 @@ class EnvironmentsCubit extends Cubit<EnvironmentsState> {
   Future<void> load({
     required String accessToken,
     required ProjectId projectId,
+    int page = 0,
   }) async {
     emit(const EnvironmentsLoading());
     final result = await _loadEnvironments(
       accessToken: accessToken,
       projectId: projectId,
+      page: page,
+      size: _pageSize,
     );
     result.fold(
       (f) => emit(EnvironmentsError(f)),
-      (envs) => emit(EnvironmentsLoaded(envs)),
+      (paged) => emit(EnvironmentsLoaded(
+        environments: paged.items,
+        totalElements: paged.totalElements,
+        page: paged.page,
+        totalPages: paged.totalPages,
+      )),
     );
   }
 
@@ -52,7 +62,12 @@ class EnvironmentsCubit extends Cubit<EnvironmentsState> {
         if (current is EnvironmentsLoaded) {
           final list = [...current.environments, created]
             ..sort((a, b) => a.name.compareTo(b.name));
-          emit(EnvironmentsLoaded(list));
+          if (list.length > _pageSize) list.removeLast();
+          emit(current.copyWith(
+            environments: list,
+            totalElements: current.totalElements + 1,
+            totalPages: ((current.totalElements + 1) / _pageSize).ceil(),
+          ));
         }
       },
     );
@@ -76,7 +91,13 @@ class EnvironmentsCubit extends Cubit<EnvironmentsState> {
           final list = current.environments
               .where((e) => e.id != environmentId)
               .toList();
-          emit(EnvironmentsLoaded(list));
+          emit(current.copyWith(
+            environments: list,
+            totalElements: current.totalElements - 1,
+            totalPages: (current.totalElements - 1) > 0
+                ? ((current.totalElements - 1) / _pageSize).ceil()
+                : 0,
+          ));
         }
       },
     );

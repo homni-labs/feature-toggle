@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${url.resourcesPath}/css/styles.css">
 </head>
-<body>
+<body<#if message?has_content && message.type == 'error'> class="has-error"</#if>>
 
 <div class="page" id="page">
 
@@ -60,14 +60,15 @@
                            value="${(login.username!'')}"
                            placeholder="Email or username"
                            autocomplete="username"
-                           autofocus>
+                           <#if !(message?has_content && message.type == 'error')>autofocus</#if>>
 
                     <input class="comic-fi"
                            type="password"
                            id="password"
                            name="password"
                            placeholder="Password"
-                           autocomplete="current-password">
+                           autocomplete="current-password"
+                           <#if message?has_content && message.type == 'error'>autofocus</#if>>
 
                     <button type="submit" class="comic-btn">BAM! Let's Go</button>
                 </form>
@@ -103,11 +104,17 @@
 /* ── Trigger animations ────────────────────────────────────── */
 requestAnimationFrame(function() { document.getElementById('page').classList.add('loaded'); });
 
-/* ── Random tagline quote ──────────────────────────────────── */
+/* ── Tagline quote (persisted across error reloads) ────────── */
 (function() {
     var el = document.getElementById('taglineQuote');
-    if (typeof QUOTES !== 'undefined' && QUOTES.length) {
-        el.textContent = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+    if (typeof QUOTES === 'undefined' || !QUOTES.length) return;
+    var saved = sessionStorage.getItem('togli_quote');
+    if (saved && QUOTES.indexOf(saved) !== -1) {
+        el.textContent = saved;
+    } else {
+        var q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+        sessionStorage.setItem('togli_quote', q);
+        el.textContent = q;
     }
 })();
 

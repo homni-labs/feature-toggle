@@ -22,10 +22,10 @@ class AppColors {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      Color(0xFF1A1A2E),
-      Color(0xFF16213E),
-      Color(0xFF0F3460),
-      Color(0xFF1A1A2E),
+      Color(0xFFF5F2EB),
+      Color(0xFFEDE9E0),
+      Color(0xFFF5F2EB),
+      Color(0xFFEDE9E0),
     ],
     stops: [0.0, 0.3, 0.7, 1.0],
   );

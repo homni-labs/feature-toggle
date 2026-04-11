@@ -117,8 +117,8 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
         padding: const EdgeInsets.all(28),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          color: const Color(0xFF1E2040),
-          border: Border.all(color: Colors.white.withOpacity(0.12)),
+          color: const Color(0xFFFFFFFF),
+          border: Border.all(color: AppColors.navy.withOpacity(0.12)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -129,7 +129,7 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: AppColors.navy,
               ),
             ),
             const SizedBox(height: 24),
@@ -138,28 +138,28 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(14),
-                color: Colors.white.withOpacity(0.07),
-                border: Border.all(color: Colors.white.withOpacity(0.12)),
+                color: AppColors.navy.withOpacity(0.07),
+                border: Border.all(color: AppColors.navy.withOpacity(0.12)),
               ),
               child: TextField(
                 controller: _searchController,
                 autofocus: true,
                 enabled: _selectedUser == null,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+                style: const TextStyle(color: AppColors.navy, fontSize: 14),
                 cursorColor: AppColors.coral,
                 onChanged: _onSearchChanged,
                 decoration: InputDecoration(
                   hintText: 'Search by email or name...',
                   hintStyle:
-                      TextStyle(color: Colors.white.withOpacity(0.3)),
+                      TextStyle(color: AppColors.navy.withOpacity(0.3)),
                   prefixIcon: Icon(Icons.search_rounded,
-                      size: 20, color: Colors.white.withOpacity(0.4)),
+                      size: 20, color: AppColors.navy.withOpacity(0.4)),
                   suffixIcon: _selectedUser != null
                       ? GestureDetector(
                           onTap: _clearSelection,
                           child: Icon(Icons.close_rounded,
                               size: 18,
-                              color: Colors.white.withOpacity(0.4)),
+                              color: AppColors.navy.withOpacity(0.4)),
                         )
                       : _searching
                           ? const Padding(
@@ -188,9 +188,9 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
                 constraints: const BoxConstraints(maxHeight: 180),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: const Color(0xFF252848),
+                  color: Colors.white,
                   border:
-                      Border.all(color: Colors.white.withOpacity(0.1)),
+                      Border.all(color: AppColors.navy.withOpacity(0.15), width: 2),
                 ),
                 child: ListView.builder(
                   shrinkWrap: true,
@@ -232,13 +232,13 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
                             style: const TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.white),
+                                color: AppColors.navy),
                           ),
                           Text(
                             _selectedUser!.email.value,
                             style: TextStyle(
                                 fontSize: 12,
-                                color: Colors.white.withOpacity(0.4)),
+                                color: AppColors.navy.withOpacity(0.4)),
                           ),
                         ],
                       ),
@@ -256,7 +256,7 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: Colors.white.withOpacity(0.6),
+                color: AppColors.navy.withOpacity(0.6),
               ),
             ),
             const SizedBox(height: 10),
@@ -280,11 +280,11 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
                         borderRadius: BorderRadius.circular(10),
                         color: selected
                             ? color.withOpacity(0.20)
-                            : Colors.white.withOpacity(0.06),
+                            : AppColors.navy.withOpacity(0.06),
                         border: Border.all(
                           color: selected
                               ? color.withOpacity(0.5)
-                              : Colors.white.withOpacity(0.12),
+                              : AppColors.navy.withOpacity(0.12),
                         ),
                       ),
                       child: Text(
@@ -296,7 +296,7 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
                               : FontWeight.w400,
                           color: selected
                               ? color
-                              : Colors.white.withOpacity(0.4),
+                              : AppColors.navy.withOpacity(0.4),
                         ),
                       ),
                     ),
@@ -317,11 +317,11 @@ class _AddMemberDialogState extends State<AddMemberDialog> {
                       onPressed: () => Navigator.of(context).pop(),
                       style: TextButton.styleFrom(
                         foregroundColor:
-                            Colors.white.withOpacity(0.6),
+                            AppColors.navy.withOpacity(0.6),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                           side: BorderSide(
-                            color: Colors.white.withOpacity(0.12),
+                            color: AppColors.navy.withOpacity(0.12),
                           ),
                         ),
                       ),
@@ -384,7 +384,7 @@ class _SearchResultItemState extends State<_SearchResultItem> {
           padding:
               const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           color: _hovering
-              ? Colors.white.withOpacity(0.06)
+              ? AppColors.navy.withOpacity(0.06)
               : Colors.transparent,
           child: Row(
             children: [
@@ -410,7 +410,7 @@ class _SearchResultItemState extends State<_SearchResultItem> {
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
-                        color: Colors.white,
+                        color: AppColors.navy,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -418,7 +418,7 @@ class _SearchResultItemState extends State<_SearchResultItem> {
                       widget.user.email.value,
                       style: TextStyle(
                         fontSize: 11,
-                        color: Colors.white.withOpacity(0.35),
+                        color: AppColors.navy.withOpacity(0.35),
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),

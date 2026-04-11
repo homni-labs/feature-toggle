@@ -2,10 +2,28 @@ import 'package:feature_toggle_app/core/domain/typedefs.dart';
 import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
 import 'package:feature_toggle_app/features/environments/domain/model/environment.dart';
 
+class PagedEnvironments {
+  final List<Environment> items;
+  final int totalElements;
+  final int page;
+  final int size;
+  final int totalPages;
+
+  const PagedEnvironments({
+    required this.items,
+    required this.totalElements,
+    required this.page,
+    required this.size,
+    required this.totalPages,
+  });
+}
+
 abstract class EnvironmentRepository {
-  FutureEither<List<Environment>> getAll({
+  FutureEither<PagedEnvironments> getAll({
     required String accessToken,
     required ProjectId projectId,
+    int page = 0,
+    int size = 20,
   });
 
   FutureEither<Environment> create({
@@ -20,8 +38,7 @@ abstract class EnvironmentRepository {
     required EnvironmentId environmentId,
   });
 
-  /// Returns the platform-wide list of default environment names that the
-  /// project-creation UI uses to render checkboxes. Read-only, lives in
-  /// backend config (not in the database).
-  FutureEither<List<String>> getDefaults({required String accessToken});
+  FutureEither<List<String>> getDefaults({
+    required String accessToken,
+  });
 }

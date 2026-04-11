@@ -15,7 +15,30 @@ class EnvironmentsLoading extends EnvironmentsState {
 
 class EnvironmentsLoaded extends EnvironmentsState {
   final List<Environment> environments;
-  const EnvironmentsLoaded(this.environments);
+  final int totalElements;
+  final int page;
+  final int totalPages;
+
+  const EnvironmentsLoaded({
+    required this.environments,
+    required this.totalElements,
+    required this.page,
+    required this.totalPages,
+  });
+
+  EnvironmentsLoaded copyWith({
+    List<Environment>? environments,
+    int? totalElements,
+    int? page,
+    int? totalPages,
+  }) {
+    return EnvironmentsLoaded(
+      environments: environments ?? this.environments,
+      totalElements: totalElements ?? this.totalElements,
+      page: page ?? this.page,
+      totalPages: totalPages ?? this.totalPages,
+    );
+  }
 }
 
 class EnvironmentsError extends EnvironmentsState {

@@ -10,8 +10,9 @@
 package com.homni.featuretoggle.infrastructure.adapter.inbound.rest;
 
 import com.homni.featuretoggle.application.usecase.CreateProjectUseCase;
+import com.homni.featuretoggle.application.usecase.GetProjectBySlugUseCase;
 import com.homni.featuretoggle.application.usecase.ListProjectsUseCase;
-import com.homni.featuretoggle.application.usecase.ProjectWithRole;
+import com.homni.featuretoggle.application.usecase.ProjectPage;
 import com.homni.featuretoggle.application.usecase.UpdateProjectUseCase;
 import com.homni.featuretoggle.domain.model.Project;
 import com.homni.featuretoggle.domain.model.ProjectId;
@@ -25,7 +26,6 @@ import com.homni.generated.model.UpdateProjectRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -35,6 +35,7 @@ import java.util.UUID;
 class ProjectsController implements ProjectsApi {
 
     private final CreateProjectUseCase createProject;
+    private final GetProjectBySlugUseCase getProjectBySlug;
     private final ListProjectsUseCase listProjects;
     private final UpdateProjectUseCase updateProject;
     private final ProjectPresenter presenter;
@@ -42,16 +43,19 @@ class ProjectsController implements ProjectsApi {
     /**
      * Creates the projects controller.
      *
-     * @param createProject the use case for project creation
-     * @param listProjects  the use case for listing projects
-     * @param updateProject the use case for updating a project
-     * @param presenter     maps domain objects to API response models
+     * @param createProject    the use case for project creation
+     * @param getProjectBySlug the use case for fetching a project by slug
+     * @param listProjects     the use case for listing projects
+     * @param updateProject    the use case for updating a project
+     * @param presenter        maps domain objects to API response models
      */
     ProjectsController(CreateProjectUseCase createProject,
+                       GetProjectBySlugUseCase getProjectBySlug,
                        ListProjectsUseCase listProjects,
                        UpdateProjectUseCase updateProject,
                        ProjectPresenter presenter) {
         this.createProject = createProject;
+        this.getProjectBySlug = getProjectBySlug;
         this.listProjects = listProjects;
         this.updateProject = updateProject;
         this.presenter = presenter;
@@ -70,9 +74,18 @@ class ProjectsController implements ProjectsApi {
 
     /** {@inheritDoc} */
     @Override
-    public ResponseEntity<ProjectListResponse> listProjects() {
-        List<ProjectWithRole> projects = listProjects.execute();
-        return ResponseEntity.ok(presenter.list(projects));
+    public ResponseEntity<ProjectSingleResponse> getProjectBySlug(String slug) {
+        Project project = getProjectBySlug.execute(new ProjectSlug(slug));
+        return ResponseEntity.ok(presenter.single(project));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public ResponseEntity<ProjectListResponse> listProjects(String q, Boolean archived,
+                                                            Integer page, Integer size) {
+        PaginationParams p = PaginationParams.of(page, size);
+        ProjectPage result = listProjects.execute(q, archived, p.page(), p.size());
+        return ResponseEntity.ok(presenter.list(result, p.page(), p.size()));
     }
 
     /** {@inheritDoc} */

@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:feature_toggle_app/app/di/injection.dart';
 import 'package:feature_toggle_app/app/theme/app_colors.dart';
 import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
 import 'package:feature_toggle_app/core/domain/value_objects/project_role.dart';
+import 'package:feature_toggle_app/core/domain/failure.dart';
 import 'package:feature_toggle_app/core/presentation/widgets/app_snackbar.dart';
+import 'package:feature_toggle_app/core/presentation/widgets/comic_button.dart';
+import 'package:feature_toggle_app/core/presentation/widgets/forbidden_page.dart';
 import 'package:feature_toggle_app/features/auth/application/bloc/auth_cubit.dart';
 import 'package:feature_toggle_app/features/users/application/usecase/search_users_usecase.dart';
 import 'package:feature_toggle_app/features/auth/application/bloc/auth_state.dart';
@@ -59,9 +63,11 @@ class _MembersView extends StatelessWidget {
           showAppSnackBar(context, state.failure);
         }
       },
+      buildWhen: (previous, current) =>
+          current is! MembersError || previous is! MembersLoaded,
       builder: (context, state) => switch (state) {
         MembersInitial() || MembersLoading() => _buildLoading(),
-        MembersError(:final failure) => _buildError(context, failure.message),
+        MembersError(:final failure) => _buildError(context, failure),
         MembersLoaded() => _buildLoaded(context, state as MembersLoaded),
       },
     );
@@ -73,17 +79,18 @@ class _MembersView extends StatelessWidget {
     );
   }
 
-  Widget _buildError(BuildContext context, String message) {
+  Widget _buildError(BuildContext context, Failure failure) {
+    if (failure is ForbiddenFailure) return const ForbiddenPage();
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.cloud_off_rounded,
-              size: 48, color: Colors.white.withOpacity(0.2)),
+              size: 48, color: AppColors.navy.withOpacity(0.2)),
           const SizedBox(height: 16),
-          Text(message,
+          Text(failure.message,
               style: TextStyle(
-                  fontSize: 16, color: Colors.white.withOpacity(0.5))),
+                  fontSize: 16, color: AppColors.navy.withOpacity(0.5))),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => _reload(context),
@@ -107,24 +114,31 @@ class _MembersView extends StatelessWidget {
         authState.canManageMembers && !authState.isProjectArchived;
 
     final currentUserId = authState.currentUser?.id;
-    final visibleMembers = state.members
+    final all = state.members
         .where((m) => m.userId != currentUserId)
         .toList();
+
+    // Group by role
+    final admins =
+        all.where((m) => m.role == ProjectRole.admin).toList();
+    final editors =
+        all.where((m) => m.role == ProjectRole.editor).toList();
+    final readers =
+        all.where((m) => m.role == ProjectRole.reader).toList();
 
     return Padding(
       padding: const EdgeInsets.all(28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title row
           Row(
             children: [
               Text(
                 'Members',
-                style: TextStyle(
+                style: GoogleFonts.fredoka(
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white.withOpacity(0.9),
+                  color: AppColors.navy,
                 ),
               ),
               const Spacer(),
@@ -135,51 +149,134 @@ class _MembersView extends StatelessWidget {
                 ),
             ],
           ).animate().fadeIn(duration: 400.ms),
-          const SizedBox(height: 16),
-
-          // Count
+          const SizedBox(height: 2),
           Text(
-            '${state.totalElements} member(s)',
+            '${state.totalElements} members',
             style: TextStyle(
               fontSize: 13,
-              color: Colors.white.withOpacity(0.4),
+              color: AppColors.navy.withOpacity(0.35),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
 
-          // List
           Expanded(
-            child: visibleMembers.isEmpty
+            child: all.isEmpty
                 ? _buildEmptyState()
-                : Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 700),
-                      child: ListView.builder(
-                        itemCount: visibleMembers.length,
-                        itemBuilder: (context, index) {
-                          final member = visibleMembers[index];
-                          return MemberCard(
-                            key: ValueKey(member.id.value),
-                            membership: member,
-                            onRoleChange: canManage
-                                ? (newRole) => _onRoleChange(
-                                    context, member, newRole)
-                                : null,
-                            onDelete: canManage
-                                ? () => _onDelete(context, member)
-                                : null,
-                          );
-                        },
+                : ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 740),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (admins.isNotEmpty)
+                            _buildGroup(
+                              context: context,
+                              title: 'Admins',
+                              count: admins.length,
+                              color: AppColors.coral,
+                              members: admins,
+                              canManage: canManage,
+                            ),
+                          if (editors.isNotEmpty)
+                            _buildGroup(
+                              context: context,
+                              title: 'Editors',
+                              count: editors.length,
+                              color: AppColors.teal,
+                              members: editors,
+                              canManage: canManage,
+                            ),
+                          if (readers.isNotEmpty)
+                            _buildGroup(
+                              context: context,
+                              title: 'Readers',
+                              count: readers.length,
+                              color: AppColors.purple,
+                              members: readers,
+                              canManage: canManage,
+                            ),
+                          if (state.totalPages > 1) ...[
+                            const SizedBox(height: 20),
+                            _buildPagination(context, state),
+                          ],
+                        ],
                       ),
                     ),
                   ),
           ),
+        ],
+      ),
+    );
+  }
 
-          // Pagination
-          if (state.totalPages > 1) ...[
-            const SizedBox(height: 16),
-            _buildPagination(context, state),
-          ],
+  Widget _buildGroup({
+    required BuildContext context,
+    required String title,
+    required int count,
+    required Color color,
+    required List<ProjectMembership> members,
+    required bool canManage,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section header
+          Container(
+            padding: const EdgeInsets.only(bottom: 8, top: 4),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(color: color, width: 2),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: GoogleFonts.fredoka(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.navy,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '$count',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.navy.withOpacity(0.3),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Member cards
+          ...members.map((member) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: MemberCard(
+                  key: ValueKey(member.id.value),
+                  membership: member,
+                  onRoleChange: canManage
+                      ? (newRole) =>
+                          _onRoleChange(context, member, newRole)
+                      : null,
+                  onDelete: canManage
+                      ? () => _onDelete(context, member)
+                      : null,
+                ),
+              )),
         ],
       ),
     );
@@ -191,73 +288,67 @@ class _MembersView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.people_outline_rounded,
-              size: 64, color: Colors.white.withOpacity(0.15)),
+              size: 64, color: AppColors.navy.withOpacity(0.15)),
           const SizedBox(height: 16),
           Text('No members yet',
               style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
-                  color: Colors.white.withOpacity(0.4))),
+                  color: AppColors.navy.withOpacity(0.4))),
           const SizedBox(height: 8),
           Text('Add the first member to this project',
               style: TextStyle(
-                  fontSize: 14, color: Colors.white.withOpacity(0.25))),
+                  fontSize: 14, color: AppColors.navy.withOpacity(0.25))),
         ],
       ),
     );
   }
 
   Widget _buildPagination(BuildContext context, MembersLoaded state) {
+    Widget pagerBtn(String text, bool enabled, bool active, VoidCallback onTap) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2),
+        child: GestureDetector(
+          onTap: enabled ? onTap : null,
+          child: Container(
+            width: 34,
+            height: 34,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: active ? AppColors.coral.withOpacity(0.1) : Colors.white,
+              border: Border.all(
+                width: 2,
+                color: active ? AppColors.coral : const Color(0xFFDDD8CC),
+              ),
+            ),
+            child: Text(
+              text,
+              style: GoogleFonts.fredoka(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: !enabled
+                    ? AppColors.navy.withOpacity(0.2)
+                    : active
+                        ? AppColors.coral
+                        : AppColors.navy.withOpacity(0.5),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _PaginationArrow(
-          icon: Icons.chevron_left_rounded,
-          enabled: state.page > 0,
-          onTap: () => _goToPage(context, state.page - 1),
-        ),
-        const SizedBox(width: 8),
-        ...List.generate(state.totalPages, (i) {
-          final isActive = i == state.page;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
-            child: GestureDetector(
-              onTap: () => _goToPage(context, i),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 36,
-                height: 36,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: isActive
-                      ? AppColors.coral.withOpacity(0.25)
-                      : Colors.white.withOpacity(0.06),
-                  border: Border.all(
-                    color: isActive
-                        ? AppColors.coral.withOpacity(0.4)
-                        : Colors.white.withOpacity(0.08),
-                  ),
-                ),
-                child: Text('${i + 1}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight:
-                          isActive ? FontWeight.w600 : FontWeight.w400,
-                      color: isActive
-                          ? AppColors.coral
-                          : Colors.white.withOpacity(0.5),
-                    )),
-              ),
-            ),
-          );
-        }),
-        const SizedBox(width: 8),
-        _PaginationArrow(
-          icon: Icons.chevron_right_rounded,
-          enabled: state.page < state.totalPages - 1,
-          onTap: () => _goToPage(context, state.page + 1),
-        ),
+        pagerBtn('\u00AB', state.page > 0, false,
+            () => _goToPage(context, state.page - 1)),
+        ...List.generate(state.totalPages, (i) =>
+            pagerBtn('${i + 1}', true, i == state.page,
+                () => _goToPage(context, i))),
+        pagerBtn('\u00BB', state.page < state.totalPages - 1, false,
+            () => _goToPage(context, state.page + 1)),
       ],
     );
   }
@@ -360,91 +451,17 @@ class _MembersView extends StatelessWidget {
 
 // ── Create button ───────────────────────────────────────────────
 
-class _CreateButton extends StatefulWidget {
+class _CreateButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
   const _CreateButton({required this.label, required this.onPressed});
 
   @override
-  State<_CreateButton> createState() => _CreateButtonState();
-}
-
-class _CreateButtonState extends State<_CreateButton> {
-  bool _hovering = false;
-
-  @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
-      child: GestureDetector(
-        onTap: widget.onPressed,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            gradient: const LinearGradient(
-                colors: [AppColors.coral, Color(0xFFE8585A)]),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.coral.withOpacity(_hovering ? 0.4 : 0.2),
-                blurRadius: _hovering ? 16 : 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.add_rounded, size: 18, color: Colors.white),
-              const SizedBox(width: 6),
-              Text(widget.label,
-                  style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ── Pagination arrow ────────────────────────────────────────────
-
-class _PaginationArrow extends StatelessWidget {
-  final IconData icon;
-  final bool enabled;
-  final VoidCallback onTap;
-
-  const _PaginationArrow({
-    required this.icon,
-    required this.enabled,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: enabled ? onTap : null,
-      child: Container(
-        width: 36,
-        height: 36,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.white.withOpacity(0.06),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
-        ),
-        child: Icon(icon,
-            size: 20,
-            color: enabled
-                ? Colors.white.withOpacity(0.7)
-                : Colors.white.withOpacity(0.15)),
-      ),
+    return ComicButton(
+      label: label,
+      icon: Icons.add_rounded,
+      onPressed: onPressed,
     );
   }
 }
@@ -470,8 +487,8 @@ class _ConfirmDialog extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: const Color(0xFF1E2040),
-          border: Border.all(color: Colors.white.withOpacity(0.12)),
+          color: const Color(0xFFFFFFFF),
+          border: Border.all(color: AppColors.navy.withOpacity(0.12)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -483,13 +500,13 @@ class _ConfirmDialog extends StatelessWidget {
                 style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white)),
+                    color: AppColors.navy)),
             const SizedBox(height: 8),
             Text(message,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     fontSize: 14,
-                    color: Colors.white.withOpacity(0.5))),
+                    color: AppColors.navy.withOpacity(0.5))),
             const SizedBox(height: 24),
             Row(
               children: [
@@ -501,12 +518,12 @@ class _ConfirmDialog extends StatelessWidget {
                           Navigator.of(context).pop(false),
                       style: TextButton.styleFrom(
                         foregroundColor:
-                            Colors.white.withOpacity(0.6),
+                            AppColors.navy.withOpacity(0.6),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                           side: BorderSide(
                               color:
-                                  Colors.white.withOpacity(0.12)),
+                                  AppColors.navy.withOpacity(0.12)),
                         ),
                       ),
                       child: const Text('Cancel'),

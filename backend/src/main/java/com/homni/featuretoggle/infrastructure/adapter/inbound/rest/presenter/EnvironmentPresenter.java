@@ -9,10 +9,11 @@
 
 package com.homni.featuretoggle.infrastructure.adapter.inbound.rest.presenter;
 
+import com.homni.featuretoggle.application.usecase.EnvironmentPage;
 import com.homni.featuretoggle.domain.model.Environment;
-import com.homni.generated.model.DefaultEnvironmentListResponse;
 import com.homni.generated.model.EnvironmentListResponse;
 import com.homni.generated.model.EnvironmentSingleResponse;
+import com.homni.generated.model.Pagination;
 import com.homni.generated.model.ResponseMeta;
 import org.springframework.stereotype.Component;
 
@@ -38,27 +39,23 @@ public class EnvironmentPresenter {
     }
 
     /**
-     * Wraps a list of environments in a typed response envelope.
+     * Wraps a page of environments in a typed response envelope.
      *
-     * @param environments the domain environment list
-     * @return the typed list response
+     * @param page     the domain environment page
+     * @param pageNum  zero-based page number
+     * @param pageSize page size
+     * @return the typed list response with pagination
      */
-    public EnvironmentListResponse list(List<Environment> environments) {
-        List<com.homni.generated.model.Environment> items = environments.stream()
+    public EnvironmentListResponse list(EnvironmentPage page, int pageNum, int pageSize) {
+        List<com.homni.generated.model.Environment> items = page.items().stream()
                 .map(this::toDto).toList();
-        return new EnvironmentListResponse(items, meta());
+        return new EnvironmentListResponse(
+                items, pagination(page.totalElements(), pageNum, pageSize), meta());
     }
 
-    /**
-     * Wraps the platform-wide list of default environment names in a typed
-     * response envelope. The list is read straight from application config and
-     * does not touch the database.
-     *
-     * @param defaultNames default environment names from config
-     * @return the typed default environment list response
-     */
-    public DefaultEnvironmentListResponse defaults(List<String> defaultNames) {
-        return new DefaultEnvironmentListResponse(List.copyOf(defaultNames), meta());
+    private Pagination pagination(long totalElements, int pageNum, int pageSize) {
+        int totalPages = pageSize > 0 ? (int) Math.ceil((double) totalElements / pageSize) : 0;
+        return new Pagination(pageNum, pageSize, totalElements, totalPages);
     }
 
     private com.homni.generated.model.Environment toDto(Environment e) {

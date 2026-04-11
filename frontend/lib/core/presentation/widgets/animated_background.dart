@@ -98,7 +98,7 @@ class _Painter extends CustomPainter {
   final List<_Node> nodes;
   static const _maxDist = 250.0;
   static const _maxDistSq = _maxDist * _maxDist;
-  static const _bgColor = Color(0xFF151530);
+  static const _bgColor = Color(0xFFF5F2EB);
 
   _Painter({required this.nodes});
 
@@ -124,7 +124,7 @@ class _Painter extends CustomPainter {
         if (distSq > _maxDistSq) continue;
         final dist = sqrt(distSq);
         final alpha = (1.0 - dist / _maxDist) * 0.12;
-        linePaint.color = Color.fromRGBO(255, 255, 255, alpha);
+        linePaint.color = Color.fromRGBO(45, 48, 71, alpha);
         canvas.drawLine(
           Offset(ax, ay),
           Offset(b.x * size.width, b.y * size.height),
@@ -138,7 +138,7 @@ class _Painter extends CustomPainter {
     for (var n in nodes) {
       nodePaint.color = n.on
           ? n.color.withOpacity(0.5)
-          : const Color.fromRGBO(255, 255, 255, 0.08);
+          : const Color.fromRGBO(45, 48, 71, 0.06);
       canvas.drawCircle(
         Offset(n.x * size.width, n.y * size.height),
         n.r,

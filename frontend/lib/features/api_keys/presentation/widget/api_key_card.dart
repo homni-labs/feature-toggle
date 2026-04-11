@@ -41,7 +41,7 @@ class ApiKeyCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: const Color(0xFF1E2040),
+        color: const Color(0xFFFFFFFF),
         border: Border.all(
           color: apiKey.active
               ? roleColor.withOpacity(0.2)
@@ -64,7 +64,7 @@ class ApiKeyCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                       color: apiKey.active
                           ? Colors.white
-                          : Colors.white.withOpacity(0.5),
+                          : AppColors.navy.withOpacity(0.5),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -75,7 +75,7 @@ class ApiKeyCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
-                          color: Colors.white.withOpacity(0.3),
+                          color: AppColors.navy.withOpacity(0.3),
                           fontFamily: 'monospace',
                         ),
                       ),
@@ -129,7 +129,7 @@ class ApiKeyCard extends StatelessWidget {
                   'Created ${_formatDate(apiKey.createdAt)}',
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.white.withOpacity(0.3),
+                    color: AppColors.navy.withOpacity(0.3),
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -139,7 +139,7 @@ class ApiKeyCard extends StatelessWidget {
                       : 'No expiry',
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.white.withOpacity(0.3),
+                    color: AppColors.navy.withOpacity(0.3),
                   ),
                 ),
               ],
@@ -192,15 +192,15 @@ class _ActionButtonState extends State<_ActionButton> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             color: _hovering
-                ? Colors.white.withOpacity(0.10)
+                ? AppColors.navy.withOpacity(0.10)
                 : Colors.transparent,
           ),
           child: Icon(
             widget.icon,
             size: 18,
             color: _hovering
-                ? (widget.hoverColor ?? Colors.white.withOpacity(0.8))
-                : Colors.white.withOpacity(0.3),
+                ? (widget.hoverColor ?? AppColors.navy.withOpacity(0.8))
+                : AppColors.navy.withOpacity(0.3),
           ),
         ),
       ),

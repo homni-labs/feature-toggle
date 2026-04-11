@@ -73,8 +73,8 @@ class _ToggleDialogState extends State<ToggleDialog> {
         padding: const EdgeInsets.all(28),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          color: const Color(0xFF1E2040),
-          border: Border.all(color: Colors.white.withOpacity(0.12)),
+          color: const Color(0xFFFFFFFF),
+          border: Border.all(color: AppColors.navy.withOpacity(0.12)),
         ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -85,7 +85,7 @@ class _ToggleDialogState extends State<ToggleDialog> {
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: AppColors.navy,
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -114,7 +114,7 @@ class _ToggleDialogState extends State<ToggleDialog> {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white.withOpacity(0.6),
+                    color: AppColors.navy.withOpacity(0.6),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -124,7 +124,7 @@ class _ToggleDialogState extends State<ToggleDialog> {
                       : 'New toggles start disabled in every env — flip them on after creating.',
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.white.withOpacity(0.35),
+                    color: AppColors.navy.withOpacity(0.35),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -151,11 +151,11 @@ class _ToggleDialogState extends State<ToggleDialog> {
                           borderRadius: BorderRadius.circular(10),
                           color: selected
                               ? _envColor(env).withOpacity(0.20)
-                              : Colors.white.withOpacity(0.06),
+                              : AppColors.navy.withOpacity(0.06),
                           border: Border.all(
                             color: selected
                                 ? _envColor(env).withOpacity(0.5)
-                                : Colors.white.withOpacity(0.12),
+                                : AppColors.navy.withOpacity(0.12),
                           ),
                         ),
                         child: Text(
@@ -166,7 +166,7 @@ class _ToggleDialogState extends State<ToggleDialog> {
                                 selected ? FontWeight.w600 : FontWeight.w400,
                             color: selected
                                 ? _envColor(env)
-                                : Colors.white.withOpacity(0.4),
+                                : AppColors.navy.withOpacity(0.4),
                           ),
                         ),
                       ),
@@ -185,11 +185,11 @@ class _ToggleDialogState extends State<ToggleDialog> {
                         child: TextButton(
                           onPressed: () => Navigator.of(context).pop(),
                           style: TextButton.styleFrom(
-                            foregroundColor: Colors.white.withOpacity(0.6),
+                            foregroundColor: AppColors.navy.withOpacity(0.6),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                               side: BorderSide(
-                                color: Colors.white.withOpacity(0.12),
+                                color: AppColors.navy.withOpacity(0.12),
                               ),
                             ),
                           ),
@@ -245,20 +245,20 @@ class _ToggleDialogState extends State<ToggleDialog> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        color: Colors.white.withOpacity(0.07),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
+        color: AppColors.navy.withOpacity(0.07),
+        border: Border.all(color: AppColors.navy.withOpacity(0.12)),
       ),
       child: TextField(
         controller: controller,
         autofocus: autofocus,
         maxLines: maxLines,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        style: const TextStyle(color: AppColors.navy, fontSize: 14),
         cursorColor: AppColors.coral,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+          hintStyle: TextStyle(color: AppColors.navy.withOpacity(0.3)),
           prefixIcon:
-              Icon(icon, size: 20, color: Colors.white.withOpacity(0.4)),
+              Icon(icon, size: 20, color: AppColors.navy.withOpacity(0.4)),
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

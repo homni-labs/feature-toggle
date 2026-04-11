@@ -1,15 +1,14 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+import 'package:feature_toggle_app/app/router/app_router.dart';
 import 'package:feature_toggle_app/features/auth/application/bloc/auth_cubit.dart';
 import 'package:feature_toggle_app/features/auth/application/bloc/auth_state.dart';
 import 'package:feature_toggle_app/app/theme/app_colors.dart';
 import 'package:feature_toggle_app/app/theme/app_theme.dart';
 import 'package:feature_toggle_app/core/presentation/widgets/animated_background.dart';
-import 'package:feature_toggle_app/features/projects/presentation/screen/projects_screen.dart';
-import 'package:feature_toggle_app/features/users/presentation/screen/users_screen.dart';
 
 enum _PageId { projects, users }
 
@@ -22,15 +21,11 @@ class _NavItem {
       {required this.icon, required this.label, required this.pageId});
 }
 
-class AppShell extends StatefulWidget {
-  const AppShell({super.key});
+class AppShell extends StatelessWidget {
+  final String currentPath;
+  final Widget child;
 
-  @override
-  State<AppShell> createState() => _AppShellState();
-}
-
-class _AppShellState extends State<AppShell> {
-  int _selectedIndex = 0;
+  const AppShell({super.key, required this.currentPath, required this.child});
 
   List<_NavItem> _buildNavItems(AuthAuthenticated auth) {
     final bool isPlatformAdmin =
@@ -48,6 +43,14 @@ class _AppShellState extends State<AppShell> {
     ];
   }
 
+  int _selectedIndex(List<_NavItem> navItems) {
+    if (currentPath.startsWith('/users')) {
+      final idx = navItems.indexWhere((n) => n.pageId == _PageId.users);
+      return idx >= 0 ? idx : 0;
+    }
+    return 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthCubit, AuthState>(
@@ -61,10 +64,7 @@ class _AppShellState extends State<AppShell> {
         final String? userEmail = authState.currentUser?.email.value;
         final String? userRole = authState.currentUser?.roleLabel;
         final List<_NavItem> navItems = _buildNavItems(authState);
-
-        if (_selectedIndex >= navItems.length) {
-          _selectedIndex = 0;
-        }
+        final int selected = _selectedIndex(navItems);
 
         return Scaffold(
           backgroundColor: AppTheme.scaffoldBackground,
@@ -75,15 +75,22 @@ class _AppShellState extends State<AppShell> {
                 children: [
                   _Sidebar(
                     navItems: navItems,
-                    selectedIndex: _selectedIndex,
+                    selectedIndex: selected,
                     collapsed: isNarrow,
                     userName: userName,
                     userEmail: userEmail,
                     userRole: userRole,
-                    onSelect: (int i) => setState(() => _selectedIndex = i),
+                    onSelect: (int i) {
+                      switch (navItems[i].pageId) {
+                        case _PageId.projects:
+                          context.go(AppRoutes.projects);
+                        case _PageId.users:
+                          context.go(AppRoutes.users);
+                      }
+                    },
                     onLogout: () => context.read<AuthCubit>().logout(),
                   ),
-                  Expanded(child: _buildPage(navItems)),
+                  Expanded(child: child),
                 ],
               ),
             ],
@@ -92,19 +99,9 @@ class _AppShellState extends State<AppShell> {
       },
     );
   }
-
-  Widget _buildPage(List<_NavItem> navItems) {
-    final _PageId pageId = navItems[_selectedIndex].pageId;
-    switch (pageId) {
-      case _PageId.projects:
-        return const ProjectsPage();
-      case _PageId.users:
-        return const UsersPage();
-    }
-  }
 }
 
-// ── Sidebar ─────────────────────────────────────────────────────
+// ── Sidebar (cartoon style from sidebar-redesign.html) ──────────
 
 class _Sidebar extends StatelessWidget {
   final List<_NavItem> navItems;
@@ -130,7 +127,7 @@ class _Sidebar extends StatelessWidget {
   Color _roleColor() {
     switch (userRole) {
       case 'Platform Admin':
-        return AppColors.coral;
+        return const Color(0xFFA08020); // yellow-ish for PA
       case 'User':
         return AppColors.teal;
       default:
@@ -138,53 +135,118 @@ class _Sidebar extends StatelessWidget {
     }
   }
 
+  Color _roleBg() {
+    switch (userRole) {
+      case 'Platform Admin':
+        return AppColors.yellow.withOpacity(0.1);
+      case 'User':
+        return AppColors.teal.withOpacity(0.1);
+      default:
+        return AppColors.purple.withOpacity(0.1);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final double width = collapsed ? 68.0 : 230.0;
+    final double width = collapsed ? 68.0 : 240.0;
 
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          width: width,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.06),
-            border: Border(
-              right: BorderSide(color: Colors.white.withOpacity(0.08)),
-            ),
-          ),
-          child: SafeArea(
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-
-                // Logo
-                Container(
-                  width: collapsed ? 44 : 120,
-                  height: collapsed ? 44 : 120,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.cream,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.coral.withOpacity(0.3),
-                        blurRadius: 14,
-                      ),
-                    ],
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      width: width,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          right: BorderSide(color: AppColors.navy, width: 3),
+        ),
+      ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            // ── Top: Logo + brand ──────────────────────────
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: Color(0xFFDDD8CC),
+                    width: 2,
                   ),
-                  child: ClipOval(
-                    child: Image.asset(
-                      'assets/images/logo_no_text.jpeg',
-                      fit: BoxFit.cover,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    width: collapsed ? 40 : 96,
+                    height: collapsed ? 40 : 96,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.cream,
+                      border: Border.all(width: 3, color: AppColors.navy),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: AppColors.navy,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: ClipOval(
+                      child: Image.asset(
+                        'assets/images/logo_no_text.jpeg',
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  if (!collapsed) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Tog',
+                          style: GoogleFonts.fredoka(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.navy,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        Text(
+                          'li',
+                          style: GoogleFonts.fredoka(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.green,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            // ── Nav ────────────────────────────────────────
+            if (!collapsed)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 12, 10, 0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'NAVIGATION',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.navy.withOpacity(0.3),
+                      letterSpacing: 1.5,
                     ),
                   ),
                 ),
-
-                const SizedBox(height: 32),
-
-                // Nav items
-                ...List.generate(navItems.length, (int i) {
+              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              child: Column(
+                children: List.generate(navItems.length, (int i) {
                   final _NavItem item = navItems[i];
                   return _NavButton(
                     icon: item.icon,
@@ -194,31 +256,54 @@ class _Sidebar extends StatelessWidget {
                     onTap: () => onSelect(i),
                   );
                 }),
+              ),
+            ),
 
-                const Spacer(),
+            const Spacer(),
 
-                // User info
-                if (userName != null) ...[
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: collapsed ? 8 : 16),
-                    child: Container(
-                      padding: EdgeInsets.all(collapsed ? 8 : 12),
+            // ── Bottom: User info + logout ─────────────────
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: const BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: Color(0xFFDDD8CC),
+                    width: 2,
+                  ),
+                ),
+              ),
+              child: Column(
+                children: [
+                  if (userName != null)
+                    Container(
+                      padding: EdgeInsets.all(collapsed ? 8 : 10),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        color: Colors.white.withOpacity(0.06),
+                        border: Border.all(
+                          color: const Color(0xFFDDD8CC),
+                          width: 2,
+                        ),
+                        color: const Color(0xFFF5F2EB),
                       ),
                       child: collapsed
                           ? Center(
-                              child: CircleAvatar(
-                                radius: 16,
-                                backgroundColor:
-                                    _roleColor().withOpacity(0.2),
+                              child: Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: _roleBg(),
+                                  border: Border.all(
+                                    width: 2,
+                                    color: AppColors.navy,
+                                  ),
+                                ),
+                                alignment: Alignment.center,
                                 child: Text(
                                   (userName ?? '?')[0].toUpperCase(),
                                   style: TextStyle(
                                     fontSize: 13,
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w700,
                                     color: _roleColor(),
                                   ),
                                 ),
@@ -226,15 +311,23 @@ class _Sidebar extends StatelessWidget {
                             )
                           : Row(
                               children: [
-                                CircleAvatar(
-                                  radius: 16,
-                                  backgroundColor:
-                                      _roleColor().withOpacity(0.2),
+                                Container(
+                                  width: 36,
+                                  height: 36,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: _roleBg(),
+                                    border: Border.all(
+                                      width: 2,
+                                      color: AppColors.navy,
+                                    ),
+                                  ),
+                                  alignment: Alignment.center,
                                   child: Text(
                                     (userName ?? '?')[0].toUpperCase(),
                                     style: TextStyle(
                                       fontSize: 13,
-                                      fontWeight: FontWeight.w600,
+                                      fontWeight: FontWeight.w700,
                                       color: _roleColor(),
                                     ),
                                   ),
@@ -247,10 +340,10 @@ class _Sidebar extends StatelessWidget {
                                     children: [
                                       Text(
                                         userName ?? '',
-                                        style: const TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.white,
+                                        style: GoogleFonts.fredoka(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.navy,
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -258,8 +351,8 @@ class _Sidebar extends StatelessWidget {
                                         Text(
                                           userEmail!,
                                           style: TextStyle(
-                                            fontSize: 11,
-                                            color: Colors.white
+                                            fontSize: 10,
+                                            color: AppColors.navy
                                                 .withOpacity(0.4),
                                           ),
                                           overflow: TextOverflow.ellipsis,
@@ -269,20 +362,20 @@ class _Sidebar extends StatelessWidget {
                                         Container(
                                           padding:
                                               const EdgeInsets.symmetric(
-                                                  horizontal: 8,
+                                                  horizontal: 7,
                                                   vertical: 2),
                                           decoration: BoxDecoration(
                                             borderRadius:
-                                                BorderRadius.circular(8),
-                                            color: _roleColor()
-                                                .withOpacity(0.15),
+                                                BorderRadius.circular(5),
+                                            color: _roleBg(),
                                           ),
                                           child: Text(
                                             userRole!,
                                             style: TextStyle(
-                                              fontSize: 10,
-                                              fontWeight: FontWeight.w600,
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w700,
                                               color: _roleColor(),
+                                              letterSpacing: 0.5,
                                             ),
                                           ),
                                         ),
@@ -293,21 +386,77 @@ class _Sidebar extends StatelessWidget {
                               ],
                             ),
                     ),
+                  const SizedBox(height: 6),
+                  _LogoutButton(
+                    collapsed: collapsed,
+                    onTap: onLogout,
                   ),
-                  const SizedBox(height: 8),
                 ],
-
-                // Logout
-                _NavButton(
-                  icon: Icons.logout_rounded,
-                  label: 'Logout',
-                  active: false,
-                  collapsed: collapsed,
-                  onTap: onLogout,
-                ),
-                const SizedBox(height: 20),
-              ],
+              ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Logout button ─────────────────────────────────────────────
+
+class _LogoutButton extends StatefulWidget {
+  final bool collapsed;
+  final VoidCallback onTap;
+  const _LogoutButton({required this.collapsed, required this.onTap});
+
+  @override
+  State<_LogoutButton> createState() => _LogoutButtonState();
+}
+
+class _LogoutButtonState extends State<_LogoutButton> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: _hovering
+                ? AppColors.coral.withOpacity(0.06)
+                : Colors.transparent,
+          ),
+          child: Row(
+            mainAxisAlignment: widget.collapsed
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.logout_rounded,
+                size: 16,
+                color: _hovering
+                    ? AppColors.coral
+                    : AppColors.navy.withOpacity(0.4),
+              ),
+              if (!widget.collapsed) ...[
+                const SizedBox(width: 8),
+                Text(
+                  'Sign out',
+                  style: GoogleFonts.fredoka(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: _hovering
+                        ? AppColors.coral
+                        : AppColors.navy.withOpacity(0.4),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ),
@@ -315,7 +464,7 @@ class _Sidebar extends StatelessWidget {
   }
 }
 
-// ── Nav button ──────────────────────────────────────────────────
+// ── Nav button (cartoon style) ────────────────────────────────
 
 class _NavButton extends StatefulWidget {
   final IconData icon;
@@ -341,25 +490,18 @@ class _NavButtonState extends State<_NavButton> {
 
   @override
   Widget build(BuildContext context) {
-    final double bgOpacity = widget.active
-        ? 0.12
-        : _hovering
-            ? 0.08
-            : 0.0;
     final Color iconColor = widget.active
         ? AppColors.coral
         : _hovering
-            ? Colors.white.withOpacity(0.8)
-            : Colors.white.withOpacity(0.4);
+            ? AppColors.navy.withOpacity(0.8)
+            : AppColors.navy.withOpacity(0.4);
     final Color textColor =
-        widget.active ? Colors.white : Colors.white.withOpacity(0.5);
+        widget.active ? AppColors.navy : AppColors.navy.withOpacity(0.5);
 
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: widget.collapsed ? 12 : 14,
-        vertical: 3,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 1),
       child: MouseRegion(
+        cursor: SystemMouseCursors.click,
         onEnter: (_) => setState(() => _hovering = true),
         onExit: (_) => setState(() => _hovering = false),
         child: GestureDetector(
@@ -367,31 +509,35 @@ class _NavButtonState extends State<_NavButton> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
             padding: EdgeInsets.symmetric(
-              horizontal: widget.collapsed ? 0 : 14,
-              vertical: 12,
+              horizontal: widget.collapsed ? 0 : 12,
+              vertical: 10,
             ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: Colors.white.withOpacity(bgOpacity),
+              color: widget.active
+                  ? AppColors.coral.withOpacity(0.06)
+                  : _hovering
+                      ? AppColors.navy.withOpacity(0.04)
+                      : Colors.transparent,
               border: widget.active
-                  ? Border.all(color: AppColors.coral.withOpacity(0.2))
-                  : null,
+                  ? Border.all(
+                      color: AppColors.coral.withOpacity(0.15), width: 2)
+                  : Border.all(color: Colors.transparent, width: 2),
             ),
             child: widget.collapsed
                 ? Center(
-                    child:
-                        Icon(widget.icon, size: 22, color: iconColor))
+                    child: Icon(widget.icon, size: 20, color: iconColor))
                 : Row(
                     children: [
                       Icon(widget.icon, size: 20, color: iconColor),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
                       Text(
                         widget.label,
-                        style: TextStyle(
-                          fontSize: 14,
+                        style: GoogleFonts.fredoka(
+                          fontSize: 13,
                           fontWeight: widget.active
-                              ? FontWeight.w600
-                              : FontWeight.w400,
+                              ? FontWeight.w700
+                              : FontWeight.w500,
                           color: textColor,
                         ),
                       ),

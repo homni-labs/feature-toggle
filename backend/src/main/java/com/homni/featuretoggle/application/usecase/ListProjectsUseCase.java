@@ -16,7 +16,8 @@ import com.homni.featuretoggle.domain.model.AppUser;
 import java.util.List;
 
 /**
- * Lists projects visible to the calling user.
+ * Lists projects visible to the calling user with filtering, search and
+ * pagination.
  */
 public final class ListProjectsUseCase {
 
@@ -33,17 +34,33 @@ public final class ListProjectsUseCase {
     }
 
     /**
-     * Lists projects accessible to the caller with their role.
+     * Lists projects accessible to the caller, optionally filtered by name/slug
+     * search and archived state, paginated.
      *
-     * @return projects with the caller's role
+     * <p>The returned page also carries workspace-level totals
+     * ({@code totalCount} and {@code archivedCount}) computed against the same
+     * visibility rules but ignoring the search/archived query parameters, so
+     * the page header subtitle ("N projects · M archived") stays stable while
+     * the user filters or searches.
+     *
+     * @param searchText optional case-insensitive name/slug substring filter
+     * @param archived   optional archived filter ({@code null} = both)
+     * @param page       zero-based page number
+     * @param size       page size
+     * @return a page of matching projects with role and counts
      */
-    public List<ProjectWithRole> execute() {
+    public ProjectPage execute(String searchText, Boolean archived, int page, int size) {
         AppUser caller = callerPort.get();
-        if (caller.isPlatformAdmin()) {
-            return projects.findAll().stream()
-                    .map(project -> new ProjectWithRole(project, null))
-                    .toList();
-        }
-        return projects.findByMemberWithRole(caller.id);
+        boolean pa = caller.isPlatformAdmin();
+        int offset = page * size;
+
+        List<ProjectListItem> items = projects.findPage(
+                caller.id, pa, searchText, archived, offset, size);
+
+        long totalElements = projects.countMatching(caller.id, pa, searchText, archived);
+        long totalCount    = projects.countMatching(caller.id, pa, null, null);
+        long archivedCount = projects.countMatching(caller.id, pa, null, true);
+
+        return ProjectPage.create(items, totalElements, totalCount, archivedCount, pa);
     }
 }

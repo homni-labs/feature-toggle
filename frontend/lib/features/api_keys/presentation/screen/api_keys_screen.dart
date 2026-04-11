@@ -4,7 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:feature_toggle_app/app/di/injection.dart';
 import 'package:feature_toggle_app/app/theme/app_colors.dart';
+import 'package:feature_toggle_app/core/domain/failure.dart';
 import 'package:feature_toggle_app/core/presentation/widgets/app_snackbar.dart';
+import 'package:feature_toggle_app/core/presentation/widgets/comic_button.dart';
+import 'package:feature_toggle_app/core/presentation/widgets/forbidden_page.dart';
 import 'package:feature_toggle_app/features/auth/application/bloc/auth_cubit.dart';
 import 'package:feature_toggle_app/features/auth/application/bloc/auth_state.dart';
 import 'package:feature_toggle_app/features/api_keys/application/bloc/api_keys_cubit.dart';
@@ -61,11 +64,13 @@ class _ApiKeysView extends StatelessWidget {
           _handleIssued(context, state.created);
         }
       },
-      buildWhen: (previous, current) => current is! ApiKeyIssued,
+      buildWhen: (previous, current) =>
+          current is! ApiKeyIssued &&
+          (current is! ApiKeysError || previous is! ApiKeysLoaded),
       builder: (context, state) => switch (state) {
         ApiKeysInitial() || ApiKeysLoading() => _buildLoading(),
         ApiKeysError(:final failure) =>
-          _buildError(context, failure.message),
+          _buildError(context, failure),
         ApiKeysLoaded() => _buildLoaded(context, state as ApiKeysLoaded),
         ApiKeyIssued() => _buildLoading(),
       },
@@ -78,17 +83,18 @@ class _ApiKeysView extends StatelessWidget {
     );
   }
 
-  Widget _buildError(BuildContext context, String message) {
+  Widget _buildError(BuildContext context, Failure failure) {
+    if (failure is ForbiddenFailure) return const ForbiddenPage();
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.cloud_off_rounded,
-              size: 48, color: Colors.white.withOpacity(0.2)),
+              size: 48, color: AppColors.navy.withOpacity(0.2)),
           const SizedBox(height: 16),
-          Text(message,
+          Text(failure.message,
               style: TextStyle(
-                  fontSize: 16, color: Colors.white.withOpacity(0.5))),
+                  fontSize: 16, color: AppColors.navy.withOpacity(0.5))),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => _reload(context),
@@ -124,7 +130,7 @@ class _ApiKeysView extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white.withOpacity(0.9),
+                  color: AppColors.navy.withOpacity(0.9),
                 ),
               ),
               const Spacer(),
@@ -142,7 +148,7 @@ class _ApiKeysView extends StatelessWidget {
             '${state.totalElements} API key(s)',
             style: TextStyle(
               fontSize: 13,
-              color: Colors.white.withOpacity(0.4),
+              color: AppColors.navy.withOpacity(0.4),
             ),
           ),
           const SizedBox(height: 16),
@@ -187,17 +193,17 @@ class _ApiKeysView extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.vpn_key_outlined,
-              size: 64, color: Colors.white.withOpacity(0.15)),
+              size: 64, color: AppColors.navy.withOpacity(0.15)),
           const SizedBox(height: 16),
           Text('No API keys yet',
               style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
-                  color: Colors.white.withOpacity(0.4))),
+                  color: AppColors.navy.withOpacity(0.4))),
           const SizedBox(height: 8),
           Text('Create your first API key',
               style: TextStyle(
-                  fontSize: 14, color: Colors.white.withOpacity(0.25))),
+                  fontSize: 14, color: AppColors.navy.withOpacity(0.25))),
         ],
       ),
     );
@@ -228,11 +234,11 @@ class _ApiKeysView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                   color: isActive
                       ? AppColors.coral.withOpacity(0.25)
-                      : Colors.white.withOpacity(0.06),
+                      : AppColors.navy.withOpacity(0.06),
                   border: Border.all(
                     color: isActive
                         ? AppColors.coral.withOpacity(0.4)
-                        : Colors.white.withOpacity(0.08),
+                        : AppColors.navy.withOpacity(0.08),
                   ),
                 ),
                 child: Text('${i + 1}',
@@ -242,7 +248,7 @@ class _ApiKeysView extends StatelessWidget {
                           isActive ? FontWeight.w600 : FontWeight.w400,
                       color: isActive
                           ? AppColors.coral
-                          : Colors.white.withOpacity(0.5),
+                          : AppColors.navy.withOpacity(0.5),
                     )),
               ),
             ),
@@ -338,55 +344,17 @@ class _ApiKeysView extends StatelessWidget {
 
 // ── Create button ───────────────────────────────────────────────
 
-class _CreateButton extends StatefulWidget {
+class _CreateButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
   const _CreateButton({required this.label, required this.onPressed});
 
   @override
-  State<_CreateButton> createState() => _CreateButtonState();
-}
-
-class _CreateButtonState extends State<_CreateButton> {
-  bool _hovering = false;
-
-  @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
-      child: GestureDetector(
-        onTap: widget.onPressed,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding:
-              const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            gradient: const LinearGradient(
-                colors: [AppColors.coral, Color(0xFFE8585A)]),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.coral.withOpacity(_hovering ? 0.4 : 0.2),
-                blurRadius: _hovering ? 16 : 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.add_rounded, size: 18, color: Colors.white),
-              const SizedBox(width: 6),
-              Text(widget.label,
-                  style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white)),
-            ],
-          ),
-        ),
-      ),
+    return ComicButton(
+      label: label,
+      icon: Icons.add_rounded,
+      onPressed: onPressed,
     );
   }
 }
@@ -414,14 +382,14 @@ class _PaginationArrow extends StatelessWidget {
         alignment: Alignment.center,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          color: Colors.white.withOpacity(0.06),
-          border: Border.all(color: Colors.white.withOpacity(0.08)),
+          color: AppColors.navy.withOpacity(0.06),
+          border: Border.all(color: AppColors.navy.withOpacity(0.08)),
         ),
         child: Icon(icon,
             size: 20,
             color: enabled
-                ? Colors.white.withOpacity(0.7)
-                : Colors.white.withOpacity(0.15)),
+                ? AppColors.navy.withOpacity(0.7)
+                : AppColors.navy.withOpacity(0.15)),
       ),
     );
   }
@@ -448,8 +416,8 @@ class _ConfirmDialog extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: const Color(0xFF1E2040),
-          border: Border.all(color: Colors.white.withOpacity(0.12)),
+          color: const Color(0xFFFFFFFF),
+          border: Border.all(color: AppColors.navy.withOpacity(0.12)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -461,13 +429,13 @@ class _ConfirmDialog extends StatelessWidget {
                 style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white)),
+                    color: AppColors.navy)),
             const SizedBox(height: 8),
             Text(message,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     fontSize: 14,
-                    color: Colors.white.withOpacity(0.5))),
+                    color: AppColors.navy.withOpacity(0.5))),
             const SizedBox(height: 24),
             Row(
               children: [
@@ -479,12 +447,12 @@ class _ConfirmDialog extends StatelessWidget {
                           Navigator.of(context).pop(false),
                       style: TextButton.styleFrom(
                         foregroundColor:
-                            Colors.white.withOpacity(0.6),
+                            AppColors.navy.withOpacity(0.6),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                           side: BorderSide(
                               color:
-                                  Colors.white.withOpacity(0.12)),
+                                  AppColors.navy.withOpacity(0.12)),
                         ),
                       ),
                       child: const Text('Cancel'),

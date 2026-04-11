@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+
+import 'package:feature_toggle_app/app/theme/app_colors.dart';
 import 'package:feature_toggle_app/features/toggles/domain/model/feature_toggle.dart';
 import 'package:feature_toggle_app/features/toggles/domain/model/toggle_environment.dart';
-import 'package:feature_toggle_app/app/theme/app_colors.dart';
 
-/// A toggle card. The global on/off switch is gone — each environment chip
-/// is its own interactive switch. Click flips the state for that env via
-/// [onEnvironmentToggle], which the parent wires to the cubit's optimistic
-/// update flow. When [onEnvironmentToggle] is null (read-only mode), the
-/// chips render as static badges.
-class ToggleCard extends StatelessWidget {
+/// Tile-style toggle card matching `app-redesign.html` Toggles section.
+///
+/// Layout:
+/// - Top stripe (4px): green gradient = all ON, coral/yellow = mixed, gray = all OFF
+/// - Head: icon (38×38 gradient) + name (monospace bold)
+/// - Description (2 lines max)
+/// - Env cells grid: each cell has env label + mini toggle switch (green=ON, red=OFF)
+/// - Actions: edit/delete in top-right corner
+class ToggleCard extends StatefulWidget {
   final FeatureToggle toggle;
   final void Function(String envName, bool enabled)? onEnvironmentToggle;
   final VoidCallback? onEdit;
@@ -22,349 +26,382 @@ class ToggleCard extends StatelessWidget {
     this.onDelete,
   });
 
-  static Color _envColor(String env) {
-    switch (env) {
-      case 'DEV':
-        return AppColors.teal;
-      case 'TEST':
-        return AppColors.yellow;
-      case 'PROD':
-        return AppColors.coral;
-      default:
-        return AppColors.purple;
-    }
-  }
+  @override
+  State<ToggleCard> createState() => _ToggleCardState();
+}
 
-  /// "Active" if at least one env is enabled — drives the card border accent
-  /// so a row that has any live flag stands out from a fully-off row.
-  bool get _hasAnyEnabled =>
-      toggle.environments.any((e) => e.enabled);
+class _ToggleCardState extends State<ToggleCard> {
+  bool _hovering = false;
+
+  bool get _allOn =>
+      widget.toggle.environments.isNotEmpty &&
+      widget.toggle.environments.every((e) => e.enabled);
+
+  bool get _allOff =>
+      widget.toggle.environments.isEmpty ||
+      widget.toggle.environments.every((e) => !e.enabled);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: const Color(0xFF1E2040),
-        border: Border.all(
-          color: _hasAnyEnabled
-              ? AppColors.green.withOpacity(0.25)
-              : Colors.white.withOpacity(0.10),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Status dot — small indicator instead of the old big switch
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: _hasAnyEnabled
-                      ? AppColors.green
-                      : Colors.white.withOpacity(0.18),
-                  boxShadow: _hasAnyEnabled
-                      ? [
-                          BoxShadow(
-                            color: AppColors.green.withOpacity(0.5),
-                            blurRadius: 8,
-                          ),
-                        ]
-                      : null,
-                ),
-              ),
-            ),
-            const SizedBox(width: 14),
+    final List<Widget> actions = _buildActions();
 
-            // Name + description + per-env switches
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          toggle.name,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: _hasAnyEnabled
-                                ? Colors.white
-                                : Colors.white.withOpacity(0.6),
-                          ),
-                        ),
-                      ),
-                      _CounterBadge(
-                        enabled: toggle.environments
-                            .where((e) => e.enabled)
-                            .length,
-                        total: toggle.environments.length,
-                      ),
-                    ],
-                  ),
-                  if (toggle.description.isNotEmpty) ...[
-                    const SizedBox(height: 3),
-                    Text(
-                      toggle.description,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(width: 3, color: AppColors.navy),
+          boxShadow: [
+            BoxShadow(
+              color: _hovering ? AppColors.navy : const Color(0xFFDDD8CC),
+              offset: Offset(0, _hovering ? 6 : 3),
+            ),
+          ],
+        ),
+        transform: _hovering
+            ? Matrix4.translationValues(0, -2, 0)
+            : Matrix4.identity(),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ── Top stripe ──────────────────────────────────
+                _Stripe(name: widget.toggle.name),
+
+                // ── Head: icon + name ───────────────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+                  child: _Head(toggle: widget.toggle),
+                ),
+
+                // ── Description (fixed height) ──────────────────
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+                  child: SizedBox(
+                    height: 40,
+                    child: Text(
+                      widget.toggle.description,
                       style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withOpacity(0.35),
+                        fontSize: 13,
+                        height: 1.5,
+                        color: AppColors.navy.withOpacity(0.55),
                       ),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                  if (toggle.environments.isNotEmpty) ...[
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: toggle.environments
-                          .map((env) => _EnvSwitchChip(
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                // ── Env cells with toggle switches ──────────────
+                if (widget.toggle.environments.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
+                    child: Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: widget.toggle.environments
+                          .map((env) => _EnvCell(
                                 env: env,
-                                color: _envColor(env.name),
-                                onToggle: onEnvironmentToggle == null
+                                onToggle: widget.onEnvironmentToggle == null
                                     ? null
-                                    : (newValue) => onEnvironmentToggle!(
-                                          env.name,
-                                          newValue,
-                                        ),
+                                    : (val) => widget.onEnvironmentToggle!(
+                                        env.name, val),
                               ))
                           .toList(),
                     ),
-                  ],
-                ],
-              ),
-            ),
-
-            const SizedBox(width: 8),
-
-            // Edit / delete actions, stacked compactly
-            Column(
-              children: [
-                if (onEdit != null) ...[
-                  _ActionButton(icon: Icons.edit_outlined, onTap: onEdit!),
-                  const SizedBox(height: 2),
-                ],
-                if (onDelete != null)
-                  _ActionButton(
-                    icon: Icons.delete_outline_rounded,
-                    onTap: onDelete!,
-                    hoverColor: AppColors.coral,
                   ),
               ],
             ),
+
+            // ── Actions: top-right ──────────────────────────────
+            if (actions.isNotEmpty)
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (int i = 0; i < actions.length; i++) ...[
+                      if (i > 0) const SizedBox(width: 4),
+                      actions[i],
+                    ],
+                  ],
+                ),
+              ),
           ],
         ),
       ),
     );
   }
+
+  List<Widget> _buildActions() {
+    final List<Widget> result = [];
+    if (widget.onEdit != null) {
+      result.add(_TileAction(
+        icon: Icons.edit_outlined,
+        accent: AppColors.teal,
+        onTap: widget.onEdit!,
+      ));
+    }
+    if (widget.onDelete != null) {
+      result.add(_TileAction(
+        icon: Icons.delete_outline_rounded,
+        accent: AppColors.coral,
+        onTap: widget.onDelete!,
+      ));
+    }
+    return result;
+  }
 }
 
-// ── Env switch chip ─────────────────────────────────────────────
+// ── Top stripe (random gradient from name hash) ──────────────────
 
-/// A clickable env chip with built-in state. Filled in env color when
-/// enabled, dim/outlined when disabled. The fill/outline animation matches
-/// the 200ms style used by the rest of the dialog/card system.
-class _EnvSwitchChip extends StatefulWidget {
-  const _EnvSwitchChip({
-    required this.env,
-    required this.color,
-    required this.onToggle,
-  });
+class _Stripe extends StatelessWidget {
+  const _Stripe({required this.name});
+  final String name;
 
+  static const _gradients = <List<Color>>[
+    [AppColors.coral, AppColors.yellow],
+    [AppColors.teal, AppColors.green],
+    [AppColors.purple, AppColors.coral],
+    [AppColors.yellow, AppColors.green],
+    [AppColors.green, AppColors.teal],
+    [AppColors.teal, AppColors.purple],
+    [AppColors.coral, AppColors.purple],
+    [AppColors.yellow, AppColors.teal],
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final int hash = name.codeUnits.fold<int>(0, (a, c) => a + c);
+    final colors = _gradients[hash % _gradients.length];
+    return Container(
+      height: 4,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: colors),
+      ),
+    );
+  }
+}
+
+// ── Head ──────────────────────────────────────────────────────────
+
+class _Head extends StatelessWidget {
+  const _Head({required this.toggle});
+  final FeatureToggle toggle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _ToggleIcon(name: toggle.name),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            toggle.name,
+            style: const TextStyle(
+              fontFamily: 'monospace',
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: AppColors.navy,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Toggle icon (generated gradient from name hash) ───────────────
+
+class _ToggleIcon extends StatelessWidget {
+  const _ToggleIcon({required this.name});
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final int hash = name.codeUnits.fold<int>(0, (a, c) => a + c);
+    const palette = <List<Color>>[
+      [AppColors.coral, AppColors.yellow],
+      [AppColors.teal, AppColors.purple],
+      [AppColors.purple, AppColors.coral],
+      [AppColors.teal, AppColors.green],
+      [AppColors.green, AppColors.teal],
+      [AppColors.yellow, AppColors.coral],
+      [AppColors.purple, AppColors.teal],
+      [AppColors.yellow, AppColors.green],
+    ];
+    final colors = palette[hash % palette.length];
+
+    return Container(
+      width: 38,
+      height: 38,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(width: 2, color: AppColors.navy),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: colors,
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        name.isNotEmpty ? name[0].toUpperCase() : 'T',
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+}
+
+// ── Env cell with mini toggle switch ──────────────────────────────
+
+class _EnvCell extends StatefulWidget {
+  const _EnvCell({required this.env, required this.onToggle});
   final ToggleEnvironment env;
-  final Color color;
   final ValueChanged<bool>? onToggle;
 
   @override
-  State<_EnvSwitchChip> createState() => _EnvSwitchChipState();
+  State<_EnvCell> createState() => _EnvCellState();
 }
 
-class _EnvSwitchChipState extends State<_EnvSwitchChip> {
+class _EnvCellState extends State<_EnvCell> {
   bool _hovering = false;
 
   @override
   Widget build(BuildContext context) {
-    final bool readOnly = widget.onToggle == null;
     final bool isOn = widget.env.enabled;
+    final bool interactive = widget.onToggle != null;
 
-    final Color bg = isOn
-        ? widget.color.withOpacity(_hovering ? 0.30 : 0.20)
-        : Colors.white.withOpacity(_hovering ? 0.10 : 0.06);
-    final Color border = isOn
-        ? widget.color.withOpacity(0.5)
-        : Colors.white.withOpacity(0.12);
-    final Color text =
-        isOn ? widget.color : Colors.white.withOpacity(0.4);
-
-    final chip = AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: bg,
-        border: Border.all(color: border),
-        boxShadow: isOn && _hovering
-            ? [
-                BoxShadow(
-                  color: widget.color.withOpacity(0.25),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
+    return MouseRegion(
+      cursor:
+          interactive ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: GestureDetector(
+        onTap: interactive ? () => widget.onToggle!(!isOn) : null,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: 90,
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: isOn
+                ? AppColors.green.withOpacity(0.06)
+                : const Color(0xFFF5F2EB),
+            border: Border.all(
+              width: 2,
+              color: isOn
+                  ? AppColors.green.withOpacity(0.4)
+                  : const Color(0xFFDDD8CC),
+            ),
+          ),
+          child: Column(
+            children: [
+              Text(
+                widget.env.name,
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
+                  color: isOn ? AppColors.navy : AppColors.navy.withOpacity(0.5),
                 ),
-              ]
-            : null,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // ON ● / OFF ○ indicator
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isOn ? widget.color : Colors.transparent,
-              border: Border.all(
-                color: isOn
-                    ? widget.color
-                    : Colors.white.withOpacity(0.35),
-                width: 1.4,
+                textAlign: TextAlign.center,
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
+              const SizedBox(height: 6),
+              // Mini toggle switch
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 36,
+                height: 18,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(999),
+                  color: isOn ? AppColors.green : AppColors.coral,
+                  border: Border.all(width: 2, color: AppColors.navy),
+                ),
+                child: AnimatedAlign(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutBack,
+                  alignment:
+                      isOn ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      border: Border.all(
+                          width: 1.5, color: AppColors.navy),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          Text(
-            widget.env.name,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: isOn ? FontWeight.w600 : FontWeight.w400,
-              color: text,
-              letterSpacing: 0.3,
-            ),
-          ),
-        ],
+        ),
       ),
     );
+  }
+}
 
-    if (readOnly) {
-      return Tooltip(
-        message:
-            '${widget.env.name} • ${isOn ? "enabled" : "disabled"} (read-only)',
-        child: chip,
-      );
-    }
+// ── Tile action button ────────────────────────────────────────────
 
+class _TileAction extends StatefulWidget {
+  const _TileAction({
+    required this.icon,
+    required this.accent,
+    required this.onTap,
+  });
+  final IconData icon;
+  final Color accent;
+  final VoidCallback onTap;
+
+  @override
+  State<_TileAction> createState() => _TileActionState();
+}
+
+class _TileActionState extends State<_TileAction> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
       child: GestureDetector(
-        onTap: () => widget.onToggle!(!isOn),
-        child: Tooltip(
-          message:
-              'Click to ${isOn ? "disable" : "enable"} in ${widget.env.name}',
-          child: chip,
-        ),
-      ),
-    );
-  }
-}
-
-// ── Counter badge ───────────────────────────────────────────────
-
-/// Tiny "n/m on" badge that shows how many of the toggle's envs are
-/// currently enabled. Helps scan a long list of toggles at a glance.
-class _CounterBadge extends StatelessWidget {
-  const _CounterBadge({required this.enabled, required this.total});
-
-  final int enabled;
-  final int total;
-
-  @override
-  Widget build(BuildContext context) {
-    if (total == 0) return const SizedBox.shrink();
-    final bool allOff = enabled == 0;
-    final Color color = allOff
-        ? Colors.white.withOpacity(0.3)
-        : AppColors.green;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: allOff
-            ? Colors.white.withOpacity(0.05)
-            : AppColors.green.withOpacity(0.12),
-        border: Border.all(
-          color: allOff
-              ? Colors.white.withOpacity(0.10)
-              : AppColors.green.withOpacity(0.25),
-        ),
-      ),
-      child: Text(
-        '$enabled/$total on',
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: color,
-          letterSpacing: 0.4,
-        ),
-      ),
-    );
-  }
-}
-
-// ── Action button (unchanged) ───────────────────────────────────
-
-class _ActionButton extends StatefulWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final Color? hoverColor;
-
-  const _ActionButton({
-    required this.icon,
-    required this.onTap,
-    this.hoverColor,
-  });
-
-  @override
-  State<_ActionButton> createState() => _ActionButtonState();
-}
-
-class _ActionButtonState extends State<_ActionButton> {
-  bool _hovering = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
-      child: GestureDetector(
         onTap: widget.onTap,
+        behavior: HitTestBehavior.opaque,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.all(8),
+          width: 30,
+          height: 30,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: _hovering
-                ? Colors.white.withOpacity(0.10)
-                : Colors.transparent,
+            color: widget.accent.withOpacity(_hovering ? 0.2 : 0.1),
+            border: Border.all(
+              width: 2,
+              color: widget.accent.withOpacity(_hovering ? 0.6 : 0.35),
+            ),
+            borderRadius: BorderRadius.circular(8),
           ),
-          child: Icon(
-            widget.icon,
-            size: 18,
-            color: _hovering
-                ? (widget.hoverColor ?? Colors.white.withOpacity(0.8))
-                : Colors.white.withOpacity(0.3),
-          ),
+          child: Icon(widget.icon, size: 14, color: widget.accent),
         ),
       ),
     );

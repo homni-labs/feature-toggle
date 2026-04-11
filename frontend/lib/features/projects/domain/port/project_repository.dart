@@ -26,6 +26,14 @@ abstract class ProjectRepository {
   /// an empty list means "create no environments at all" (explicit opt-out),
   /// and a non-empty list bootstraps exactly the listed names (each must be
   /// in the platform's configured defaults — otherwise the backend rejects).
+  /// Returns a single project by slug. The backend enforces RBAC:
+  /// - 404 if the slug does not exist
+  /// - 403 if the caller is not a member
+  FutureEither<Project> getBySlug({
+    required String accessToken,
+    required String slug,
+  });
+
   FutureEither<Project> create({
     required String accessToken,
     required String slug,

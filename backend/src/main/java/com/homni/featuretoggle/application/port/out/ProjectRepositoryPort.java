@@ -9,9 +9,10 @@
 
 package com.homni.featuretoggle.application.port.out;
 
+import com.homni.featuretoggle.application.usecase.ProjectListItem;
 import com.homni.featuretoggle.domain.model.Project;
 import com.homni.featuretoggle.domain.model.ProjectId;
-import com.homni.featuretoggle.application.usecase.ProjectWithRole;
+import com.homni.featuretoggle.domain.model.ProjectSlug;
 import com.homni.featuretoggle.domain.model.UserId;
 
 import java.util.List;
@@ -38,25 +39,62 @@ public interface ProjectRepositoryPort {
     Optional<Project> findById(ProjectId id);
 
     /**
-     * Returns all projects ordered by name.
+     * Finds a project by its unique slug.
      *
-     * @return all projects
+     * @param slug the project slug
+     * @return the project if found, or empty
      */
-    List<Project> findAll();
+    Optional<Project> findBySlug(ProjectSlug slug);
 
     /**
-     * Returns projects where the user is a member.
+     * Returns a page of projects visible to the caller, pre-aggregated with
+     * per-project counts (toggles, environments, members) and the caller's
+     * role in each project.
      *
-     * @param userId user identity
-     * @return the user's projects
+     * <p>Visibility rules: {@code platformAdmin == true} sees every project
+     * (including archived ones). Otherwise the caller sees only projects they
+     * are a member of, with archived projects further restricted to those
+     * where their role is {@code ADMIN}.
+     *
+     * <p>Filters compose on top of the visibility rules:
+     * <ul>
+     *     <li>{@code searchText} — case-insensitive substring match against
+     *         the project name and slug. {@code null} or blank disables it.</li>
+     *     <li>{@code archived} — tri-state filter; {@code null} returns both,
+     *         {@code true} only archived, {@code false} only active.</li>
+     * </ul>
+     *
+     * @param callerUserId    the caller's user identity
+     * @param platformAdmin   whether the caller has platform-admin privileges
+     * @param searchText      optional case-insensitive substring filter on
+     *                        name/slug, or {@code null}
+     * @param archived        optional archived filter, or {@code null} for both
+     * @param offset          rows to skip
+     * @param limit           max rows to return
+     * @return matching projects with role + counts, ordered by name
      */
-    List<Project> findByMember(UserId userId);
+    List<ProjectListItem> findPage(UserId callerUserId,
+                                   boolean platformAdmin,
+                                   String searchText,
+                                   Boolean archived,
+                                   int offset,
+                                   int limit);
 
     /**
-     * Returns non-archived projects with the user's role.
+     * Counts projects visible to the caller, applying the same visibility
+     * rules and optional filters as {@link #findPage}. Used both for the
+     * pagination envelope (with active filters) and for the workspace-level
+     * subtitle counters (with filters set to {@code null}).
      *
-     * @param userId user identity
-     * @return projects with role
+     * @param callerUserId    the caller's user identity
+     * @param platformAdmin   whether the caller has platform-admin privileges
+     * @param searchText      optional case-insensitive substring filter on
+     *                        name/slug, or {@code null}
+     * @param archived        optional archived filter, or {@code null} for both
+     * @return matching project count
      */
-    List<ProjectWithRole> findByMemberWithRole(UserId userId);
+    long countMatching(UserId callerUserId,
+                       boolean platformAdmin,
+                       String searchText,
+                       Boolean archived);
 }

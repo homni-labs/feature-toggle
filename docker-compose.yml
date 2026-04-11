@@ -17,12 +17,13 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
-    command: start-dev --import-realm
+    command: start-dev --import-realm --metrics-enabled=true
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
     ports:
       - "8180:8080"
+      - "9000:9000"
     volumes:
       - ./sso/keycloak/feature-toggle-realm.json:/opt/keycloak/data/import/feature-toggle-realm.json:ro
       - ./sso/keycloak/themes/dark-theme:/opt/keycloak/themes/dark-theme:ro
@@ -44,6 +45,8 @@ services:
       OIDC_ADMIN_EMAIL: admin@homni.local
       CORS_ORIGINS: http://localhost:3000
       APP_DEFAULT_ENVIRONMENTS: DEV,TEST,PROD
+      OBSERVABILITY_ENABLED: true
+      PROMETHEUS_URL: http://prometheus:9090
     depends_on:
       postgres:
         condition: service_healthy
@@ -56,5 +59,72 @@ services:
       timeout: 5s
       retries: 5
 
+  # --- Observability ---
+
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=7d'
+      - '--storage.tsdb.retention.size=500MB'
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.4.2
+    volumes:
+      - ./observability/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki-data:/loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/loki-config.yml
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:3.4.2
+    volumes:
+      - ./observability/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: -config.file=/etc/promtail/promtail-config.yml
+    depends_on:
+      - loki
+    restart: unless-stopped
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.19.0
+    environment:
+      DATA_SOURCE_NAME: "postgresql://homni:homni@postgres:5432/homni_feature_toggle?sslmode=disable"
+    ports:
+      - "9187:9187"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.6.0
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+      - loki
+    restart: unless-stopped
+
 volumes:
   pgdata:
+  prometheus-data:
+  loki-data:
+  grafana-data:

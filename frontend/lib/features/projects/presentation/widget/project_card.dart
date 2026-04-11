@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:feature_toggle_app/app/theme/app_colors.dart';
 import 'package:feature_toggle_app/core/domain/value_objects/project_role.dart';
@@ -58,77 +59,86 @@ class _ProjectCardState extends State<ProjectCard> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.all(22),
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            color: const Color(0xFF1E2040),
-            borderRadius: BorderRadius.circular(18),
+            color: const Color(0xFFFFFFFF),
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: _hovering
-                  ? Colors.white.withOpacity(0.20)
-                  : Colors.white.withOpacity(0.08),
+              width: 3,
+              color: AppColors.navy,
             ),
-            boxShadow: _hovering
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.3),
-                      blurRadius: 24,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
-                : null,
+            boxShadow: [
+              BoxShadow(
+                color: _hovering ? AppColors.navy : const Color(0xFFDDD8CC),
+                offset: Offset(0, _hovering ? 6 : 3),
+              ),
+            ],
           ),
+          transform: _hovering
+              ? Matrix4.translationValues(0, -2, 0)
+              : Matrix4.identity(),
           child: Opacity(
-            opacity: isArchived ? 0.72 : 1.0,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            opacity: isArchived ? 0.6 : 1.0,
+            child: Stack(
               children: [
-                // ── Head: avatar + slug + name + role badge ───────────────
-                _Head(
-                  project: p,
-                  showRoleBadge: widget.showRoleBadge,
-                ),
-                const SizedBox(height: 14),
-
-                // ── Description ───────────────────────────────────────────
-                SizedBox(
-                  height: 38,
-                  child: Text(
-                    (p.description != null && p.description!.isNotEmpty)
-                        ? p.description!
-                        : '',
-                    style: TextStyle(
-                      fontSize: 13,
-                      height: 1.5,
-                      color: Colors.white.withOpacity(0.5),
+                // Card content
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _ColorStripe(seed: p.slug.value),
+                    Padding(
+                      padding: const EdgeInsets.all(22),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _Head(
+                            project: p,
+                            showRoleBadge: widget.showRoleBadge,
+                          ),
+                          const SizedBox(height: 14),
+                          SizedBox(
+                            height: 40,
+                            child: Text(
+                              (p.description != null &&
+                                      p.description!.isNotEmpty)
+                                  ? p.description!
+                                  : '',
+                              style: TextStyle(
+                                fontSize: 13,
+                                height: 1.5,
+                                color: AppColors.navy.withOpacity(0.55),
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          _Counters(
+                            toggles: p.togglesCount,
+                            envs: p.environmentsCount,
+                            members: p.membersCount,
+                            isArchived: isArchived,
+                          ),
+                        ],
+                      ),
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  ],
                 ),
-                const SizedBox(height: 16),
-
-                // ── Counters ──────────────────────────────────────────────
-                _Counters(
-                  toggles: p.togglesCount,
-                  envs: p.environmentsCount,
-                  members: p.membersCount,
-                  isArchived: isArchived,
-                ),
-                const SizedBox(height: 16),
-
-                // ── Actions row ───────────────────────────────────────────
+                // Actions top-right
                 if (actions.isNotEmpty)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      for (int i = 0; i < actions.length; i++) ...[
-                        if (i > 0) const SizedBox(width: 8),
-                        actions[i],
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        for (int i = 0; i < actions.length; i++) ...[
+                          if (i > 0) const SizedBox(width: 6),
+                          actions[i],
+                        ],
                       ],
-                    ],
-                  )
-                else
-                  const SizedBox(height: 40), // keep cards same height
+                    ),
+                  ),
               ],
             ),
           ),
@@ -207,7 +217,7 @@ class _Head extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: AppColors.navy,
                 ),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
@@ -223,6 +233,36 @@ class _Head extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ── Color stripe (random from seed) ───────────────────────────
+
+class _ColorStripe extends StatelessWidget {
+  const _ColorStripe({required this.seed});
+  final String seed;
+
+  static const _gradients = <List<Color>>[
+    [AppColors.coral, AppColors.yellow],
+    [AppColors.teal, AppColors.green],
+    [AppColors.purple, AppColors.coral],
+    [AppColors.yellow, AppColors.green],
+    [AppColors.green, AppColors.teal],
+    [AppColors.teal, AppColors.purple],
+    [AppColors.coral, AppColors.purple],
+    [AppColors.yellow, AppColors.teal],
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final int hash = seed.codeUnits.fold<int>(0, (a, c) => a + c);
+    final colors = _gradients[hash % _gradients.length];
+    return Container(
+      height: 5,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: colors),
+      ),
     );
   }
 }
@@ -246,18 +286,19 @@ class _SlugAvatar extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(width: 3, color: AppColors.navy),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: archived
-              ? [const Color(0xFF444444), const Color(0xFF666666)]
+              ? [const Color(0xFFBBBBBB), const Color(0xFFCCCCCC)]
               : colors,
         ),
       ),
       child: ColorFiltered(
         colorFilter: archived
             ? const ColorFilter.mode(
-                Color(0xFF999999),
+                Color(0xFFBBBBBB),
                 BlendMode.modulate,
               )
             : const ColorFilter.mode(
@@ -270,7 +311,7 @@ class _SlugAvatar extends StatelessWidget {
             fontFamily: 'monospace',
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: Colors.white,
+            color: AppColors.navy,
             letterSpacing: -0.5,
           ),
         ),
@@ -364,8 +405,8 @@ class _ArchivedBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
+        color: AppColors.navy.withOpacity(0.08),
+        border: Border.all(color: AppColors.navy.withOpacity(0.12)),
         borderRadius: BorderRadius.circular(7),
       ),
       child: Text(
@@ -373,7 +414,7 @@ class _ArchivedBadge extends StatelessWidget {
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w700,
-          color: Colors.white.withOpacity(0.5),
+          color: AppColors.navy.withOpacity(0.5),
           letterSpacing: 0.5,
         ),
       ),
@@ -398,13 +439,13 @@ class _Counters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color borderColor = Colors.white.withOpacity(0.08);
+    const Color borderColor = Color(0xFFDDD8CC);
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         border: Border(
-          top: BorderSide(color: borderColor),
-          bottom: BorderSide(color: borderColor),
+          top: BorderSide(color: borderColor, width: 2),
+          bottom: BorderSide(color: borderColor, width: 2),
         ),
       ),
       child: Row(
@@ -414,8 +455,8 @@ class _Counters extends StatelessWidget {
               value: toggles,
               label: 'Toggles',
               valueColor: isArchived
-                  ? Colors.white.withOpacity(0.35)
-                  : (toggles > 0 ? AppColors.green : Colors.white),
+                  ? AppColors.navy.withOpacity(0.35)
+                  : (toggles > 0 ? AppColors.green : AppColors.navy.withOpacity(0.3)),
             ),
           ),
           Expanded(
@@ -423,7 +464,7 @@ class _Counters extends StatelessWidget {
               value: envs,
               label: 'Envs',
               valueColor: isArchived
-                  ? Colors.white.withOpacity(0.35)
+                  ? AppColors.navy.withOpacity(0.35)
                   : AppColors.teal,
             ),
           ),
@@ -432,8 +473,8 @@ class _Counters extends StatelessWidget {
               value: members,
               label: 'Members',
               valueColor: isArchived
-                  ? Colors.white.withOpacity(0.35)
-                  : Colors.white,
+                  ? AppColors.navy.withOpacity(0.35)
+                  : AppColors.navy,
             ),
           ),
         ],
@@ -459,7 +500,7 @@ class _Counter extends StatelessWidget {
       children: [
         Text(
           '$value',
-          style: TextStyle(
+          style: GoogleFonts.fredoka(
             fontSize: 20,
             fontWeight: FontWeight.w700,
             color: valueColor,
@@ -472,7 +513,7 @@ class _Counter extends StatelessWidget {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w600,
-            color: Colors.white.withOpacity(0.35),
+            color: AppColors.navy.withOpacity(0.35),
             letterSpacing: 0.6,
           ),
         ),
@@ -520,15 +561,16 @@ class _ActionButtonState extends State<_ActionButton> {
           behavior: HitTestBehavior.opaque,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
-            width: 40,
-            height: 40,
+            width: 34,
+            height: 34,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: widget.accent.withOpacity(_hovering ? 0.26 : 0.16),
               border: Border.all(
+                width: 2,
                 color: widget.accent.withOpacity(_hovering ? 0.65 : 0.45),
               ),
-              borderRadius: BorderRadius.circular(11),
+              borderRadius: BorderRadius.circular(9),
             ),
             child: Icon(
               widget.icon,

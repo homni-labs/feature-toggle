@@ -1,8 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import 'package:feature_toggle_app/features/auth/domain/model/user.dart';
 import 'package:feature_toggle_app/app/theme/app_colors.dart';
 
-class UserCard extends StatelessWidget {
+const _months = [
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+];
+
+String _formatDate(DateTime d) {
+  final day = d.day.toString().padLeft(2, '0');
+  final mon = _months[d.month - 1];
+  final year = (d.year % 100).toString().padLeft(2, '0');
+  return '$day $mon $year';
+}
+
+const _creamDark = Color(0xFFDDD8CC);
+
+class UserCard extends StatefulWidget {
   final User user;
   final VoidCallback? onToggleRole;
   final VoidCallback? onToggleActive;
@@ -15,157 +31,259 @@ class UserCard extends StatelessWidget {
   });
 
   @override
+  State<UserCard> createState() => _UserCardState();
+}
+
+class _UserCardState extends State<UserCard> {
+  bool _hovering = false;
+
+  Color get _stripeColor {
+    if (!widget.user.active) return _creamDark;
+    return widget.user.isPlatformAdmin
+        ? const Color(0xFFF5C842)
+        : AppColors.teal;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final Color roleColor =
-        user.isPlatformAdmin ? AppColors.coral : AppColors.teal;
+    final user = widget.user;
+    final isInactive = !user.active;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: const Color(0xFF1E2040),
-        border: Border.all(color: roleColor.withOpacity(0.2)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
-          children: [
-            // Avatar
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: roleColor.withOpacity(0.2),
-              child: Text(
-                user.displayName.isNotEmpty
-                    ? user.displayName[0].toUpperCase()
-                    : '?',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: roleColor,
-                ),
-              ),
-            ),
-            const SizedBox(width: 14),
-
-            // Email + name + badges
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    user.email.value,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                    ),
-                  ),
-                  if (user.name != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      user.name!,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white.withOpacity(0.35),
-                      ),
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      cursor: SystemMouseCursors.click,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        transform: Matrix4.translationValues(0, _hovering ? -1 : 0, 0),
+        margin: const EdgeInsets.only(bottom: 10),
+        child: Opacity(
+          opacity: isInactive ? 0.55 : 1.0,
+          child: Stack(
+            children: [
+              // Main card body
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.navy, width: 3),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _hovering ? AppColors.navy : _creamDark,
+                      offset: Offset(0, _hovering ? 3 : 2),
                     ),
                   ],
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      // Platform role badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: roleColor.withOpacity(0.15),
-                        ),
-                        child: Text(
-                          user.roleLabel,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: roleColor,
-                          ),
+                ),
+                padding: const EdgeInsets.only(
+                    left: 18, right: 14, top: 10, bottom: 10),
+                child: Row(
+                  children: [
+                    // Avatar
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.navy, width: 2),
+                        color: _stripeColor.withOpacity(0.12),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        user.displayName.isNotEmpty
+                            ? user.displayName[0].toUpperCase()
+                            : '?',
+                        style: GoogleFonts.fredoka(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: _stripeColor == _creamDark
+                              ? AppColors.navy.withOpacity(0.4)
+                              : _stripeColor,
                         ),
                       ),
+                    ),
+                    const SizedBox(width: 12),
+
+                    // Name + email
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            user.displayName,
+                            style: GoogleFonts.fredoka(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.navy,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (user.name != null) ...[
+                            const SizedBox(height: 1),
+                            Text(
+                              user.email.value,
+                              style: GoogleFonts.fredoka(
+                                fontSize: 10,
+                                color: Colors.grey,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+
+                    // Badges
+                    _RoleBadge(user: user),
+                    const SizedBox(width: 6),
+                    _ActiveBadge(active: user.active),
+                    const SizedBox(width: 12),
+
+                    // Date
+                    Text(
+                      _formatDate(user.createdAt),
+                      style: GoogleFonts.fredoka(
+                        fontSize: 9,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+
+                    // Action buttons
+                    if (widget.onToggleRole != null)
+                      _CardActionButton(
+                        icon: user.isPlatformAdmin
+                            ? Icons.arrow_downward_rounded
+                            : Icons.arrow_upward_rounded,
+                        borderColor: AppColors.yellow,
+                        bgColor: AppColors.yellow.withOpacity(0.10),
+                        iconColor: AppColors.yellow,
+                        onTap: widget.onToggleRole!,
+                      ),
+                    if (widget.onToggleRole != null)
                       const SizedBox(width: 6),
-                      // Active badge
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: user.active
-                              ? AppColors.green.withOpacity(0.15)
-                              : AppColors.coral.withOpacity(0.15),
-                        ),
-                        child: Text(
-                          user.active ? 'Active' : 'Inactive',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: user.active
-                                ? AppColors.green
-                                : AppColors.coral,
-                          ),
-                        ),
+
+                    if (widget.onToggleActive != null)
+                      _CardActionButton(
+                        icon: user.active
+                            ? Icons.block_rounded
+                            : Icons.check_circle_outline_rounded,
+                        borderColor: user.active
+                            ? AppColors.coral
+                            : AppColors.green,
+                        bgColor: user.active
+                            ? AppColors.coral.withOpacity(0.10)
+                            : AppColors.green.withOpacity(0.10),
+                        iconColor:
+                            user.active ? AppColors.coral : AppColors.green,
+                        onTap: widget.onToggleActive!,
                       ),
-                    ],
+                  ],
+                ),
+              ),
+
+              // Left stripe (absolute positioned via Stack)
+              Positioned(
+                left: 3,
+                top: 8,
+                bottom: 8,
+                child: Container(
+                  width: 4,
+                  decoration: BoxDecoration(
+                    color: _stripeColor,
+                    borderRadius: BorderRadius.circular(2),
                   ),
-                ],
+                ),
               ),
-            ),
-
-            // Toggle role button
-            if (onToggleRole != null) ...[
-              _ActionButton(
-                icon: user.isPlatformAdmin
-                    ? Icons.arrow_downward
-                    : Icons.arrow_upward,
-                onTap: onToggleRole!,
-                hoverColor: user.isPlatformAdmin
-                    ? AppColors.yellow
-                    : AppColors.coral,
-              ),
-              const SizedBox(width: 4),
             ],
-
-            // Toggle active button
-            if (onToggleActive != null)
-              _ActionButton(
-                icon: user.active
-                    ? Icons.block
-                    : Icons.check_circle_outline,
-                onTap: onToggleActive!,
-                hoverColor: user.active
-                    ? AppColors.coral
-                    : AppColors.green,
-              ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _ActionButton extends StatefulWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final Color? hoverColor;
+// ── Role badge ─────────────────────────────────────────────────────
 
-  const _ActionButton({
+class _RoleBadge extends StatelessWidget {
+  final User user;
+  const _RoleBadge({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color =
+        user.isPlatformAdmin ? AppColors.yellow : AppColors.teal;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6),
+        color: color.withOpacity(0.12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Text(
+        user.roleLabel,
+        style: GoogleFonts.fredoka(
+          fontSize: 9,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
+      ),
+    );
+  }
+}
+
+// ── Active / Inactive badge ────────────────────────────────────────
+
+class _ActiveBadge extends StatelessWidget {
+  final bool active;
+  const _ActiveBadge({required this.active});
+
+  @override
+  Widget build(BuildContext context) {
+    final Color color = active ? AppColors.green : _creamDark;
+    final String label = active ? 'Active' : 'Inactive';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6),
+        color: color.withOpacity(active ? 0.12 : 0.25),
+        border: Border.all(color: color.withOpacity(active ? 0.3 : 0.5)),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.fredoka(
+          fontSize: 9,
+          fontWeight: FontWeight.w600,
+          color: active ? color : AppColors.navy.withOpacity(0.4),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Action button ──────────────────────────────────────────────────
+
+class _CardActionButton extends StatefulWidget {
+  final IconData icon;
+  final Color borderColor;
+  final Color bgColor;
+  final Color iconColor;
+  final VoidCallback onTap;
+
+  const _CardActionButton({
     required this.icon,
+    required this.borderColor,
+    required this.bgColor,
+    required this.iconColor,
     required this.onTap,
-    this.hoverColor,
   });
 
   @override
-  State<_ActionButton> createState() => _ActionButtonState();
+  State<_CardActionButton> createState() => _CardActionButtonState();
 }
 
-class _ActionButtonState extends State<_ActionButton> {
+class _CardActionButtonState extends State<_CardActionButton> {
   bool _hovering = false;
 
   @override
@@ -173,23 +291,28 @@ class _ActionButtonState extends State<_ActionButton> {
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
+      cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.all(8),
+          width: 32,
+          height: 32,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(9),
             color: _hovering
-                ? Colors.white.withOpacity(0.10)
-                : Colors.transparent,
+                ? widget.borderColor.withOpacity(0.18)
+                : widget.bgColor,
+            border: Border.all(
+              color: widget.borderColor,
+              width: _hovering ? 2 : 1.5,
+            ),
           ),
           child: Icon(
             widget.icon,
-            size: 18,
-            color: _hovering
-                ? (widget.hoverColor ?? Colors.white.withOpacity(0.8))
-                : Colors.white.withOpacity(0.3),
+            size: 16,
+            color: widget.iconColor,
           ),
         ),
       ),

@@ -177,7 +177,7 @@ class _ProjectSettingsViewState extends State<_ProjectSettingsView> {
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w700,
-              color: Colors.white.withOpacity(0.9),
+              color: AppColors.navy.withOpacity(0.9),
             ),
           ).animate().fadeIn(duration: 400.ms),
           const SizedBox(height: 24),
@@ -200,7 +200,7 @@ class _ProjectSettingsViewState extends State<_ProjectSettingsView> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white.withOpacity(0.8),
+                          color: AppColors.navy.withOpacity(0.8),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -247,7 +247,7 @@ class _ProjectSettingsViewState extends State<_ProjectSettingsView> {
                       // ── Danger Zone ─────────────────────────────
                       if (isPlatformAdmin) ...[
                         const SizedBox(height: 32),
-                        Divider(color: Colors.white.withOpacity(0.1)),
+                        Divider(color: AppColors.navy.withOpacity(0.1)),
                         const SizedBox(height: 24),
                         const Text(
                           'Danger Zone',
@@ -311,8 +311,8 @@ class _ArchivedProjectPanel extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: Colors.white.withOpacity(0.04),
-        border: Border.all(color: Colors.white.withOpacity(0.10)),
+        color: AppColors.navy.withOpacity(0.04),
+        border: Border.all(color: AppColors.navy.withOpacity(0.10)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -320,7 +320,7 @@ class _ArchivedProjectPanel extends StatelessWidget {
           Row(
             children: [
               Icon(Icons.archive_rounded,
-                  size: 22, color: Colors.white.withOpacity(0.6)),
+                  size: 22, color: AppColors.navy.withOpacity(0.6)),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -328,7 +328,7 @@ class _ArchivedProjectPanel extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: AppColors.navy,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -338,14 +338,14 @@ class _ArchivedProjectPanel extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(6),
-                  color: Colors.white.withOpacity(0.08),
+                  color: AppColors.navy.withOpacity(0.08),
                 ),
                 child: Text(
                   'Archived',
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white.withOpacity(0.4),
+                    color: AppColors.navy.withOpacity(0.4),
                   ),
                 ),
               ),
@@ -359,7 +359,7 @@ class _ArchivedProjectPanel extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               height: 1.4,
-              color: Colors.white.withOpacity(0.5),
+              color: AppColors.navy.withOpacity(0.5),
             ),
           ),
           const SizedBox(height: 20),
@@ -390,7 +390,7 @@ class _ArchivedProjectPanel extends StatelessWidget {
               'You do not have permission to unarchive this project.',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.white.withOpacity(0.4),
+                color: AppColors.navy.withOpacity(0.4),
               ),
             ),
         ],
@@ -419,19 +419,19 @@ class _SettingsField extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(14),
-        color: Colors.white.withOpacity(0.07),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
+        color: AppColors.navy.withOpacity(0.07),
+        border: Border.all(color: AppColors.navy.withOpacity(0.12)),
       ),
       child: TextField(
         controller: controller,
         maxLines: maxLines,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        style: const TextStyle(color: AppColors.navy, fontSize: 14),
         cursorColor: AppColors.coral,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
+          hintStyle: TextStyle(color: AppColors.navy.withOpacity(0.3)),
           prefixIcon:
-              Icon(icon, size: 20, color: Colors.white.withOpacity(0.4)),
+              Icon(icon, size: 20, color: AppColors.navy.withOpacity(0.4)),
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -462,8 +462,8 @@ class _ConfirmDialog extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: const Color(0xFF1E2040),
-          border: Border.all(color: Colors.white.withOpacity(0.12)),
+          color: const Color(0xFFFFFFFF),
+          border: Border.all(color: AppColors.navy.withOpacity(0.12)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -475,13 +475,13 @@ class _ConfirmDialog extends StatelessWidget {
                 style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white)),
+                    color: AppColors.navy)),
             const SizedBox(height: 8),
             Text(message,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                     fontSize: 14,
-                    color: Colors.white.withOpacity(0.5))),
+                    color: AppColors.navy.withOpacity(0.5))),
             const SizedBox(height: 24),
             Row(
               children: [
@@ -493,12 +493,12 @@ class _ConfirmDialog extends StatelessWidget {
                           Navigator.of(context).pop(false),
                       style: TextButton.styleFrom(
                         foregroundColor:
-                            Colors.white.withOpacity(0.6),
+                            AppColors.navy.withOpacity(0.6),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                           side: BorderSide(
                               color:
-                                  Colors.white.withOpacity(0.12)),
+                                  AppColors.navy.withOpacity(0.12)),
                         ),
                       ),
                       child: const Text('Cancel'),

@@ -30,12 +30,9 @@ public interface EnvironmentRepositoryPort {
     void save(Environment environment);
 
     /**
-     * Saves a batch of environments atomically. Either all rows are persisted
-     * or none — used when bootstrapping default environments at project
-     * creation, where partial creation would leave the project in a
-     * confusing state.
+     * Bulk-saves environments (used during project creation).
      *
-     * @param environments the environments to save
+     * @param environments the list of environments to save
      */
     void saveAll(List<Environment> environments);
 
@@ -54,6 +51,24 @@ public interface EnvironmentRepositoryPort {
      * @return the project's environments
      */
     List<Environment> findAllByProject(ProjectId projectId);
+
+    /**
+     * Lists environments for a project with pagination, ordered by name.
+     *
+     * @param projectId owning project identity
+     * @param offset    rows to skip
+     * @param limit     max rows to return
+     * @return the project's environments for the requested page
+     */
+    List<Environment> findAllByProject(ProjectId projectId, int offset, int limit);
+
+    /**
+     * Counts environments belonging to a project.
+     *
+     * @param projectId owning project identity
+     * @return the count
+     */
+    long countByProject(ProjectId projectId);
 
     /**
      * Returns environment names defined in a project.

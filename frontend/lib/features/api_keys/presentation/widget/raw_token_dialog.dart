@@ -18,8 +18,8 @@ class RawTokenDialog extends StatelessWidget {
         padding: const EdgeInsets.all(28),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          color: const Color(0xFF1E2040),
-          border: Border.all(color: Colors.white.withOpacity(0.12)),
+          color: const Color(0xFFFFFFFF),
+          border: Border.all(color: AppColors.navy.withOpacity(0.12)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -35,7 +35,7 @@ class RawTokenDialog extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: AppColors.navy,
               ),
             ),
             const SizedBox(height: 8),
@@ -43,7 +43,7 @@ class RawTokenDialog extends StatelessWidget {
               'Copy this token now. It will not be shown again.',
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.white.withOpacity(0.5),
+                color: AppColors.navy.withOpacity(0.5),
               ),
               textAlign: TextAlign.center,
             ),
@@ -55,8 +55,8 @@ class RawTokenDialog extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: Colors.white.withOpacity(0.06),
-                border: Border.all(color: Colors.white.withOpacity(0.12)),
+                color: AppColors.navy.withOpacity(0.06),
+                border: Border.all(color: AppColors.navy.withOpacity(0.12)),
               ),
               child: SelectableText(
                 rawToken,

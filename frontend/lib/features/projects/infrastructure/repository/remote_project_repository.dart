@@ -57,6 +57,31 @@ class RemoteProjectRepository implements ProjectRepository {
   }
 
   @override
+  FutureEither<Project> getBySlug({
+    required String accessToken,
+    required String slug,
+  }) async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse('${ApiConfig.baseUrl}/projects/by-slug/$slug'),
+            headers: _headers(accessToken),
+          )
+          .timeout(_timeout);
+
+      if (response.statusCode != 200) {
+        return Left(_mapError(response));
+      }
+
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      final dto = ProjectDto.fromJson(json['payload'] as Map<String, dynamic>);
+      return Right(_mapper.toDomain(dto));
+    } on Exception {
+      return const Left(NetworkFailure());
+    }
+  }
+
+  @override
   FutureEither<Project> create({
     required String accessToken,
     required String slug,

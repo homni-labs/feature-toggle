@@ -120,6 +120,38 @@ paths:
         '500':
           $ref: '#/components/responses/500'
 
+  /projects/by-slug/{slug}:
+    parameters:
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Unique project slug
+
+    get:
+      tags: [Projects]
+      operationId: getProjectBySlug
+      summary: Get a project by slug
+      description: |
+        Returns the project matching the slug. Returns 404 if the slug does
+        not exist and 403 if the caller is not a member of the project.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectSingleResponse'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+
   /projects/{projectId}:
     parameters:
       - $ref: '#/components/parameters/projectId'
@@ -331,6 +363,22 @@ paths:
       operationId: listEnvironments
       summary: List environments in a project
       description: Requires READ_TOGGLES permission (READER+).
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
       responses:
         '200':
           description: OK
@@ -1111,12 +1159,14 @@ components:
 
     EnvironmentListResponse:
       type: object
-      required: [payload, meta]
+      required: [payload, pagination, meta]
       properties:
         payload:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
         meta:
           $ref: '#/components/schemas/ResponseMeta'
 
