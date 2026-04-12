@@ -3,11 +3,6 @@ FROM debian:bookworm-slim AS build
 
 ARG FLUTTER_VERSION=3.41.6
 ARG BASE_HREF=/
-ARG API_BASE_URL=http://localhost:8080
-ARG OIDC_ISSUER=http://localhost:8180/realms/feature-toggle
-ARG OIDC_CLIENT_ID=feature-toggle-frontend
-ARG OIDC_REDIRECT_URI=http://localhost:3000/callback
-ARG OIDC_POST_LOGOUT_REDIRECT_URI=http://localhost:3000/
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl git unzip ca-certificates \
@@ -29,12 +24,7 @@ COPY --chown=flutter:flutter pubspec.yaml pubspec.lock ./
 RUN flutter pub get
 
 COPY --chown=flutter:flutter . .
-RUN flutter build web --release --base-href "$BASE_HREF" \
-    --dart-define=API_BASE_URL=$API_BASE_URL \
-    --dart-define=OIDC_ISSUER=$OIDC_ISSUER \
-    --dart-define=OIDC_CLIENT_ID=$OIDC_CLIENT_ID \
-    --dart-define=OIDC_REDIRECT_URI=$OIDC_REDIRECT_URI \
-    --dart-define=OIDC_POST_LOGOUT_REDIRECT_URI=$OIDC_POST_LOGOUT_REDIRECT_URI
+RUN flutter build web --release --base-href "$BASE_HREF"
 
 # Stage 2 — Serve with nginx
 FROM nginx:1.27-alpine
