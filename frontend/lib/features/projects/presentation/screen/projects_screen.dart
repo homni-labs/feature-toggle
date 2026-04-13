@@ -127,8 +127,11 @@ class _ProjectsViewState extends State<_ProjectsView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Header row: title + create button ──────────────────
-              Row(
+              // ── Header row: title + search + filters + create ─────
+              Wrap(
+                spacing: 16,
+                runSpacing: 12,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
                   Text(
                     'Projects',
@@ -138,30 +141,34 @@ class _ProjectsViewState extends State<_ProjectsView> {
                       color: AppColors.navy,
                     ),
                   ),
-                  const Spacer(),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 400),
+                    child: _SearchField(
+                      controller: _searchController,
+                      onChanged: _onSearchChanged,
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _FilterPill(
+                        label: 'All',
+                        active: loaded?.archivedFilter == null,
+                        onTap: () => _onArchivedFilterChanged(null),
+                      ),
+                      const SizedBox(width: 6),
+                      _FilterPill(
+                        label: 'Archived',
+                        active: loaded?.archivedFilter == true,
+                        onTap: () => _onArchivedFilterChanged(
+                            loaded?.archivedFilter == true ? null : true),
+                      ),
+                    ],
+                  ),
                   if (isPlatformAdmin)
                     _CreateButton(onPressed: () => _onCreate(context)),
                 ],
               ).animate().fadeIn(duration: 400.ms),
-              const SizedBox(height: 4),
-
-              // ── Subtitle ───────────────────────────────────────────
-              Text(
-                _subtitle(loaded, isPlatformAdmin),
-                style: TextStyle(
-                  fontSize: 13,
-                  color: AppColors.navy.withOpacity(0.35),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // ── Toolbar: search + filters + create ─────────────────
-              _Toolbar(
-                searchController: _searchController,
-                onSearchChanged: _onSearchChanged,
-                archivedFilter: loaded?.archivedFilter,
-                onArchivedFilterChanged: _onArchivedFilterChanged,
-              ),
               const SizedBox(height: 20),
 
               // ── Body ──────────────────────────────────────────────
@@ -171,17 +178,6 @@ class _ProjectsViewState extends State<_ProjectsView> {
         );
       },
     );
-  }
-
-  String _subtitle(ProjectsLoaded? loaded, bool isPlatformAdmin) {
-    if (loaded == null) return '\u00A0'; // non-breaking space, keeps height
-    if (isPlatformAdmin) {
-      final String archivedFragment = loaded.archivedCount > 0
-          ? ' · ${loaded.archivedCount} archived'
-          : '';
-      return '${loaded.totalCount} projects$archivedFragment · viewing all';
-    }
-    return '${loaded.totalCount} of your projects';
   }
 
   Future<void> _onCreate(BuildContext context) async {
@@ -458,51 +454,6 @@ class _EmptyState extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-// ── Toolbar ────────────────────────────────────────────────────
-
-class _Toolbar extends StatelessWidget {
-  const _Toolbar({
-    required this.searchController,
-    required this.onSearchChanged,
-    required this.archivedFilter,
-    required this.onArchivedFilterChanged,
-  });
-
-  final TextEditingController searchController;
-  final ValueChanged<String> onSearchChanged;
-  final bool? archivedFilter;
-  final ValueChanged<bool?> onArchivedFilterChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 480),
-          child: _SearchField(
-            controller: searchController,
-            onChanged: onSearchChanged,
-          ),
-        ),
-        _FilterPill(
-          label: 'All',
-          active: archivedFilter == null,
-          onTap: () => onArchivedFilterChanged(null),
-        ),
-        _FilterPill(
-          label: 'Archived',
-          active: archivedFilter == true,
-          onTap: () =>
-              onArchivedFilterChanged(archivedFilter == true ? null : true),
-        ),
-      ],
     );
   }
 }
