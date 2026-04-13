@@ -59,9 +59,11 @@ class _ApiKeyDialogState extends State<ApiKeyDialog> {
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.dark(
+            colorScheme: const ColorScheme.light(
               primary: AppColors.coral,
+              onPrimary: Colors.white,
               surface: Color(0xFFFFFFFF),
+              onSurface: AppColors.navy,
             ),
           ),
           child: child!,
