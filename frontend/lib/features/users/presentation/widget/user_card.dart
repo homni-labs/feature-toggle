@@ -22,12 +22,14 @@ class UserCard extends StatefulWidget {
   final User user;
   final VoidCallback? onToggleRole;
   final VoidCallback? onToggleActive;
+  final bool isCurrentUser;
 
   const UserCard({
     super.key,
     required this.user,
     this.onToggleRole,
     this.onToggleActive,
+    this.isCurrentUser = false,
   });
 
   @override
@@ -150,35 +152,54 @@ class _UserCardState extends State<UserCard> {
                     ),
                     const SizedBox(width: 10),
 
-                    // Action buttons
-                    if (widget.onToggleRole != null)
-                      _CardActionButton(
-                        icon: user.isPlatformAdmin
-                            ? Icons.arrow_downward_rounded
-                            : Icons.arrow_upward_rounded,
-                        borderColor: AppColors.yellow,
-                        bgColor: AppColors.yellow.withOpacity(0.10),
-                        iconColor: AppColors.yellow,
-                        onTap: widget.onToggleRole!,
-                      ),
-                    if (widget.onToggleRole != null)
-                      const SizedBox(width: 6),
+                    // Action buttons or "You" badge
+                    if (widget.isCurrentUser)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(6),
+                          color: AppColors.navy.withOpacity(0.08),
+                        ),
+                        child: Text(
+                          'You',
+                          style: GoogleFonts.fredoka(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.navy.withOpacity(0.4),
+                          ),
+                        ),
+                      )
+                    else ...[
+                      if (widget.onToggleRole != null)
+                        _CardActionButton(
+                          icon: user.isPlatformAdmin
+                              ? Icons.arrow_downward_rounded
+                              : Icons.arrow_upward_rounded,
+                          borderColor: AppColors.yellow,
+                          bgColor: AppColors.yellow.withOpacity(0.10),
+                          iconColor: AppColors.yellow,
+                          onTap: widget.onToggleRole!,
+                        ),
+                      if (widget.onToggleRole != null)
+                        const SizedBox(width: 6),
 
-                    if (widget.onToggleActive != null)
-                      _CardActionButton(
-                        icon: user.active
-                            ? Icons.block_rounded
-                            : Icons.check_circle_outline_rounded,
-                        borderColor: user.active
-                            ? AppColors.coral
-                            : AppColors.green,
-                        bgColor: user.active
-                            ? AppColors.coral.withOpacity(0.10)
-                            : AppColors.green.withOpacity(0.10),
-                        iconColor:
-                            user.active ? AppColors.coral : AppColors.green,
-                        onTap: widget.onToggleActive!,
-                      ),
+                      if (widget.onToggleActive != null)
+                        _CardActionButton(
+                          icon: user.active
+                              ? Icons.block_rounded
+                              : Icons.check_circle_outline_rounded,
+                          borderColor: user.active
+                              ? AppColors.coral
+                              : AppColors.green,
+                          bgColor: user.active
+                              ? AppColors.coral.withOpacity(0.10)
+                              : AppColors.green.withOpacity(0.10),
+                          iconColor:
+                              user.active ? AppColors.coral : AppColors.green,
+                          onTap: widget.onToggleActive!,
+                        ),
+                    ],
                   ],
                 ),
               ),

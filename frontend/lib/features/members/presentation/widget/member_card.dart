@@ -12,12 +12,14 @@ class MemberCard extends StatefulWidget {
   final ProjectMembership membership;
   final ValueChanged<ProjectRole>? onRoleChange;
   final VoidCallback? onDelete;
+  final bool isCurrentUser;
 
   const MemberCard({
     super.key,
     required this.membership,
     this.onRoleChange,
     this.onDelete,
+    this.isCurrentUser = false,
   });
 
   @override
@@ -182,18 +184,38 @@ class _MemberCardState extends State<MemberCard> {
                   ),
                   const SizedBox(width: 8),
 
-                  // Actions
-                  if (widget.onRoleChange != null)
-                    _RolePopup(
-                      currentRole: m.role,
-                      onSelected: widget.onRoleChange!,
-                    ),
-                  if (widget.onDelete != null)
-                    _ActionBtn(
-                      icon: Icons.delete_outline_rounded,
-                      color: AppColors.coral,
-                      onTap: widget.onDelete!,
-                    ),
+                  // Actions or "You" badge
+                  if (widget.isCurrentUser)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: AppColors.navy.withOpacity(0.08),
+                      ),
+                      child: Text(
+                        'You',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.navy.withOpacity(0.4),
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    )
+                  else ...[
+                    if (widget.onRoleChange != null)
+                      _RolePopup(
+                        currentRole: m.role,
+                        onSelected: widget.onRoleChange!,
+                      ),
+                    if (widget.onDelete != null)
+                      _ActionBtn(
+                        icon: Icons.delete_outline_rounded,
+                        color: AppColors.coral,
+                        onTap: widget.onDelete!,
+                      ),
+                  ],
                 ],
               ),
             ),

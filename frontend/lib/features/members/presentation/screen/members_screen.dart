@@ -114,9 +114,7 @@ class _MembersView extends StatelessWidget {
         authState.canManageMembers && !authState.isProjectArchived;
 
     final currentUserId = authState.currentUser?.id;
-    final all = state.members
-        .where((m) => m.userId != currentUserId)
-        .toList();
+    final all = state.members;
 
     // Group by role
     final admins =
@@ -176,6 +174,7 @@ class _MembersView extends StatelessWidget {
                               color: AppColors.coral,
                               members: admins,
                               canManage: canManage,
+                              currentUserId: currentUserId,
                             ),
                           if (editors.isNotEmpty)
                             _buildGroup(
@@ -185,6 +184,7 @@ class _MembersView extends StatelessWidget {
                               color: AppColors.teal,
                               members: editors,
                               canManage: canManage,
+                              currentUserId: currentUserId,
                             ),
                           if (readers.isNotEmpty)
                             _buildGroup(
@@ -194,6 +194,7 @@ class _MembersView extends StatelessWidget {
                               color: AppColors.purple,
                               members: readers,
                               canManage: canManage,
+                              currentUserId: currentUserId,
                             ),
                           if (state.totalPages > 1) ...[
                             const SizedBox(height: 20),
@@ -216,6 +217,7 @@ class _MembersView extends StatelessWidget {
     required Color color,
     required List<ProjectMembership> members,
     required bool canManage,
+    UserId? currentUserId,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -263,20 +265,25 @@ class _MembersView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           // Member cards
-          ...members.map((member) => Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: MemberCard(
-                  key: ValueKey(member.id.value),
-                  membership: member,
-                  onRoleChange: canManage
-                      ? (newRole) =>
-                          _onRoleChange(context, member, newRole)
-                      : null,
-                  onDelete: canManage
-                      ? () => _onDelete(context, member)
-                      : null,
-                ),
-              )),
+          ...members.map((member) {
+            final bool isSelf = currentUserId != null &&
+                member.userId == currentUserId;
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: MemberCard(
+                key: ValueKey(member.id.value),
+                membership: member,
+                isCurrentUser: isSelf,
+                onRoleChange: canManage && !isSelf
+                    ? (newRole) =>
+                        _onRoleChange(context, member, newRole)
+                    : null,
+                onDelete: canManage && !isSelf
+                    ? () => _onDelete(context, member)
+                    : null,
+              ),
+            );
+          }),
         ],
       ),
     );

@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:feature_toggle_app/app/di/injection.dart';
 import 'package:feature_toggle_app/app/theme/app_colors.dart';
+import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
 import 'package:feature_toggle_app/core/domain/failure.dart';
 import 'package:feature_toggle_app/core/presentation/widgets/app_snackbar.dart';
 import 'package:feature_toggle_app/core/presentation/widgets/forbidden_page.dart';
@@ -127,9 +128,7 @@ class _UsersViewState extends State<_UsersView> {
     final authState =
         context.read<AuthCubit>().state as AuthAuthenticated;
     final currentUserId = authState.currentUser?.id;
-    final allUsers = state.users
-        .where((u) => u.id != currentUserId)
-        .toList();
+    final allUsers = state.users;
 
     // Filter by search query
     final query = _searchController.text.toLowerCase();
@@ -200,6 +199,7 @@ class _UsersViewState extends State<_UsersView> {
                                 count: platformAdmins.length,
                                 borderColor: AppColors.yellow,
                                 users: platformAdmins,
+                                currentUserId: currentUserId,
                               ),
 
                             // Users section
@@ -210,6 +210,7 @@ class _UsersViewState extends State<_UsersView> {
                                 count: regularUsers.length,
                                 borderColor: AppColors.teal,
                                 users: regularUsers,
+                                currentUserId: currentUserId,
                               ),
 
                             // Inactive section
@@ -220,6 +221,7 @@ class _UsersViewState extends State<_UsersView> {
                                 count: inactive.length,
                                 borderColor: _creamDark,
                                 users: inactive,
+                                currentUserId: currentUserId,
                               ),
 
                             // Pagination inside scroll view
@@ -282,6 +284,7 @@ class _UsersViewState extends State<_UsersView> {
     required int count,
     required Color borderColor,
     required List<User> users,
+    UserId? currentUserId,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
@@ -331,12 +334,21 @@ class _UsersViewState extends State<_UsersView> {
           const SizedBox(height: 10),
 
           // User cards
-          ...users.map((user) => UserCard(
-                key: ValueKey(user.id.value),
-                user: user,
-                onToggleRole: () => _onToggleRole(context, user),
-                onToggleActive: () => _onToggleActive(context, user),
-              )),
+          ...users.map((user) {
+            final bool isSelf = currentUserId != null &&
+                user.id == currentUserId;
+            return UserCard(
+              key: ValueKey(user.id.value),
+              user: user,
+              isCurrentUser: isSelf,
+              onToggleRole: isSelf
+                  ? null
+                  : () => _onToggleRole(context, user),
+              onToggleActive: isSelf
+                  ? null
+                  : () => _onToggleActive(context, user),
+            );
+          }),
         ],
       ),
     );
