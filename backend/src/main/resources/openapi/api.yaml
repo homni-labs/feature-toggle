@@ -568,6 +568,37 @@ paths:
         '500':
           $ref: '#/components/responses/500'
 
+  /projects/{projectId}/api-keys/{apiKeyId}/permanently:
+    parameters:
+      - $ref: '#/components/parameters/projectId'
+      - name: apiKeyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    delete:
+      tags: [API Keys]
+      operationId: deleteApiKey
+      summary: Permanently delete a revoked API key
+      description: |
+        Physically removes a revoked API key from the system. The key must
+        already be revoked (active=false) before it can be deleted. Requires
+        MANAGE_MEMBERS permission (ADMIN or Platform Admin).
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '409':
+          $ref: '#/components/responses/409'
+        '500':
+          $ref: '#/components/responses/500'
+
   # ========== Members ==========
 
   /projects/{projectId}/members:

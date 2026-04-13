@@ -21,6 +21,7 @@ import com.homni.featuretoggle.application.port.out.ProjectRepositoryPort;
 import com.homni.featuretoggle.application.usecase.CreateEnvironmentUseCase;
 import com.homni.featuretoggle.application.usecase.CreateProjectUseCase;
 import com.homni.featuretoggle.application.usecase.CreateToggleUseCase;
+import com.homni.featuretoggle.application.usecase.DeleteApiKeyUseCase;
 import com.homni.featuretoggle.application.usecase.DeleteEnvironmentUseCase;
 import com.homni.featuretoggle.application.usecase.DeleteToggleUseCase;
 import com.homni.featuretoggle.application.usecase.FindOrCreateUserUseCase;
@@ -305,6 +306,21 @@ class CompositionRootConfig {
                                             ProjectRepositoryPort projects,
                                             CallerProjectAccessPort callerAccess) {
         return new RevokeApiKeyUseCase(apiKeys, projects, callerAccess);
+    }
+
+    /**
+     * Wires the DeleteApiKeyUseCase.
+     *
+     * @param apiKeys      API key persistence port
+     * @param projects     project persistence port
+     * @param callerAccess caller project access port
+     * @return the wired use case
+     */
+    @Bean
+    DeleteApiKeyUseCase deleteApiKeyUseCase(ApiKeyRepositoryPort apiKeys,
+                                            ProjectRepositoryPort projects,
+                                            CallerProjectAccessPort callerAccess) {
+        return new DeleteApiKeyUseCase(apiKeys, projects, callerAccess);
     }
 
     // --- Environment use-cases ---

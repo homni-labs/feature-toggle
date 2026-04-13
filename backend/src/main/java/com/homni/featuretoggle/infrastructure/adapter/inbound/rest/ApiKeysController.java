@@ -10,6 +10,7 @@
 package com.homni.featuretoggle.infrastructure.adapter.inbound.rest;
 
 import com.homni.featuretoggle.application.usecase.ApiKeyPage;
+import com.homni.featuretoggle.application.usecase.DeleteApiKeyUseCase;
 import com.homni.featuretoggle.application.usecase.IssueApiKeyUseCase;
 import com.homni.featuretoggle.application.usecase.ListApiKeysUseCase;
 import com.homni.featuretoggle.application.usecase.RevokeApiKeyUseCase;
@@ -36,6 +37,7 @@ class ApiKeysController implements ApiKeysApi {
     private final IssueApiKeyUseCase issueApiKey;
     private final ListApiKeysUseCase listApiKeys;
     private final RevokeApiKeyUseCase revokeApiKey;
+    private final DeleteApiKeyUseCase deleteApiKey;
     private final ApiKeyPresenter presenter;
 
     /**
@@ -44,15 +46,18 @@ class ApiKeysController implements ApiKeysApi {
      * @param issueApiKey  the use case for issuing an API key
      * @param listApiKeys  the use case for listing API keys
      * @param revokeApiKey the use case for revoking an API key
+     * @param deleteApiKey the use case for permanently deleting a revoked API key
      * @param presenter    maps domain objects to API response models
      */
     ApiKeysController(IssueApiKeyUseCase issueApiKey,
                       ListApiKeysUseCase listApiKeys,
                       RevokeApiKeyUseCase revokeApiKey,
+                      DeleteApiKeyUseCase deleteApiKey,
                       ApiKeyPresenter presenter) {
         this.issueApiKey = issueApiKey;
         this.listApiKeys = listApiKeys;
         this.revokeApiKey = revokeApiKey;
+        this.deleteApiKey = deleteApiKey;
         this.presenter = presenter;
     }
 
@@ -77,6 +82,13 @@ class ApiKeysController implements ApiKeysApi {
     @Override
     public ResponseEntity<Void> revokeApiKey(UUID projectId, UUID apiKeyId) {
         revokeApiKey.execute(new ApiKeyId(apiKeyId));
+        return ResponseEntity.noContent().build();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public ResponseEntity<Void> deleteApiKey(UUID projectId, UUID apiKeyId) {
+        deleteApiKey.execute(new ApiKeyId(apiKeyId));
         return ResponseEntity.noContent().build();
     }
 }
