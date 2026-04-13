@@ -54,6 +54,8 @@ class _MemberCardState extends State<MemberCard> {
     final m = widget.membership;
     final Color roleColor = _roleColor(m.role);
 
+    final bool isSelf = widget.isCurrentUser;
+
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
@@ -63,7 +65,10 @@ class _MemberCardState extends State<MemberCard> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(width: 3, color: AppColors.navy),
+          border: Border.all(
+            width: 3,
+            color: isSelf ? AppColors.teal : AppColors.navy,
+          ),
           boxShadow: [
             BoxShadow(
               color: _hovering ? AppColors.navy : const Color(0xFFDDD8CC),
@@ -188,17 +193,21 @@ class _MemberCardState extends State<MemberCard> {
                   if (widget.isCurrentUser)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 7, vertical: 2),
+                          horizontal: 10, vertical: 3),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: AppColors.navy.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(6),
+                        color: AppColors.teal.withOpacity(0.12),
+                        border: Border.all(
+                          color: AppColors.teal.withOpacity(0.3),
+                          width: 1.5,
+                        ),
                       ),
-                      child: Text(
+                      child: const Text(
                         'You',
                         style: TextStyle(
-                          fontSize: 9,
+                          fontSize: 10,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.navy.withOpacity(0.4),
+                          color: AppColors.teal,
                           letterSpacing: 0.5,
                         ),
                       ),

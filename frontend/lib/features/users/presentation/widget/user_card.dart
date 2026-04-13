@@ -68,7 +68,10 @@ class _UserCardState extends State<UserCard> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.navy, width: 3),
+                  border: Border.all(
+                    color: widget.isCurrentUser ? AppColors.teal : AppColors.navy,
+                    width: 3,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: _hovering ? AppColors.navy : _creamDark,
@@ -156,17 +159,22 @@ class _UserCardState extends State<UserCard> {
                     if (widget.isCurrentUser)
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 7, vertical: 2),
+                            horizontal: 10, vertical: 3),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(6),
-                          color: AppColors.navy.withOpacity(0.08),
+                          color: AppColors.teal.withOpacity(0.12),
+                          border: Border.all(
+                            color: AppColors.teal.withOpacity(0.3),
+                            width: 1.5,
+                          ),
                         ),
                         child: Text(
                           'You',
                           style: GoogleFonts.fredoka(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.navy.withOpacity(0.4),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.teal,
+                            letterSpacing: 0.5,
                           ),
                         ),
                       )
