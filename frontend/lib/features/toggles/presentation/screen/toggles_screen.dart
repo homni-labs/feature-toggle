@@ -241,7 +241,25 @@ class _LoadedBody extends StatelessWidget {
 
   Future<void> _onCreate(BuildContext context) async {
     final EnvironmentsCubit envCubit = context.read<EnvironmentsCubit>();
-    final List<String> availableEnvs = envCubit.environmentNames;
+    List<String> availableEnvs = envCubit.environmentNames;
+
+    // If environments haven't loaded yet, trigger a reload and wait
+    if (availableEnvs.isEmpty && envCubit.state is! EnvironmentsLoaded) {
+      final AuthCubit authCubit = context.read<AuthCubit>();
+      final AuthState authState = authCubit.state;
+      if (authState is AuthAuthenticated && authState.currentProject != null) {
+        final String? token = await authCubit.getValidAccessToken();
+        if (token != null && context.mounted) {
+          await envCubit.load(
+            accessToken: token,
+            projectId: authState.currentProject!.id,
+          );
+          availableEnvs = envCubit.environmentNames;
+        }
+      }
+    }
+
+    if (!context.mounted) return;
 
     final ToggleDialogResult? result = await showDialog<ToggleDialogResult>(
       context: context,
@@ -363,7 +381,24 @@ class _ToggleGrid extends StatelessWidget {
     FeatureToggle toggle,
   ) async {
     final EnvironmentsCubit envCubit = context.read<EnvironmentsCubit>();
-    final List<String> availableEnvs = envCubit.environmentNames;
+    List<String> availableEnvs = envCubit.environmentNames;
+
+    if (availableEnvs.isEmpty && envCubit.state is! EnvironmentsLoaded) {
+      final AuthCubit authCubit = context.read<AuthCubit>();
+      final AuthState authState = authCubit.state;
+      if (authState is AuthAuthenticated && authState.currentProject != null) {
+        final String? token = await authCubit.getValidAccessToken();
+        if (token != null && context.mounted) {
+          await envCubit.load(
+            accessToken: token,
+            projectId: authState.currentProject!.id,
+          );
+          availableEnvs = envCubit.environmentNames;
+        }
+      }
+    }
+
+    if (!context.mounted) return;
 
     final ToggleDialogResult? result = await showDialog<ToggleDialogResult>(
       context: context,
