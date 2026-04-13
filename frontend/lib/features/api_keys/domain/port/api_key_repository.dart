@@ -38,4 +38,10 @@ abstract class ApiKeyRepository {
     required ProjectId projectId,
     required ApiKeyId apiKeyId,
   });
+
+  FutureEither<void> delete({
+    required String accessToken,
+    required ProjectId projectId,
+    required ApiKeyId apiKeyId,
+  });
 }

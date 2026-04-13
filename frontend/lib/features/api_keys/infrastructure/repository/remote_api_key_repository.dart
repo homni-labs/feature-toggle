@@ -123,6 +123,33 @@ class RemoteApiKeyRepository implements ApiKeyRepository {
     }
   }
 
+  @override
+  FutureEither<void> delete({
+    required String accessToken,
+    required ProjectId projectId,
+    required ApiKeyId apiKeyId,
+  }) async {
+    try {
+      final response = await http
+          .delete(
+            Uri.parse(
+              '${ApiConfig.baseUrl}/projects/${projectId.value}'
+              '/api-keys/${apiKeyId.value}/permanently',
+            ),
+            headers: _headers(accessToken),
+          )
+          .timeout(_timeout);
+
+      if (response.statusCode != 204) {
+        return Left(_mapError(response));
+      }
+
+      return const Right(null);
+    } on Exception {
+      return const Left(NetworkFailure());
+    }
+  }
+
   Map<String, String> _headers(String token) => {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',

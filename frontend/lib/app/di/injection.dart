@@ -42,6 +42,7 @@ import 'package:feature_toggle_app/features/api_keys/infrastructure/repository/r
 import 'package:feature_toggle_app/features/api_keys/application/usecase/load_api_keys_usecase.dart';
 import 'package:feature_toggle_app/features/api_keys/application/usecase/issue_api_key_usecase.dart';
 import 'package:feature_toggle_app/features/api_keys/application/usecase/revoke_api_key_usecase.dart';
+import 'package:feature_toggle_app/features/api_keys/application/usecase/delete_api_key_usecase.dart';
 import 'package:feature_toggle_app/features/api_keys/application/bloc/api_keys_cubit.dart';
 
 import 'package:feature_toggle_app/features/users/domain/port/user_repository.dart';
@@ -135,11 +136,13 @@ void configureDependencies() {
   sl.registerFactory(() => LoadApiKeysUseCase(sl<ApiKeyRepository>()));
   sl.registerFactory(() => IssueApiKeyUseCase(sl<ApiKeyRepository>()));
   sl.registerFactory(() => RevokeApiKeyUseCase(sl<ApiKeyRepository>()));
+  sl.registerFactory(() => DeleteApiKeyUseCase(sl<ApiKeyRepository>()));
   sl.registerFactory(
     () => ApiKeysCubit(
       loadApiKeys: sl<LoadApiKeysUseCase>(),
       issueApiKey: sl<IssueApiKeyUseCase>(),
       revokeApiKey: sl<RevokeApiKeyUseCase>(),
+      deleteApiKey: sl<DeleteApiKeyUseCase>(),
     ),
   );
 

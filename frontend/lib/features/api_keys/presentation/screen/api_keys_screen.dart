@@ -159,6 +159,7 @@ class _ApiKeysView extends StatelessWidget {
                     state: state,
                     canManage: canManage,
                     onRevoke: (apiKey) => _onRevoke(context, apiKey),
+                    onDelete: (apiKey) => _onDelete(context, apiKey),
                   ),
           ),
         ],
@@ -258,6 +259,32 @@ class _ApiKeysView extends StatelessWidget {
           apiKeyId: apiKey.id,
         );
   }
+
+  Future<void> _onDelete(BuildContext context, ApiKey apiKey) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => _ConfirmDialog(
+        title: 'Delete API Key',
+        message:
+            'Permanently delete "${apiKey.name}"? This cannot be undone.',
+        confirmLabel: 'Delete',
+      ),
+    );
+    if (confirmed != true) return;
+    if (!context.mounted) return;
+
+    final token = await context.read<AuthCubit>().getValidAccessToken();
+    if (token == null) return;
+    if (!context.mounted) return;
+
+    final authState =
+        context.read<AuthCubit>().state as AuthAuthenticated;
+    await context.read<ApiKeysCubit>().delete(
+          accessToken: token,
+          projectId: authState.currentProject!.id,
+          apiKeyId: apiKey.id,
+        );
+  }
 }
 
 // ── API Key Grid ──────────────────────────────────────────────
@@ -267,11 +294,13 @@ class _ApiKeyGrid extends StatelessWidget {
     required this.state,
     required this.canManage,
     required this.onRevoke,
+    required this.onDelete,
   });
 
   final ApiKeysLoaded state;
   final bool canManage;
   final void Function(ApiKey) onRevoke;
+  final void Function(ApiKey) onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -300,6 +329,9 @@ class _ApiKeyGrid extends StatelessWidget {
                         apiKey: apiKey,
                         onRevoke: canManage && apiKey.active
                             ? () => onRevoke(apiKey)
+                            : null,
+                        onDelete: canManage && !apiKey.active
+                            ? () => onDelete(apiKey)
                             : null,
                       ),
                     ),

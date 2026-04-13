@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
 import 'package:feature_toggle_app/core/domain/value_objects/project_role.dart';
 import 'package:feature_toggle_app/features/api_keys/application/bloc/api_keys_state.dart';
+import 'package:feature_toggle_app/features/api_keys/application/usecase/delete_api_key_usecase.dart';
 import 'package:feature_toggle_app/features/api_keys/application/usecase/issue_api_key_usecase.dart';
 import 'package:feature_toggle_app/features/api_keys/application/usecase/load_api_keys_usecase.dart';
 import 'package:feature_toggle_app/features/api_keys/application/usecase/revoke_api_key_usecase.dart';
@@ -12,6 +13,7 @@ class ApiKeysCubit extends Cubit<ApiKeysState> {
   final LoadApiKeysUseCase _loadApiKeys;
   final IssueApiKeyUseCase _issueApiKey;
   final RevokeApiKeyUseCase _revokeApiKey;
+  final DeleteApiKeyUseCase _deleteApiKey;
 
   static const _pageSize = 10;
   ApiKeysLoaded? _lastLoaded;
@@ -20,9 +22,11 @@ class ApiKeysCubit extends Cubit<ApiKeysState> {
     required LoadApiKeysUseCase loadApiKeys,
     required IssueApiKeyUseCase issueApiKey,
     required RevokeApiKeyUseCase revokeApiKey,
+    required DeleteApiKeyUseCase deleteApiKey,
   })  : _loadApiKeys = loadApiKeys,
         _issueApiKey = issueApiKey,
         _revokeApiKey = revokeApiKey,
+        _deleteApiKey = deleteApiKey,
         super(const ApiKeysInitial());
 
   Future<void> load({
@@ -132,6 +136,39 @@ class ApiKeysCubit extends Cubit<ApiKeysState> {
             totalElements: current.totalElements,
             page: current.page,
             totalPages: current.totalPages,
+          );
+          _lastLoaded = loaded;
+          emit(loaded);
+        }
+      },
+    );
+  }
+
+  Future<void> delete({
+    required String accessToken,
+    required ProjectId projectId,
+    required ApiKeyId apiKeyId,
+  }) async {
+    final result = await _deleteApiKey(
+      accessToken: accessToken,
+      projectId: projectId,
+      apiKeyId: apiKeyId,
+    );
+    result.fold(
+      (f) => emit(ApiKeysError(f)),
+      (_) {
+        final current = _lastLoaded;
+        if (current != null) {
+          final list = current.apiKeys
+              .where((k) => k.id != apiKeyId)
+              .toList();
+          final loaded = ApiKeysLoaded(
+            apiKeys: list,
+            totalElements: current.totalElements - 1,
+            page: current.page,
+            totalPages: (current.totalElements - 1) > 0
+                ? ((current.totalElements - 1) / _pageSize).ceil()
+                : 0,
           );
           _lastLoaded = loaded;
           emit(loaded);

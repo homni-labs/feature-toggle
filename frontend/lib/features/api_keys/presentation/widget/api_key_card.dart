@@ -6,11 +6,13 @@ import 'package:feature_toggle_app/app/theme/app_colors.dart';
 class ApiKeyCard extends StatelessWidget {
   final ApiKey apiKey;
   final VoidCallback? onRevoke;
+  final VoidCallback? onDelete;
 
   const ApiKeyCard({
     super.key,
     required this.apiKey,
     this.onRevoke,
+    this.onDelete,
   });
 
   static Color _roleColor(ProjectRole role) {
@@ -156,6 +158,8 @@ class ApiKeyCard extends StatelessWidget {
                         const Spacer(),
                         if (!isRevoked && onRevoke != null)
                           _RevokeButton(onTap: onRevoke!),
+                        if (isRevoked && onDelete != null)
+                          _DeleteButton(onTap: onDelete!),
                       ],
                     ),
                   ),
@@ -278,6 +282,51 @@ class _RevokeButtonState extends State<_RevokeButton> {
           ),
           child: Icon(
             Icons.block_rounded,
+            size: 14,
+            color: AppColors.coral,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DeleteButton extends StatefulWidget {
+  final VoidCallback onTap;
+  const _DeleteButton({required this.onTap});
+
+  @override
+  State<_DeleteButton> createState() => _DeleteButtonState();
+}
+
+class _DeleteButtonState extends State<_DeleteButton> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: 32,
+          height: 32,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(9),
+            color: _hovering
+                ? AppColors.coral.withOpacity(0.12)
+                : AppColors.coral.withOpacity(0.06),
+            border: Border.all(
+              color: AppColors.coral.withOpacity(0.35),
+              width: 2,
+            ),
+          ),
+          child: Icon(
+            Icons.delete_outline_rounded,
             size: 14,
             color: AppColors.coral,
           ),
