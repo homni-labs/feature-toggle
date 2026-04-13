@@ -15,7 +15,7 @@ class ApiKeysCubit extends Cubit<ApiKeysState> {
   final RevokeApiKeyUseCase _revokeApiKey;
   final DeleteApiKeyUseCase _deleteApiKey;
 
-  static const _pageSize = 10;
+  static const _pageSize = 12;
   ApiKeysLoaded? _lastLoaded;
 
   ApiKeysCubit({

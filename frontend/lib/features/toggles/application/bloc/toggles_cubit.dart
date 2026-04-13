@@ -14,7 +14,7 @@ class TogglesCubit extends Cubit<TogglesState> {
   final UpdateToggleUseCase _updateToggle;
   final DeleteToggleUseCase _deleteToggle;
 
-  static const _pageSize = 6;
+  static const _pageSize = 9;
 
   TogglesCubit({
     required LoadTogglesUseCase loadToggles,
