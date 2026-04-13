@@ -17,11 +17,15 @@ import com.homni.featuretoggle.domain.exception.ProjectArchivedException;
 import com.homni.featuretoggle.domain.model.Permission;
 import com.homni.featuretoggle.domain.model.ProjectId;
 import com.homni.featuretoggle.domain.model.UserId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Removes a member from a project.
  */
 public final class RemoveMemberUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(RemoveMemberUseCase.class);
 
     private final ProjectMembershipRepositoryPort memberships;
     private final ProjectRepositoryPort projects;
@@ -50,6 +54,7 @@ public final class RemoveMemberUseCase {
      * @throws EntityNotFoundException if the project does not exist
      */
     public void execute(ProjectId projectId, UserId userId) {
+        log.debug("Removing member: project={}, user={}", projectId.value, userId.value);
         callerAccess.resolve(projectId).ensure(Permission.MANAGE_MEMBERS);
         projects.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project", projectId.value))

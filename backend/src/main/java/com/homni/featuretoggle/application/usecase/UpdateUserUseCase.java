@@ -17,11 +17,15 @@ import com.homni.featuretoggle.domain.exception.InvalidStateException;
 import com.homni.featuretoggle.domain.model.AppUser;
 import com.homni.featuretoggle.domain.model.PlatformRole;
 import com.homni.featuretoggle.domain.model.UserId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Updates a user's platform role and active status.
  */
 public final class UpdateUserUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(UpdateUserUseCase.class);
 
     private final AppUserRepositoryPort users;
     private final CallerPort callerPort;
@@ -47,6 +51,7 @@ public final class UpdateUserUseCase {
      * @throws InvalidStateException if the state transition is invalid
      */
     public AppUser execute(UserId targetId, PlatformRole newRole, Boolean newActive) {
+        log.debug("Updating user: id={}, newRole={}, newActive={}", targetId.value, newRole, newActive);
         UserId callerId = callerPort.get().id;
         if (targetId.equals(callerId)) {
             throw new CannotModifySelfException(callerId);
@@ -56,6 +61,7 @@ public final class UpdateUserUseCase {
         applyRoleChange(user, newRole);
         applyActiveChange(user, newActive);
         users.save(user);
+        log.debug("User updated: id={}", targetId.value);
         return user;
     }
 

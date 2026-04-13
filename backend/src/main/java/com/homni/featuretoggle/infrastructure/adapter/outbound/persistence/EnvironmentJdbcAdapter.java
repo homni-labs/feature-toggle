@@ -14,6 +14,8 @@ import com.homni.featuretoggle.domain.exception.AlreadyExistsException;
 import com.homni.featuretoggle.domain.model.Environment;
 import com.homni.featuretoggle.domain.model.EnvironmentId;
 import com.homni.featuretoggle.domain.model.ProjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -33,6 +35,8 @@ import java.util.UUID;
 @Repository
 public class EnvironmentJdbcAdapter implements EnvironmentRepositoryPort {
 
+    private static final Logger log = LoggerFactory.getLogger(EnvironmentJdbcAdapter.class);
+
     private static final String COLUMNS = "id, project_id, name, created_at";
 
     private final JdbcClient jdbc;
@@ -44,6 +48,7 @@ public class EnvironmentJdbcAdapter implements EnvironmentRepositoryPort {
     /** {@inheritDoc} */
     @Override
     public void save(Environment env) {
+        log.debug("Persisting environment: id={}, project={}, name={}", env.id.value, env.projectId.value, env.name());
         try {
             jdbc.sql("""
                     INSERT INTO environment (id, project_id, name, created_at)
@@ -119,6 +124,7 @@ public class EnvironmentJdbcAdapter implements EnvironmentRepositoryPort {
     /** {@inheritDoc} */
     @Override
     public void deleteById(EnvironmentId id) {
+        log.debug("Deleting environment: id={}", id.value);
         jdbc.sql("DELETE FROM environment WHERE id = ?")
                 .param(id.value)
                 .update();

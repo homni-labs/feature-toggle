@@ -15,6 +15,8 @@ import com.homni.featuretoggle.domain.model.AppUser;
 import com.homni.featuretoggle.domain.model.Email;
 import com.homni.featuretoggle.domain.model.PlatformRole;
 import com.homni.featuretoggle.domain.model.UserId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -33,6 +35,8 @@ import java.util.UUID;
 @Repository
 public class AppUserJdbcAdapter implements AppUserRepositoryPort {
 
+    private static final Logger log = LoggerFactory.getLogger(AppUserJdbcAdapter.class);
+
     private static final String COLUMNS =
             "id, oidc_subject, email, name, platform_role, active, created_at, updated_at";
 
@@ -45,6 +49,7 @@ public class AppUserJdbcAdapter implements AppUserRepositoryPort {
     /** {@inheritDoc} */
     @Override
     public void save(AppUser u) {
+        log.debug("Persisting user: id={}, email={}", u.id.value, u.email.value());
         try {
             jdbc.sql("""
                     INSERT INTO app_user (id, oidc_subject, email, name, platform_role, active, created_at, updated_at)

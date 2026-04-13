@@ -15,6 +15,8 @@ import com.homni.featuretoggle.domain.model.ApiKeyId;
 import com.homni.featuretoggle.domain.model.ProjectId;
 import com.homni.featuretoggle.domain.model.ProjectRole;
 import com.homni.featuretoggle.domain.model.TokenHash;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -32,6 +34,8 @@ import java.util.UUID;
 @Repository
 public class ApiKeyJdbcAdapter implements ApiKeyRepositoryPort {
 
+    private static final Logger log = LoggerFactory.getLogger(ApiKeyJdbcAdapter.class);
+
     private static final String COLUMNS =
             "id, project_id, project_role, name, token_hash, active, created_at, expires_at";
 
@@ -44,6 +48,7 @@ public class ApiKeyJdbcAdapter implements ApiKeyRepositoryPort {
     /** {@inheritDoc} */
     @Override
     public void save(ApiKey k) {
+        log.debug("Persisting API key: id={}, project={}", k.id.value, k.projectId.value);
         Timestamp expiresAt = k.expiresAt != null ? Timestamp.from(k.expiresAt) : null;
         jdbc.sql("""
                 INSERT INTO api_key (id, project_id, project_role, name, token_hash, active, created_at, expires_at)
@@ -105,6 +110,7 @@ public class ApiKeyJdbcAdapter implements ApiKeyRepositoryPort {
     /** {@inheritDoc} */
     @Override
     public void deleteById(ApiKeyId id) {
+        log.debug("Deleting API key: id={}", id.value);
         jdbc.sql("DELETE FROM api_key WHERE id = ?")
                 .param(id.value)
                 .update();

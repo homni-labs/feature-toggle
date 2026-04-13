@@ -13,6 +13,8 @@ import com.homni.featuretoggle.application.port.out.AppUserRepositoryPort;
 import com.homni.featuretoggle.domain.exception.AlreadyExistsException;
 import com.homni.featuretoggle.domain.model.AppUser;
 import com.homni.featuretoggle.domain.model.PlatformRole;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
@@ -20,6 +22,8 @@ import java.util.Optional;
  * Finds a user by OIDC subject, or binds/creates one on first login.
  */
 public final class FindOrCreateUserUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(FindOrCreateUserUseCase.class);
 
     private final AppUserRepositoryPort users;
     private final String defaultAdminEmail;
@@ -43,6 +47,7 @@ public final class FindOrCreateUserUseCase {
      * @throws com.homni.featuretoggle.domain.exception.DomainValidationException if the email is invalid
      */
     public AppUser execute(String oidcSubject, String email, String name) {
+        log.debug("Resolving user: oidcSubject={}, email={}", oidcSubject, email);
         AppUser user = resolveUser(oidcSubject, email, name);
         bootstrapDefaultAdmin(user);
         return user;
@@ -60,6 +65,7 @@ public final class FindOrCreateUserUseCase {
     private AppUser findBySubjectOrBindOrCreate(String oidcSubject, String email, String name) {
         Optional<AppUser> bySubject = users.findByOidcSubject(oidcSubject);
         if (bySubject.isPresent()) {
+            log.debug("User found by OIDC subject: id={}", bySubject.get().id.value);
             return bySubject.get();
         }
         return tryBindOrCreate(oidcSubject, email, name);
@@ -69,10 +75,12 @@ public final class FindOrCreateUserUseCase {
         Optional<AppUser> byEmail = users.findByEmail(email);
         if (byEmail.isPresent() && byEmail.get().canBindOidc()) {
             AppUser existing = byEmail.get();
+            log.debug("Binding OIDC subject to existing user: id={}, email={}", existing.id.value, email);
             existing.bindOidcSubject(oidcSubject);
             users.save(existing);
             return existing;
         }
+        log.debug("Creating new user: email={}", email);
         AppUser newUser = new AppUser(oidcSubject, email, name);
         users.save(newUser);
         return newUser;
@@ -80,6 +88,7 @@ public final class FindOrCreateUserUseCase {
 
     private void bootstrapDefaultAdmin(AppUser user) {
         if (isDefaultAdmin(user) && user.platformRole() == PlatformRole.USER) {
+            log.debug("Bootstrapping default admin: id={}, email={}", user.id.value, user.email.value());
             user.promoteToPlatformAdmin();
             users.save(user);
         }

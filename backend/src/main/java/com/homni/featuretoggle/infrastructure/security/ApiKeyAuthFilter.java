@@ -16,6 +16,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -31,6 +33,7 @@ import java.util.List;
 @Component
 public class ApiKeyAuthFilter extends OncePerRequestFilter {
 
+    private static final Logger log = LoggerFactory.getLogger(ApiKeyAuthFilter.class);
     private static final String API_KEY_HEADER = "X-API-Key";
 
     private final ApiKeyRepositoryPort apiKeyRepository;
@@ -46,6 +49,7 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
         String apiKeyHeader = request.getHeader(API_KEY_HEADER);
 
         if (apiKeyHeader != null && !apiKeyHeader.isBlank()) {
+            log.debug("API key header present, resolving token");
             TokenHash hash = TokenHash.from(apiKeyHeader);
             ApiKey apiKey = apiKeyRepository.findByTokenHash(hash).orElse(null);
 
@@ -57,6 +61,10 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
                         List.of(new SimpleGrantedAuthority(
                                 "ROLE_" + apiKey.projectRole.name())));
                 SecurityContextHolder.getContext().setAuthentication(auth);
+                log.debug("API key authenticated: name={}, project={}, role={}",
+                        apiKey.name, apiKey.projectId.value, apiKey.projectRole);
+            } else {
+                log.debug("API key not found or invalid");
             }
         }
 

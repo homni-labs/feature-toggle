@@ -21,6 +21,8 @@ import com.homni.featuretoggle.domain.model.ProjectId;
 import com.homni.featuretoggle.domain.model.ProjectMembership;
 import com.homni.featuretoggle.domain.model.ProjectRole;
 import com.homni.featuretoggle.domain.model.UserId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
@@ -28,6 +30,8 @@ import java.util.Optional;
  * Adds a user to a project or updates their role (upsert semantics).
  */
 public final class UpsertMemberUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(UpsertMemberUseCase.class);
 
     private final ProjectMembershipRepositoryPort memberships;
     private final AppUserRepositoryPort users;
@@ -62,6 +66,7 @@ public final class UpsertMemberUseCase {
      * @throws EntityNotFoundException if the user does not exist
      */
     public ProjectMembership execute(ProjectId projectId, UserId userId, ProjectRole role) {
+        log.debug("Upserting member: project={}, user={}, role={}", projectId.value, userId.value, role);
         callerAccess.resolve(projectId).ensure(Permission.MANAGE_MEMBERS);
         projects.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project", projectId.value))
@@ -70,6 +75,7 @@ public final class UpsertMemberUseCase {
                 .orElseThrow(() -> new EntityNotFoundException("User", userId.value));
         Optional<ProjectMembership> existing = memberships.findByProjectAndUser(projectId, userId);
         ProjectMembership membership = existing.map(m -> {
+            log.debug("Updating existing member role: project={}, user={}, oldRole={}", projectId.value, userId.value, m.currentRole());
             m.changeRole(role);
             return m;
         }).orElseGet(() -> new ProjectMembership(projectId, userId, role));

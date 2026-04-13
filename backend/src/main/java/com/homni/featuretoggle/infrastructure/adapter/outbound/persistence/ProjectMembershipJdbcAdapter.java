@@ -16,6 +16,8 @@ import com.homni.featuretoggle.domain.model.ProjectMembership;
 import com.homni.featuretoggle.domain.model.ProjectMembershipId;
 import com.homni.featuretoggle.domain.model.ProjectRole;
 import com.homni.featuretoggle.domain.model.UserId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -34,6 +36,8 @@ import java.util.UUID;
 @Repository
 public class ProjectMembershipJdbcAdapter implements ProjectMembershipRepositoryPort {
 
+    private static final Logger log = LoggerFactory.getLogger(ProjectMembershipJdbcAdapter.class);
+
     private static final String COLUMNS =
             "id, project_id, user_id, role, granted_at, updated_at";
 
@@ -51,6 +55,7 @@ public class ProjectMembershipJdbcAdapter implements ProjectMembershipRepository
      */
     @Override
     public void save(ProjectMembership membership) {
+        log.debug("Persisting membership: project={}, user={}, role={}", membership.projectId.value, membership.userId.value, membership.currentRole());
         try {
             jdbc.sql("""
                     INSERT INTO project_membership (id, project_id, user_id, role, granted_at, updated_at)
@@ -135,6 +140,7 @@ public class ProjectMembershipJdbcAdapter implements ProjectMembershipRepository
      */
     @Override
     public void deleteByProjectAndUser(ProjectId projectId, UserId userId) {
+        log.debug("Deleting membership: project={}, user={}", projectId.value, userId.value);
         jdbc.sql("DELETE FROM project_membership WHERE project_id = ? AND user_id = ?")
                 .param(projectId.value)
                 .param(userId.value)

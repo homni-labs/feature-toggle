@@ -17,11 +17,15 @@ import com.homni.featuretoggle.domain.exception.ProjectArchivedException;
 import com.homni.featuretoggle.domain.model.ApiKey;
 import com.homni.featuretoggle.domain.model.ApiKeyId;
 import com.homni.featuretoggle.domain.model.Permission;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Revokes an API key within a project.
  */
 public final class RevokeApiKeyUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(RevokeApiKeyUseCase.class);
 
     private final ApiKeyRepositoryPort apiKeys;
     private final ProjectRepositoryPort projects;
@@ -52,6 +56,7 @@ public final class RevokeApiKeyUseCase {
     public void execute(ApiKeyId id) {
         ApiKey apiKey = apiKeys.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("ApiKey", id.value));
+        log.debug("Revoking API key: id={}, project={}", id.value, apiKey.projectId.value);
         callerAccess.resolve(apiKey.projectId).ensure(Permission.MANAGE_MEMBERS);
         projects.findById(apiKey.projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project", apiKey.projectId.value))

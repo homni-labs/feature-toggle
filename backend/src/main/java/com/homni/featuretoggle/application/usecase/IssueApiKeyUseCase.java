@@ -17,6 +17,8 @@ import com.homni.featuretoggle.domain.exception.ProjectArchivedException;
 import com.homni.featuretoggle.domain.model.IssuedApiKey;
 import com.homni.featuretoggle.domain.model.Permission;
 import com.homni.featuretoggle.domain.model.ProjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 
@@ -24,6 +26,8 @@ import java.time.Instant;
  * Issues a read-only API key bound to a project.
  */
 public final class IssueApiKeyUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(IssueApiKeyUseCase.class);
 
     private final ApiKeyRepositoryPort apiKeys;
     private final ProjectRepositoryPort projects;
@@ -54,12 +58,14 @@ public final class IssueApiKeyUseCase {
      * @throws com.homni.featuretoggle.domain.exception.DomainValidationException if the name is invalid
      */
     public IssuedApiKey execute(ProjectId projectId, String name, Instant expiresAt) {
+        log.debug("Issuing API key: project={}, name={}", projectId.value, name);
         callerAccess.resolve(projectId).ensure(Permission.MANAGE_MEMBERS);
         projects.findById(projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project", projectId.value))
                 .ensureNotArchived();
         IssuedApiKey issued = new IssuedApiKey(projectId, name, expiresAt);
         apiKeys.save(issued.apiKey);
+        log.debug("API key issued: id={}, project={}", issued.apiKey.id.value, projectId.value);
         return issued;
     }
 }

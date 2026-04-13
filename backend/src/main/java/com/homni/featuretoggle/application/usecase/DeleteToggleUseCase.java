@@ -17,11 +17,15 @@ import com.homni.featuretoggle.domain.exception.ProjectArchivedException;
 import com.homni.featuretoggle.domain.model.FeatureToggle;
 import com.homni.featuretoggle.domain.model.FeatureToggleId;
 import com.homni.featuretoggle.domain.model.Permission;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Deletes a feature toggle from a project.
  */
 public final class DeleteToggleUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(DeleteToggleUseCase.class);
 
     private final FeatureToggleRepositoryPort toggles;
     private final ProjectRepositoryPort projects;
@@ -51,6 +55,7 @@ public final class DeleteToggleUseCase {
     public void execute(FeatureToggleId id) {
         FeatureToggle toggle = toggles.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Toggle", id.value));
+        log.debug("Deleting toggle: id={}, project={}", id.value, toggle.projectId.value);
         callerAccess.resolve(toggle.projectId).ensure(Permission.WRITE_TOGGLES);
         projects.findById(toggle.projectId)
                 .orElseThrow(() -> new EntityNotFoundException("Project", toggle.projectId.value))

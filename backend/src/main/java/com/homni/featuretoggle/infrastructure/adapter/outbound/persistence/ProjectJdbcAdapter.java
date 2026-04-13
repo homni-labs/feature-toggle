@@ -17,6 +17,8 @@ import com.homni.featuretoggle.domain.model.ProjectId;
 import com.homni.featuretoggle.domain.model.ProjectRole;
 import com.homni.featuretoggle.domain.model.ProjectSlug;
 import com.homni.featuretoggle.domain.model.UserId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -35,6 +37,8 @@ import java.util.UUID;
  */
 @Repository
 public class ProjectJdbcAdapter implements ProjectRepositoryPort {
+
+    private static final Logger log = LoggerFactory.getLogger(ProjectJdbcAdapter.class);
 
     private static final String COLUMNS =
             "id, slug, name, description, archived, created_at, updated_at";
@@ -74,6 +78,7 @@ public class ProjectJdbcAdapter implements ProjectRepositoryPort {
      */
     @Override
     public void save(Project project) {
+        log.debug("Persisting project: id={}, slug={}", project.id.value, project.slug.value());
         try {
             jdbc.sql("""
                     INSERT INTO project (id, slug, name, description, archived, created_at, updated_at)

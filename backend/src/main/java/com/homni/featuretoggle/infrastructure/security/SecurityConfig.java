@@ -143,6 +143,7 @@ public class SecurityConfig {
             }
 
             AppUser user = findOrCreateUser.execute(subject, email, name);
+            log.debug("JWT authenticated: sub={}, email={}, role={}", subject, email, user.platformRole());
 
             if (!user.canAuthenticate()) {
                 throw new org.springframework.security.access.AccessDeniedException("User is disabled");

@@ -18,11 +18,15 @@ import com.homni.featuretoggle.domain.exception.ProjectArchivedException;
 import com.homni.featuretoggle.domain.model.Permission;
 import com.homni.featuretoggle.domain.model.Project;
 import com.homni.featuretoggle.domain.model.ProjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Updates mutable fields of an existing project.
  */
 public final class UpdateProjectUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(UpdateProjectUseCase.class);
 
     private final ProjectRepositoryPort projects;
     private final FeatureToggleRepositoryPort toggles;
@@ -65,6 +69,7 @@ public final class UpdateProjectUseCase {
      * @throws InvalidStateException if archive/unarchive transition is invalid
      */
     public Project execute(ProjectId id, String name, String description, Boolean archived) {
+        log.debug("Updating project: id={}, archived={}", id.value, archived);
         callerAccess.resolve(id).ensure(Permission.MANAGE_MEMBERS);
         Project project = projects.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Project", id.value));
@@ -75,12 +80,14 @@ public final class UpdateProjectUseCase {
 
         boolean willArchive = Boolean.TRUE.equals(archived) && !project.isArchived();
         if (willArchive) {
-            toggles.disableAllByProject(id);
+            int disabled = toggles.disableAllByProject(id);
+            log.debug("Archiving project {}: disabled {} toggle-environment pairs", id.value, disabled);
         }
 
         project.update(name, description);
         applyArchivedChange(project, archived);
         projects.save(project);
+        log.debug("Project updated: id={}", project.id.value);
         return project;
     }
 

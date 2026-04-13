@@ -19,6 +19,8 @@ import com.homni.featuretoggle.domain.model.FeatureToggle;
 import com.homni.featuretoggle.domain.model.FeatureToggleId;
 import com.homni.featuretoggle.domain.model.Permission;
 import com.homni.featuretoggle.domain.model.Project;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +31,8 @@ import java.util.Set;
  * domain, then persist.
  */
 public final class UpdateToggleUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(UpdateToggleUseCase.class);
 
     private final FeatureToggleRepositoryPort toggles;
     private final EnvironmentRepositoryPort environments;
@@ -69,6 +73,7 @@ public final class UpdateToggleUseCase {
     public FeatureToggle execute(FeatureToggleId id, String name, String description,
                                  Set<String> environmentNames,
                                  Map<String, Boolean> environmentStateChanges) {
+        log.debug("Updating toggle: id={}", id.value);
         FeatureToggle toggle = toggles.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Toggle", id.value));
         callerAccess.resolve(toggle.projectId).ensure(Permission.WRITE_TOGGLES);
@@ -82,6 +87,7 @@ public final class UpdateToggleUseCase {
         toggle.setEnvironmentStates(environmentStateChanges);
 
         toggles.save(toggle);
+        log.debug("Toggle updated: id={}, envStates={}", toggle.id.value, toggle.environmentStates());
         return toggle;
     }
 }

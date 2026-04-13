@@ -13,6 +13,8 @@ import com.homni.featuretoggle.application.port.out.CallerProjectAccessPort;
 import com.homni.featuretoggle.application.usecase.ResolveProjectAccessUseCase;
 import com.homni.featuretoggle.domain.model.ProjectAccess;
 import com.homni.featuretoggle.domain.model.ProjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class CallerProjectAccessAdapter implements CallerProjectAccessPort {
+
+    private static final Logger log = LoggerFactory.getLogger(CallerProjectAccessAdapter.class);
 
     private final ResolveProjectAccessUseCase resolveProjectAccess;
 
@@ -41,6 +45,8 @@ public class CallerProjectAccessAdapter implements CallerProjectAccessPort {
     public ProjectAccess resolve(ProjectId projectId) {
         ProjectAccessSource source =
                 (ProjectAccessSource) SecurityContextHolder.getContext().getAuthentication();
-        return source.resolveAccess(projectId, resolveProjectAccess);
+        ProjectAccess access = source.resolveAccess(projectId, resolveProjectAccess);
+        log.debug("Resolved project access: projectId={}, access={}", projectId.value, access);
+        return access;
     }
 }

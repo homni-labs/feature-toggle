@@ -15,6 +15,8 @@ import com.homni.generated.model.ErrorResponsePayload;
 import com.homni.generated.model.ResponseMeta;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
@@ -32,6 +34,8 @@ import java.time.OffsetDateTime;
  */
 @Component
 public class SecurityErrorHandler implements AuthenticationEntryPoint, AccessDeniedHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(SecurityErrorHandler.class);
 
     private final ObjectMapper mapper;
 
@@ -61,6 +65,7 @@ public class SecurityErrorHandler implements AuthenticationEntryPoint, AccessDen
             message = "Authentication is required to access this resource";
         }
 
+        log.debug("Authentication failure: status=401, code={}, uri={}", code, request.getRequestURI());
         writeError(response, HttpServletResponse.SC_UNAUTHORIZED, code, message);
     }
 
@@ -75,6 +80,7 @@ public class SecurityErrorHandler implements AuthenticationEntryPoint, AccessDen
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException {
+        log.debug("Access denied: uri={}", request.getRequestURI());
         writeError(response, HttpServletResponse.SC_FORBIDDEN,
                 "FORBIDDEN", "You do not have permission to access this resource");
     }

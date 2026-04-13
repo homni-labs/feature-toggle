@@ -19,6 +19,8 @@ import com.homni.featuretoggle.domain.model.FeatureToggle;
 import com.homni.featuretoggle.domain.model.Permission;
 import com.homni.featuretoggle.domain.model.Project;
 import com.homni.featuretoggle.domain.model.ProjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
@@ -27,6 +29,8 @@ import java.util.Set;
  * delegate every business rule to the domain, then persist.
  */
 public final class CreateToggleUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(CreateToggleUseCase.class);
 
     private final FeatureToggleRepositoryPort toggles;
     private final EnvironmentRepositoryPort environments;
@@ -63,6 +67,7 @@ public final class CreateToggleUseCase {
      */
     public FeatureToggle execute(ProjectId projectId, String name, String description,
                                  Set<String> environmentNames) {
+        log.debug("Creating toggle: project={}, name={}", projectId.value, name);
         callerAccess.resolve(projectId).ensure(Permission.WRITE_TOGGLES);
 
         Project project = projects.findById(projectId)
@@ -72,6 +77,7 @@ public final class CreateToggleUseCase {
         Set<String> projectEnvs = environments.findNamesByProjectId(projectId);
         FeatureToggle toggle = new FeatureToggle(projectId, name, description, environmentNames, projectEnvs);
         toggles.save(toggle);
+        log.debug("Toggle created: id={}, environments={}", toggle.id.value, environmentNames);
         return toggle;
     }
 }

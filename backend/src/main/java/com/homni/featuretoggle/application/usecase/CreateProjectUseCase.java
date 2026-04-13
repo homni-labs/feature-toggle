@@ -16,6 +16,8 @@ import com.homni.featuretoggle.domain.model.Environment;
 import com.homni.featuretoggle.domain.model.EnvironmentDefaults;
 import com.homni.featuretoggle.domain.model.Project;
 import com.homni.featuretoggle.domain.model.ProjectSlug;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -25,6 +27,8 @@ import java.util.List;
  * {@link EnvironmentDefaults} domain object — this use case just orchestrates.
  */
 public final class CreateProjectUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(CreateProjectUseCase.class);
 
     private final ProjectRepositoryPort projects;
     private final EnvironmentRepositoryPort environments;
@@ -57,6 +61,7 @@ public final class CreateProjectUseCase {
      */
     public Project execute(ProjectSlug slug, String name, String description,
                            List<String> selectedEnvironmentNames) {
+        log.debug("Creating project: slug={}", slug.value());
         Project project = new Project(slug, name, description);
         projects.save(project);
 
@@ -64,6 +69,7 @@ public final class CreateProjectUseCase {
         if (!envs.isEmpty()) {
             environments.saveAll(envs);
         }
+        log.debug("Project created: id={}, environments bootstrapped={}", project.id.value, envs.size());
         return project;
     }
 }

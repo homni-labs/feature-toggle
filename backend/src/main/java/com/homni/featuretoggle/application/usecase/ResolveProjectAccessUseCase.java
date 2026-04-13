@@ -14,6 +14,8 @@ import com.homni.featuretoggle.domain.model.AppUser;
 import com.homni.featuretoggle.domain.model.ProjectAccess;
 import com.homni.featuretoggle.domain.model.ProjectId;
 import com.homni.featuretoggle.domain.model.ProjectMembership;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
@@ -21,6 +23,8 @@ import java.util.Optional;
  * Resolves the caller's access level for a project.
  */
 public final class ResolveProjectAccessUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(ResolveProjectAccessUseCase.class);
 
     private final ProjectMembershipRepositoryPort memberships;
 
@@ -40,8 +44,11 @@ public final class ResolveProjectAccessUseCase {
      * @throws com.homni.featuretoggle.domain.exception.NotProjectMemberException if the user has no access
      */
     public ProjectAccess resolve(AppUser caller, ProjectId projectId) {
+        log.debug("Resolving access: user={}, project={}", caller.id.value, projectId.value);
         Optional<ProjectMembership> membership = memberships.findByProjectAndUser(
                 projectId, caller.id);
-        return caller.accessFor(projectId, membership);
+        ProjectAccess access = caller.accessFor(projectId, membership);
+        log.debug("Access resolved: user={}, project={}, access={}", caller.id.value, projectId.value, access);
+        return access;
     }
 }

@@ -14,6 +14,8 @@ import com.homni.featuretoggle.domain.exception.AlreadyExistsException;
 import com.homni.featuretoggle.domain.model.FeatureToggle;
 import com.homni.featuretoggle.domain.model.FeatureToggleId;
 import com.homni.featuretoggle.domain.model.ProjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
@@ -36,6 +38,8 @@ import java.util.UUID;
  */
 @Repository
 public class FeatureToggleJdbcAdapter implements FeatureToggleRepositoryPort {
+
+    private static final Logger log = LoggerFactory.getLogger(FeatureToggleJdbcAdapter.class);
 
     /**
      * Selects toggles together with two parallel arrays — env names and the
@@ -72,6 +76,7 @@ public class FeatureToggleJdbcAdapter implements FeatureToggleRepositoryPort {
     @Override
     @Transactional
     public void save(FeatureToggle t) {
+        log.debug("Persisting toggle: id={}, project={}", t.id.value, t.projectId.value);
         upsertToggle(t);
         syncEnvironments(t);
     }
@@ -138,6 +143,7 @@ public class FeatureToggleJdbcAdapter implements FeatureToggleRepositoryPort {
      */
     @Override
     public void deleteById(FeatureToggleId id) {
+        log.debug("Deleting toggle: id={}", id.value);
         jdbc.sql("DELETE FROM feature_toggle WHERE id = ?")
                 .param(id.value)
                 .update();
@@ -153,6 +159,7 @@ public class FeatureToggleJdbcAdapter implements FeatureToggleRepositoryPort {
      */
     @Override
     public int disableAllByProject(ProjectId projectId) {
+        log.debug("Disabling all toggles for project: id={}", projectId.value);
         return jdbc.sql("""
                 UPDATE toggle_environment te
                    SET enabled = false
@@ -212,6 +219,7 @@ public class FeatureToggleJdbcAdapter implements FeatureToggleRepositoryPort {
         if (states.isEmpty()) {
             return;
         }
+        log.debug("Syncing toggle environments: id={}, envCount={}", t.id.value, states.size());
         String[] envNames = new String[states.size()];
         Boolean[] envEnabled = new Boolean[states.size()];
         int i = 0;
