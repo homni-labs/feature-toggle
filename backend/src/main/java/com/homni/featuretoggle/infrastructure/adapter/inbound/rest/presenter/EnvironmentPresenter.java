@@ -11,6 +11,7 @@ package com.homni.featuretoggle.infrastructure.adapter.inbound.rest.presenter;
 
 import com.homni.featuretoggle.application.usecase.EnvironmentPage;
 import com.homni.featuretoggle.domain.model.Environment;
+import com.homni.generated.model.DefaultEnvironmentListResponse;
 import com.homni.generated.model.EnvironmentListResponse;
 import com.homni.generated.model.EnvironmentSingleResponse;
 import com.homni.generated.model.Pagination;
@@ -51,6 +52,16 @@ public class EnvironmentPresenter {
                 .map(this::toDto).toList();
         return new EnvironmentListResponse(
                 items, pagination(page.totalElements(), pageNum, pageSize), meta());
+    }
+
+    /**
+     * Wraps a list of default environment names in a typed response envelope.
+     *
+     * @param defaults the default environment names
+     * @return the typed defaults list response
+     */
+    public DefaultEnvironmentListResponse defaultsList(List<String> defaults) {
+        return new DefaultEnvironmentListResponse(defaults, meta());
     }
 
     private Pagination pagination(long totalElements, int pageNum, int pageSize) {
