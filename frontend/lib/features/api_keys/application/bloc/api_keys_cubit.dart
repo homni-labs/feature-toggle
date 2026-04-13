@@ -14,6 +14,7 @@ class ApiKeysCubit extends Cubit<ApiKeysState> {
   final RevokeApiKeyUseCase _revokeApiKey;
 
   static const _pageSize = 10;
+  ApiKeysLoaded? _lastLoaded;
 
   ApiKeysCubit({
     required LoadApiKeysUseCase loadApiKeys,
@@ -38,12 +39,16 @@ class ApiKeysCubit extends Cubit<ApiKeysState> {
     );
     result.fold(
       (f) => emit(ApiKeysError(f)),
-      (paged) => emit(ApiKeysLoaded(
-        apiKeys: paged.items,
-        totalElements: paged.totalElements,
-        page: paged.page,
-        totalPages: paged.totalPages,
-      )),
+      (paged) {
+        final loaded = ApiKeysLoaded(
+          apiKeys: paged.items,
+          totalElements: paged.totalElements,
+          page: paged.page,
+          totalPages: paged.totalPages,
+        );
+        _lastLoaded = loaded;
+        emit(loaded);
+      },
     );
   }
 
@@ -66,7 +71,8 @@ class ApiKeysCubit extends Cubit<ApiKeysState> {
   }
 
   void addIssuedToList(ApiKeyCreated created, ProjectId projectId) {
-    final current = state;
+    final current = _lastLoaded;
+    if (current == null) return;
     final apiKey = ApiKey(
       id: created.id,
       projectId: projectId,
@@ -78,16 +84,16 @@ class ApiKeysCubit extends Cubit<ApiKeysState> {
       createdAt: created.createdAt,
       expiresAt: created.expiresAt,
     );
-    if (current is ApiKeysLoaded) {
-      final list = [apiKey, ...current.apiKeys];
-      if (list.length > _pageSize) list.removeLast();
-      emit(ApiKeysLoaded(
-        apiKeys: list,
-        totalElements: current.totalElements + 1,
-        page: current.page,
-        totalPages: ((current.totalElements + 1) / _pageSize).ceil(),
-      ));
-    }
+    final list = [apiKey, ...current.apiKeys];
+    if (list.length > _pageSize) list.removeLast();
+    final loaded = ApiKeysLoaded(
+      apiKeys: list,
+      totalElements: current.totalElements + 1,
+      page: current.page,
+      totalPages: ((current.totalElements + 1) / _pageSize).ceil(),
+    );
+    _lastLoaded = loaded;
+    emit(loaded);
   }
 
   Future<void> revoke({
