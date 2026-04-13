@@ -36,124 +36,132 @@ class ApiKeyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color roleColor = _roleColor(apiKey.role);
+    final bool isRevoked = !apiKey.active;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: const Color(0xFFFFFFFF),
-        border: Border.all(
-          color: apiKey.active
-              ? roleColor.withOpacity(0.2)
-              : AppColors.coral.withOpacity(0.15),
+    return Opacity(
+      opacity: isRevoked ? 0.5 : 1.0,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
+          border: Border.all(color: AppColors.navy, width: 3),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0xFFDDD8CC),
+              offset: Offset(0, 3),
+            ),
+          ],
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        child: Row(
+        child: Stack(
           children: [
-            // Name + masked token + role badge
-            Expanded(
+            // Status dot
+            Positioned(
+              top: 16,
+              right: 16,
+              child: Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isRevoked
+                      ? const Color(0xFFDDD8CC)
+                      : AppColors.green,
+                  boxShadow: isRevoked
+                      ? null
+                      : [
+                          BoxShadow(
+                            color: AppColors.green.withOpacity(0.5),
+                            blurRadius: 8,
+                          ),
+                        ],
+                ),
+              ),
+            ),
+
+            // Body
+            Padding(
+              padding: const EdgeInsets.all(18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    apiKey.name,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: apiKey.active
-                          ? Colors.white
-                          : AppColors.navy.withOpacity(0.5),
+                  // Name
+                  Padding(
+                    padding: const EdgeInsets.only(right: 24),
+                    child: Text(
+                      apiKey.name,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: isRevoked
+                            ? AppColors.navy.withOpacity(0.5)
+                            : AppColors.navy,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 4),
+
+                  // Masked token
+                  Text(
+                    apiKey.maskedToken,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'monospace',
+                      color: AppColors.navy.withOpacity(0.3),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // Badges
                   Row(
                     children: [
-                      Text(
-                        apiKey.maskedToken,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.navy.withOpacity(0.3),
-                          fontFamily: 'monospace',
-                        ),
+                      _Badge(
+                        label: apiKey.roleLabel,
+                        color: roleColor,
                       ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: roleColor.withOpacity(0.15),
-                        ),
-                        child: Text(
-                          apiKey.roleLabel,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                            color: roleColor,
-                          ),
-                        ),
-                      ),
-                      if (!apiKey.active) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 2),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            color: AppColors.coral.withOpacity(0.15),
-                          ),
-                          child: const Text(
-                            'Revoked',
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.coral,
-                            ),
-                          ),
+                      if (isRevoked) ...[
+                        const SizedBox(width: 6),
+                        const _Badge(
+                          label: 'Revoked',
+                          color: AppColors.coral,
                         ),
                       ],
                     ],
                   ),
+                  const SizedBox(height: 10),
+
+                  // Divider + meta
+                  Container(
+                    padding: const EdgeInsets.only(top: 10),
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        top: BorderSide(
+                          color: Color(0xFFDDD8CC),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        _MetaColumn(
+                          label: 'Created',
+                          value: _formatDate(apiKey.createdAt),
+                        ),
+                        const SizedBox(width: 16),
+                        _MetaColumn(
+                          label: isRevoked ? 'Revoked' : 'Expires',
+                          value: apiKey.expiresAt != null
+                              ? _formatDate(apiKey.expiresAt!)
+                              : 'No expiry',
+                        ),
+                        const Spacer(),
+                        if (!isRevoked && onRevoke != null)
+                          _RevokeButton(onTap: onRevoke!),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-
-            // Dates column
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'Created ${_formatDate(apiKey.createdAt)}',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: AppColors.navy.withOpacity(0.3),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  apiKey.expiresAt != null
-                      ? 'Expires ${_formatDate(apiKey.expiresAt!)}'
-                      : 'No expiry',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: AppColors.navy.withOpacity(0.3),
-                  ),
-                ),
-              ],
-            ),
-
-            // Revoke button
-            if (apiKey.active && onRevoke != null) ...[
-              const SizedBox(width: 8),
-              _ActionButton(
-                icon: Icons.block_rounded,
-                onTap: onRevoke!,
-                hoverColor: AppColors.coral,
-              ),
-            ],
           ],
         ),
       ),
@@ -161,46 +169,117 @@ class ApiKeyCard extends StatelessWidget {
   }
 }
 
-class _ActionButton extends StatefulWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  final Color? hoverColor;
+class _Badge extends StatelessWidget {
+  final String label;
+  final Color color;
 
-  const _ActionButton({
-    required this.icon,
-    required this.onTap,
-    this.hoverColor,
-  });
+  const _Badge({required this.label, required this.color});
 
   @override
-  State<_ActionButton> createState() => _ActionButtonState();
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5),
+        color: color.withOpacity(0.1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 5,
+            height: 5,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: color,
+            ),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w700,
+              color: color,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _ActionButtonState extends State<_ActionButton> {
+class _MetaColumn extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _MetaColumn({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color: AppColors.navy.withOpacity(0.45),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: AppColors.navy.withOpacity(0.8),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RevokeButton extends StatefulWidget {
+  final VoidCallback onTap;
+  const _RevokeButton({required this.onTap});
+
+  @override
+  State<_RevokeButton> createState() => _RevokeButtonState();
+}
+
+class _RevokeButtonState extends State<_RevokeButton> {
   bool _hovering = false;
 
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
+      cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.all(8),
+          width: 32,
+          height: 32,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(9),
             color: _hovering
-                ? AppColors.navy.withOpacity(0.10)
-                : Colors.transparent,
+                ? AppColors.coral.withOpacity(0.12)
+                : AppColors.coral.withOpacity(0.06),
+            border: Border.all(
+              color: AppColors.coral.withOpacity(0.35),
+              width: 2,
+            ),
           ),
           child: Icon(
-            widget.icon,
-            size: 18,
-            color: _hovering
-                ? (widget.hoverColor ?? AppColors.navy.withOpacity(0.8))
-                : AppColors.navy.withOpacity(0.3),
+            Icons.block_rounded,
+            size: 14,
+            color: AppColors.coral,
           ),
         ),
       ),

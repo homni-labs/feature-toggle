@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:feature_toggle_app/app/di/injection.dart';
 import 'package:feature_toggle_app/app/theme/app_colors.dart';
@@ -127,10 +128,10 @@ class _ApiKeysView extends StatelessWidget {
             children: [
               Text(
                 'API Keys',
-                style: TextStyle(
+                style: GoogleFonts.fredoka(
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.navy.withOpacity(0.9),
+                  color: AppColors.navy,
                 ),
               ),
               const Spacer(),
@@ -141,47 +142,25 @@ class _ApiKeysView extends StatelessWidget {
                 ),
             ],
           ).animate().fadeIn(duration: 400.ms),
-          const SizedBox(height: 16),
-
-          // Count
           Text(
-            '${state.totalElements} API key(s)',
+            '${state.totalElements} API keys \u00B7 All keys grant read-only access',
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.navy.withOpacity(0.4),
+              color: AppColors.navy.withOpacity(0.35),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
-          // List
+          // Grid
           Expanded(
             child: state.apiKeys.isEmpty
                 ? _buildEmptyState()
-                : Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 700),
-                      child: ListView.builder(
-                        itemCount: state.apiKeys.length,
-                        itemBuilder: (context, index) {
-                          final apiKey = state.apiKeys[index];
-                          return ApiKeyCard(
-                            key: ValueKey(apiKey.id.value),
-                            apiKey: apiKey,
-                            onRevoke: canManage
-                                ? () => _onRevoke(context, apiKey)
-                                : null,
-                          );
-                        },
-                      ),
-                    ),
+                : _ApiKeyGrid(
+                    state: state,
+                    canManage: canManage,
+                    onRevoke: (apiKey) => _onRevoke(context, apiKey),
                   ),
           ),
-
-          // Pagination
-          if (state.totalPages > 1) ...[
-            const SizedBox(height: 16),
-            _buildPagination(context, state),
-          ],
         ],
       ),
     );
@@ -209,73 +188,12 @@ class _ApiKeysView extends StatelessWidget {
     );
   }
 
-  Widget _buildPagination(BuildContext context, ApiKeysLoaded state) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _PaginationArrow(
-          icon: Icons.chevron_left_rounded,
-          enabled: state.page > 0,
-          onTap: () => _goToPage(context, state.page - 1),
-        ),
-        const SizedBox(width: 8),
-        ...List.generate(state.totalPages, (i) {
-          final isActive = i == state.page;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
-            child: GestureDetector(
-              onTap: () => _goToPage(context, i),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                width: 36,
-                height: 36,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: isActive
-                      ? AppColors.coral.withOpacity(0.25)
-                      : AppColors.navy.withOpacity(0.06),
-                  border: Border.all(
-                    color: isActive
-                        ? AppColors.coral.withOpacity(0.4)
-                        : AppColors.navy.withOpacity(0.08),
-                  ),
-                ),
-                child: Text('${i + 1}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight:
-                          isActive ? FontWeight.w600 : FontWeight.w400,
-                      color: isActive
-                          ? AppColors.coral
-                          : AppColors.navy.withOpacity(0.5),
-                    )),
-              ),
-            ),
-          );
-        }),
-        const SizedBox(width: 8),
-        _PaginationArrow(
-          icon: Icons.chevron_right_rounded,
-          enabled: state.page < state.totalPages - 1,
-          onTap: () => _goToPage(context, state.page + 1),
-        ),
-      ],
-    );
-  }
-
   // ── Operations ───────────────────────────────────────────────────
 
   Future<void> _reload(BuildContext context) async {
     final authCubit = context.read<AuthCubit>();
     final cubit = context.read<ApiKeysCubit>();
     await ApiKeysPage._load(authCubit, cubit);
-  }
-
-  Future<void> _goToPage(BuildContext context, int page) async {
-    final authCubit = context.read<AuthCubit>();
-    final cubit = context.read<ApiKeysCubit>();
-    await ApiKeysPage._load(authCubit, cubit, page: page);
   }
 
   Future<void> _onCreate(BuildContext context) async {
@@ -342,6 +260,97 @@ class _ApiKeysView extends StatelessWidget {
   }
 }
 
+// ── API Key Grid ──────────────────────────────────────────────
+
+class _ApiKeyGrid extends StatelessWidget {
+  const _ApiKeyGrid({
+    required this.state,
+    required this.canManage,
+    required this.onRevoke,
+  });
+
+  final ApiKeysLoaded state;
+  final bool canManage;
+  final void Function(ApiKey) onRevoke;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const double minCard = 360;
+        const double gap = 14;
+        final int columns =
+            (constraints.maxWidth / (minCard + gap)).floor().clamp(1, 3);
+        final double cardWidth = columns == 1
+            ? constraints.maxWidth
+            : (constraints.maxWidth - gap * (columns - 1)) / columns;
+
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              Wrap(
+                spacing: gap,
+                runSpacing: gap,
+                children: [
+                  for (final apiKey in state.apiKeys)
+                    SizedBox(
+                      width: cardWidth,
+                      child: ApiKeyCard(
+                        key: ValueKey(apiKey.id),
+                        apiKey: apiKey,
+                        onRevoke: canManage && apiKey.active
+                            ? () => onRevoke(apiKey)
+                            : null,
+                      ),
+                    ),
+                ],
+              ),
+              if (state.totalPages > 1) ...[
+                const SizedBox(height: 20),
+                _buildPagination(context),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPagination(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _PagerBtn(
+          text: '\u00AB',
+          enabled: state.page > 0,
+          active: false,
+          onTap: () => _goToPage(context, state.page - 1),
+        ),
+        ...List.generate(state.totalPages, (i) {
+          return _PagerBtn(
+            text: '${i + 1}',
+            enabled: true,
+            active: i == state.page,
+            onTap: () => _goToPage(context, i),
+          );
+        }),
+        _PagerBtn(
+          text: '\u00BB',
+          enabled: state.page < state.totalPages - 1,
+          active: false,
+          onTap: () => _goToPage(context, state.page + 1),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _goToPage(BuildContext context, int page) async {
+    final authCubit = context.read<AuthCubit>();
+    final cubit = context.read<ApiKeysCubit>();
+    await ApiKeysPage._load(authCubit, cubit, page: page);
+  }
+}
+
 // ── Create button ───────────────────────────────────────────────
 
 class _CreateButton extends StatelessWidget {
@@ -359,37 +368,56 @@ class _CreateButton extends StatelessWidget {
   }
 }
 
-// ── Pagination arrow ────────────────────────────────────────────
+// ── Pager button ────────────────────────────────────────────────
 
-class _PaginationArrow extends StatelessWidget {
-  final IconData icon;
-  final bool enabled;
-  final VoidCallback onTap;
-
-  const _PaginationArrow({
-    required this.icon,
+class _PagerBtn extends StatelessWidget {
+  const _PagerBtn({
+    required this.text,
     required this.enabled,
+    required this.active,
     required this.onTap,
   });
 
+  final String text;
+  final bool enabled;
+  final bool active;
+  final VoidCallback onTap;
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: enabled ? onTap : null,
-      child: Container(
-        width: 36,
-        height: 36,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: AppColors.navy.withOpacity(0.06),
-          border: Border.all(color: AppColors.navy.withOpacity(0.08)),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: GestureDetector(
+        onTap: enabled ? onTap : null,
+        child: Container(
+          width: 34,
+          height: 34,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: active
+                ? AppColors.coral.withOpacity(0.1)
+                : Colors.white,
+            border: Border.all(
+              width: 2,
+              color: active
+                  ? AppColors.coral
+                  : const Color(0xFFDDD8CC),
+            ),
+          ),
+          child: Text(
+            text,
+            style: GoogleFonts.fredoka(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: !enabled
+                  ? AppColors.navy.withOpacity(0.2)
+                  : active
+                      ? AppColors.coral
+                      : AppColors.navy.withOpacity(0.5),
+            ),
+          ),
         ),
-        child: Icon(icon,
-            size: 20,
-            color: enabled
-                ? AppColors.navy.withOpacity(0.7)
-                : AppColors.navy.withOpacity(0.15)),
       ),
     );
   }
