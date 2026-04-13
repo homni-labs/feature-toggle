@@ -69,7 +69,7 @@ class _UserCardState extends State<UserCard> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: widget.isCurrentUser ? AppColors.teal : AppColors.navy,
+                    color: widget.isCurrentUser ? AppColors.coral : AppColors.navy,
                     width: 3,
                   ),
                   boxShadow: [

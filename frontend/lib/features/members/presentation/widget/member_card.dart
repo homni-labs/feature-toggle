@@ -67,7 +67,7 @@ class _MemberCardState extends State<MemberCard> {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             width: 3,
-            color: isSelf ? AppColors.teal : AppColors.navy,
+            color: isSelf ? AppColors.coral : AppColors.navy,
           ),
           boxShadow: [
             BoxShadow(
