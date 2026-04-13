@@ -109,19 +109,32 @@ class ApiKeysCubit extends Cubit<ApiKeysState> {
     result.fold(
       (f) => emit(ApiKeysError(f)),
       (_) {
-        final current = state;
-        if (current is ApiKeysLoaded) {
-          final list = current.apiKeys
-              .where((k) => k.id != apiKeyId)
-              .toList();
-          emit(ApiKeysLoaded(
+        final current = _lastLoaded;
+        if (current != null) {
+          final list = current.apiKeys.map((k) {
+            if (k.id == apiKeyId) {
+              return ApiKey(
+                id: k.id,
+                projectId: k.projectId,
+                projectName: k.projectName,
+                name: k.name,
+                role: k.role,
+                maskedToken: k.maskedToken,
+                active: false,
+                createdAt: k.createdAt,
+                expiresAt: k.expiresAt,
+              );
+            }
+            return k;
+          }).toList();
+          final loaded = ApiKeysLoaded(
             apiKeys: list,
-            totalElements: current.totalElements - 1,
+            totalElements: current.totalElements,
             page: current.page,
-            totalPages: (current.totalElements - 1) > 0
-                ? ((current.totalElements - 1) / _pageSize).ceil()
-                : 0,
-          ));
+            totalPages: current.totalPages,
+          );
+          _lastLoaded = loaded;
+          emit(loaded);
         }
       },
     );
