@@ -1,50 +1,73 @@
 <div align="center">
 
-<img src="assets/feature_toggle_logo.jpeg" width="600" alt="Homni Feature Toggle">
+<table><tr>
+<td><img src="assets/feature_toggle_logo.jpeg" width="80" alt="Homni Feature Toggle"></td>
+<td>
+<h1>Homni Feature Toggle</h1>
+<p>Open-source платформа для управления фича-флагами с RBAC на уровне проектов, мультисредовым контролем и встроенным мониторингом.</p>
+</td>
+</tr></table>
 
-# Homni Feature Toggle
-
-Самостоятельно размещаемая платформа для управления фича-флагами с RBAC на уровне проектов, мультисредовым контролем и аутентификацией по API-ключам.
+<p>
+  <a href="#быстрый-старт">Быстрый старт</a> &middot;
+  <a href="http://localhost:8080/docs">Swagger UI</a> &middot;
+  <a href="#дорожная-карта">Roadmap</a>
+</p>
 
 **[English documentation](README.md)**
 
 [![Build](https://github.com/homni-labs/feature-toggle/actions/workflows/ci.yml/badge.svg)](https://github.com/homni-labs/feature-toggle/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![GitHub Release](https://img.shields.io/github/v/release/homni-labs/feature-toggle)](https://github.com/homni-labs/feature-toggle/releases)
-[![GitHub Stars](https://img.shields.io/github/stars/homni-labs/feature-toggle?style=social)](https://github.com/homni-labs/feature-toggle)
 [![Docker Pulls](https://img.shields.io/docker/pulls/zaytsevdv/homni-feature-toggle)](https://hub.docker.com/r/zaytsevdv/homni-feature-toggle)
+[![GitHub Stars](https://img.shields.io/github/stars/homni-labs/feature-toggle?style=social)](https://github.com/homni-labs/feature-toggle)
 
 </div>
 
 ---
 
-## Скриншоты
+## Содержание
 
-> Скоро здесь появятся скриншоты дашборда, управления тогглами и настроек проекта.
+- [Почему Homni?](#почему-homni)
+- [Возможности](#возможности)
+- [Быстрый старт](#быстрый-старт)
+- [Архитектура](#архитектура)
+- [Технологический стек](#технологический-стек)
+- [Мониторинг](#мониторинг)
+- [API](#api)
+- [Конфигурация](#конфигурация)
+- [Разрешения](#разрешения)
+- [Локальная разработка](#локальная-разработка)
+- [Участие в разработке](#участие-в-разработке)
+- [Дорожная карта](#дорожная-карта)
+- [Сообщество и поддержка](#сообщество-и-поддержка)
+- [Лицензия](#лицензия)
 
 ---
 
 ## Почему Homni?
 
-Большинство решений для фича-тогглов либо доступны только как SaaS, либо не имеют нормального контроля доступа. Homni даёт вам:
+Большинство решений для фича-флагов либо доступны только как SaaS, берут плату за каждого пользователя, либо не имеют нормального контроля доступа. Homni — другой:
 
 - **Полный контроль** &mdash; разворачивайте на своей инфраструктуре, без привязки к вендору, без лимитов, данные не покидают вашу сеть
 - **Изоляция проектов** &mdash; у каждого проекта свои тогглы, окружения, участники и API-ключи
 - **Гранулярный RBAC** &mdash; Администратор платформы, Администратор проекта, Редактор, Читатель &mdash; чёткие границы прав на каждом уровне
 - **Управление окружениями** &mdash; создавайте кастомные окружения для каждого проекта, не ограничиваясь DEV / STAGING / PROD
 - **API по контракту** &mdash; спецификация OpenAPI 3.0 с кодогенерацией контроллеров, Swagger UI и скоупированными API-ключами
+- **Встроенный мониторинг** &mdash; Prometheus, Grafana и Loki настроены из коробки с тремя готовыми дашбордами
 
 ---
 
 ## Возможности
 
-- &#x1F512; **OIDC-аутентификация** &mdash; Keycloak из коробки с кастомной страницей входа, совместимость с любым OpenID Connect провайдером. OAuth 2.1 + PKCE
-- &#x1F4C1; **Изоляция проектов** &mdash; каждый проект — самодостаточное рабочее пространство со своими тогглами, окружениями, участниками и API-ключами
-- &#x1F6E1; **Гранулярный RBAC** &mdash; Администратор платформы, Администратор проекта, Редактор, Читатель с детальной матрицей разрешений
-- &#x1F30D; **Мультисредовой контроль** &mdash; список дефолтных окружений задаётся через конфиг при старте платформы; выбирайте, какие из них создать в новом проекте, а кастомные добавляйте отдельно для каждого проекта
-- &#x1F511; **Аутентификация по API-ключам** &mdash; скоупированные read-only токены с опциональным сроком действия для CI/CD пайплайнов и внешних сервисов
-- &#x1F4D6; **OpenAPI 3.0** &mdash; полный контракт API с интерактивным Swagger UI по адресу `/docs`
-- &#x1F5A5; **Панель управления** &mdash; полнофункциональный Flutter Web UI для управления проектами, тогглами, окружениями, участниками и API-ключами
+- &#x1F512; **[OIDC-аутентификация](#конфигурация)** &mdash; Keycloak с кастомной брендированной SSO-страницей входа (тёмная и светлая темы) из коробки. Совместимость с любым OpenID Connect провайдером (Authentik, Auth0, Okta и др.). OAuth 2.1 + PKCE
+- &#x1F4C1; **[Изоляция проектов](#архитектура)** &mdash; каждый проект — самодостаточное рабочее пространство со своими тогглами, окружениями, участниками и API-ключами
+- &#x1F6E1; **[Гранулярный RBAC](#разрешения)** &mdash; Администратор платформы, Администратор проекта, Редактор, Читатель с детальной матрицей разрешений
+- &#x1F30D; **[Мультисредовой контроль](#конфигурация)** &mdash; список дефолтных окружений задаётся через конфиг при старте; выбирайте, какие из них создать в новом проекте, а кастомные добавляйте отдельно
+- &#x1F511; **[Аутентификация по API-ключам](#api)** &mdash; скоупированные read-only токены с опциональным сроком действия для CI/CD пайплайнов и внешних сервисов
+- &#x1F4D6; **[OpenAPI 3.0](#api)** &mdash; полный контракт API с интерактивным Swagger UI по адресу `/docs`
+- &#x1F5A5; **[Панель управления](#архитектура)** &mdash; полнофункциональный Flutter Web UI для управления проектами, тогглами, окружениями, участниками и API-ключами
+- &#x1F4CA; **[Встроенный мониторинг](#мониторинг)** &mdash; метрики Prometheus, дашборды Grafana, агрегация логов Loki и Promtail &mdash; всё настроено и готово к использованию
 
 ---
 
@@ -57,7 +80,7 @@ git clone https://github.com/homni-labs/feature-toggle.git
 cd feature-toggle
 ```
 
-**2. Запустите инфраструктуру** (PostgreSQL + Keycloak + Backend)
+**2. Запустите инфраструктуру** (PostgreSQL + Keycloak + Backend + Мониторинг)
 
 ```bash
 docker compose up -d
@@ -77,66 +100,102 @@ flutter run -d chrome --web-port 3000
 | Backend API | [localhost:8080](http://localhost:8080) | Bearer JWT |
 | Swagger UI | [localhost:8080/docs](http://localhost:8080/docs) | &mdash; |
 | Keycloak Admin | [localhost:8180](http://localhost:8180) | `admin` / `admin` |
+| Grafana | [localhost:3001](http://localhost:3001) | `admin` / `admin` |
+| Prometheus | [localhost:9090](http://localhost:9090) | &mdash; |
 
-> Предустановленные тестовые пользователи: `admin` / `admin` (Администратор платформы), `editor` / `editor`, `reader` / `reader`.
-
----
-
-## Локальная разработка
-
-### Предварительные требования
-
-| Инструмент | Версия | |
-|------------|--------|---|
-| Java | 21+ | [adoptium.net](https://adoptium.net) |
-| Maven | 3.9+ | [maven.apache.org](https://maven.apache.org) |
-| Flutter | &ge; 3.2 | [flutter.dev](https://flutter.dev) |
-| Docker & Compose | Последняя | [docs.docker.com](https://docs.docker.com) |
-
-### Backend
-
-Запустите только инфраструктурные сервисы:
+> **Тестовые пользователи (Keycloak):** `admin` / `admin` (Администратор платформы), `editor` / `editor`, `reader` / `reader`.
 
 ```bash
-docker compose up -d postgres keycloak
-```
-
-Запустите бэкенд из исходников (дефолтные значения совпадают с Compose-конфигурацией, дополнительная настройка не требуется):
-
-```bash
-cd backend
-mvn spring-boot:run
-```
-
-Бэкенд запускается на порту **8080**. Liquibase автоматически выполняет миграции при старте.
-
-### Frontend
-
-```bash
-cd frontend
-flutter pub get
-flutter run -d chrome --web-port 3000
-```
-
-Фронтенд запускается на порту **3000**. Конфигурация по умолчанию указывает на `localhost:8080` (API) и `localhost:8180` (Keycloak) &mdash; дополнительная настройка не требуется.
-
-### Проверка работоспособности
-
-```bash
-# Проверка здоровья бэкенда
+# Проверка работоспособности бэкенда
 curl http://localhost:8080/actuator/health
-# Ожидаемый ответ: {"status":"UP"}
+# {"status":"UP"}
 ```
 
-- Swagger UI: откройте [localhost:8080/docs](http://localhost:8080/docs)
-- Фронтенд: откройте [localhost:3000](http://localhost:3000), войдите под `admin` / `admin`
+> [!TIP]
+> Все значения по умолчанию настроены для локальной разработки &mdash; никаких `.env` файлов или ручной настройки не требуется.
 
 ---
 
 ## Архитектура
 
-- **Backend** &mdash; Гексагональная архитектура (Ports & Adapters) со строгим DDD. Доменный слой не имеет зависимостей от фреймворка. Подробнее в [backend/README_RU.md](backend/README_RU.md).
-- **Frontend** &mdash; Чистая архитектура с модульной структурой по фичам (auth, projects, toggles, environments, members, API keys, users). BLoC/Cubit для управления состоянием с sealed-состояниями. Подробнее в [frontend/README_RU.md](frontend/README_RU.md).
+```
+                          ┌───────────┐
+                          │  Browser  │
+                          └─────┬─────┘
+                                │
+                   ┌────────────┼────────────┐
+                   │            │             │
+            ┌──────┴──────┐    │     ┌───────┴───────┐
+            │  Frontend   │    │     │     SSO       │
+            │  Dashboard  │◄───┘     │  OIDC Provider│
+            │   :3000     │          │   :8180       │
+            └──────┬──────┘          └───────┬───────┘
+                   │                         │
+                   │    REST API + JWT        │
+                   └────────────┬─────────────┘
+                                │
+                     ┌──────────┴──────────┐
+                     │      Backend        │
+                     │  Hexagonal / DDD    │
+                     │      :8080          │
+                     └──────────┬──────────┘
+                                │
+                     ┌──────────┴──────────┐
+                     │     Database        │
+                     │      :5432          │
+                     └─────────────────────┘
+
+  ┌─ Observability ─────────────────────────────────────┐
+  │                                                     │
+  │  Metrics    :9090  ◄── Backend, SSO, Database       │
+  │  Logs       :3100  ◄── All containers               │
+  │  Dashboards :3001  ──► 3 pre-built dashboards       │
+  │                                                     │
+  └─────────────────────────────────────────────────────┘
+```
+
+**Backend** &mdash; Гексагональная архитектура (Ports & Adapters) со строгим Domain-Driven Design. Доменный слой не имеет зависимостей от фреймворка; use-case'ы — чистые оркестраторы; репозитории реализуют выходные порты через JDBC. Подробнее в [backend/README_RU.md](backend/README_RU.md).
+
+**Frontend** &mdash; Чистая архитектура с модульной структурой по фичам (auth, projects, toggles, environments, members, API keys, users). BLoC/Cubit для управления состоянием с sealed-состояниями и функциональной обработкой ошибок. OIDC/PKCE аутентификация с редиректом на SSO-страницу. Подробнее в [frontend/README_RU.md](frontend/README_RU.md).
+
+---
+
+## Технологический стек
+
+| Слой | Технологии |
+|------|-----------|
+| Backend | Java, Spring Boot, Spring Security, OAuth2, Liquibase, OpenAPI Generator |
+| База данных | PostgreSQL |
+| Аутентификация | Keycloak (пример из коробки, работает с любым OIDC-провайдером) |
+| Frontend | Flutter Web, flutter_bloc (Cubit), fpdart, go_router |
+| Мониторинг | Prometheus, Grafana, Loki, Promtail |
+| Инфраструктура | Docker, Docker Compose, Nginx |
+
+---
+
+## Мониторинг
+
+Homni поставляется с production-grade стеком мониторинга. Всё настроено из коробки &mdash; просто `docker compose up` и откройте Grafana.
+
+**Готовые дашборды Grafana** (в `observability/grafana/dashboards/`):
+
+| Дашборд | Метрики |
+|---------|---------|
+| Spring Boot | HTTP-запросы (RPS), латентность (p50 / p95 / p99), JVM-память, GC-паузы |
+| Keycloak | События аутентификации, активные сессии, операции с токенами |
+| PostgreSQL | Активные соединения, производительность запросов, размер БД |
+
+**Пайплайн метрик:** Backend &rarr; `/actuator/prometheus` (Micrometer) &rarr; Prometheus (скрейпинг каждые 10 сек) &rarr; Grafana.
+
+**Пайплайн логов:** Docker-контейнеры &rarr; Promtail &rarr; Loki &rarr; Grafana Explore.
+
+| Компонент | URL | Назначение |
+|-----------|-----|------------|
+| Grafana | [localhost:3001](http://localhost:3001) | Дашборды и просмотр логов |
+| Prometheus | [localhost:9090](http://localhost:9090) | Метрики и PromQL-запросы |
+
+> [!NOTE]
+> Дашборды в `observability/` — готовые примеры. Модифицируйте их или добавляйте свои через провижининг Grafana.
 
 ---
 
@@ -146,7 +205,21 @@ curl http://localhost:8080/actuator/health
 
 Полная спецификация OpenAPI 3.0: [`backend/src/main/resources/openapi/api.yaml`](backend/src/main/resources/openapi/api.yaml)
 
-Интерактивный Swagger UI доступен по адресу [`/docs`](http://localhost:8080/docs) при запущенном бэкенде.
+Интерактивный Swagger UI: [`/docs`](http://localhost:8080/docs) (при запущенном бэкенде)
+
+**Формат ошибок** (единый конверт):
+
+```json
+{
+  "payload": {
+    "code": "NOT_FOUND",
+    "message": "Toggle not found"
+  },
+  "meta": {
+    "timestamp": "2026-04-14T12:00:00Z"
+  }
+}
+```
 
 ---
 
@@ -165,27 +238,31 @@ curl http://localhost:8080/actuator/health
 | `DB_PASSWORD` | `homni` | Пароль БД |
 | `OIDC_ISSUER_URI` | `http://localhost:8180/realms/feature-toggle` | URI OIDC-издателя |
 | `OIDC_ADMIN_EMAIL` | `admin@homni.local` | Email первого администратора (назначается при первом входе) |
-| `APP_DEFAULT_ENVIRONMENTS` | `DEV,TEST,PROD` | Список дефолтных имён окружений (через запятую), которые можно создать в новом проекте при его создании. Каждое имя должно соответствовать `^[A-Z][A-Z0-9_]*$` (макс 50 символов). Установите пустую строку, чтобы отключить дефолты полностью. Список валидируется на старте — приложение не поднимется, если хотя бы одно имя невалидно или встречается дважды. |
+| `APP_DEFAULT_ENVIRONMENTS` | `DEV,TEST,PROD` | Список дефолтных имён окружений через запятую. Каждое должно соответствовать `^[A-Z][A-Z0-9_]*$` (макс 50 символов). Валидируется при старте. |
 | `CORS_ORIGINS` | `*` | Разрешённые CORS-источники |
 | `LOG_LEVEL` | `DEBUG` | Уровень логирования |
+| `OBSERVABILITY_ENABLED` | `true` | Включить эндпоинт метрик Prometheus |
+| `PROMETHEUS_URL` | `http://localhost:9090` | URL сервера Prometheus |
 
-> **Дефолтные окружения**: при создании проекта Администратор платформы видит чекбоксы со всеми именами из `APP_DEFAULT_ENVIRONMENTS`. Выбранные окружения создаются как независимые строки внутри нового проекта — удаление `DEV` в одном проекте не затрагивает другие проекты. Список дефолтов хранится только в конфиге (единственный источник истины) и не дублируется в БД.
+> **Дефолтные окружения:** при создании проекта UI показывает чекбоксы для каждого имени из `APP_DEFAULT_ENVIRONMENTS`. Выбранные создаются как независимые строки внутри проекта &mdash; удаление `DEV` в одном проекте не затрагивает другие. Дефолты хранятся только в конфиге (единственный источник истины).
 
 ### Frontend
 
-Константы времени компиляции, передаваемые через `--dart-define`. Значения по умолчанию работают из коробки для локальной разработки.
+Конфигурация загружается из `/config.json` при старте приложения. Значения по умолчанию работают из коробки для локальной разработки.
 
 | Переменная | По умолчанию | Описание |
 |------------|-------------|----------|
-| `API_BASE_URL` | `http://localhost:8080` | URL Backend API |
-| `OIDC_ISSUER` | `http://localhost:8180/realms/feature-toggle` | OIDC-издатель |
-| `OIDC_CLIENT_ID` | `feature-toggle-frontend` | OIDC Client ID |
-| `OIDC_REDIRECT_URI` | `http://localhost:3000/callback` | URI редиректа OIDC |
-| `OIDC_POST_LOGOUT_REDIRECT_URI` | `http://localhost:3000/` | URI редиректа после выхода |
+| `apiBaseUrl` | `http://localhost:8081` | URL Backend API |
+| `oidcIssuer` | `http://localhost:8180/realms/feature-toggle` | OIDC-издатель |
+| `oidcClientId` | `feature-toggle-frontend` | OIDC Client ID |
+| `oidcRedirectUri` | `http://localhost:3000/callback` | URI редиректа OIDC |
+| `oidcPostLogoutRedirectUri` | `http://localhost:3000/` | URI редиректа после выхода |
 
 ### Свой SSO-провайдер
 
-Если вы используете собственный OIDC-провайдер вместо встроенного Keycloak, убедитесь, что в нём создан пользователь с email, который вы хотите назначить первым администратором платформы. Укажите этот email в конфигурации бэкенда:
+Keycloak в `sso/` — это пример настройки с преднастроенными тестовыми пользователями и кастомными темами страницы входа (тёмная и светлая). **Homni работает с любым OIDC/OAuth провайдером** &mdash; Authentik, Auth0, Okta, Google Workspace или любым другим провайдером, поддерживающим OpenID Connect.
+
+Для подключения своего провайдера:
 
 ```yaml
 # docker-compose.yml
@@ -193,14 +270,6 @@ backend:
   environment:
     OIDC_ISSUER_URI: https://your-sso.example.com/realms/your-realm
     OIDC_ADMIN_EMAIL: your-admin@example.com
-```
-
-Или через переменные окружения при запуске из исходников:
-
-```bash
-OIDC_ISSUER_URI=https://your-sso.example.com/realms/your-realm \
-OIDC_ADMIN_EMAIL=your-admin@example.com \
-mvn spring-boot:run
 ```
 
 При первом входе с этим email пользователь автоматически получает роль **Администратор платформы**.
@@ -224,6 +293,66 @@ mvn spring-boot:run
 
 ---
 
+## Локальная разработка
+
+### Предварительные требования
+
+| Инструмент | Версия |
+|------------|--------|
+| Java | 21+ |
+| Maven | 3.9+ |
+| Flutter | 3.2+ |
+| Docker & Compose | Последняя |
+
+### Backend
+
+Запустите только инфраструктурные сервисы:
+
+```bash
+docker compose up -d postgres keycloak
+```
+
+Запустите бэкенд из исходников (дефолтные значения совпадают с Compose-конфигурацией):
+
+```bash
+cd backend
+mvn spring-boot:run
+```
+
+Бэкенд запускается на порту **8080**. Liquibase автоматически выполняет миграции при старте.
+
+### Frontend
+
+```bash
+cd frontend
+flutter pub get
+flutter run -d chrome --web-port 3000
+```
+
+Фронтенд запускается на порту **3000**. Конфигурация по умолчанию указывает на `localhost:8081` (API) и `localhost:8180` (Keycloak).
+
+### Проверка
+
+```bash
+curl http://localhost:8080/actuator/health
+# {"status":"UP"}
+```
+
+- Swagger UI: [localhost:8080/docs](http://localhost:8080/docs)
+- Фронтенд: [localhost:3000](http://localhost:3000), войдите под `admin` / `admin`
+
+### С мониторингом
+
+Для запуска полного стека мониторинга при локальной разработке:
+
+```bash
+docker compose up -d postgres keycloak prometheus grafana loki promtail postgres-exporter
+```
+
+Grafana будет доступна по адресу [localhost:3001](http://localhost:3001) со всеми тремя дашбордами.
+
+---
+
 ## Участие в разработке
 
 1. Сделайте форк репозитория
@@ -231,11 +360,11 @@ mvn spring-boot:run
 3. Закоммитьте изменения
 4. Откройте Pull Request
 
-Для крупных изменений, пожалуйста, сначала [создайте issue](https://github.com/homni-labs/feature-toggle/issues), чтобы обсудить предлагаемые улучшения.
+Для крупных изменений сначала [создайте issue](https://github.com/homni-labs/feature-toggle/issues), чтобы обсудить предлагаемые улучшения.
 
-Подробные рекомендации в [CONTRIBUTING.md](CONTRIBUTING.md).
+Если у вас есть вопросы, идеи или предложения по проекту &mdash; пишите в [Telegram](https://t.me/zaytsev_dv) или на почту zaytsev.dmitry9228@gmail.com.
 
-**Безопасность** &mdash; если вы обнаружили уязвимость, **не** создавайте публичный issue. Свяжитесь напрямую через [Telegram](https://t.me/zaytsev_dv) или email zaytsev.dmitry9228@gmail.com.
+**Безопасность** &mdash; если вы обнаружили уязвимость, **не** создавайте публичный issue. Используйте те же контакты выше.
 
 ---
 
@@ -244,12 +373,19 @@ mvn spring-boot:run
 - [ ] Java SDK &mdash; нативная клиентская библиотека
 - [ ] Аудит-лог &mdash; отслеживание всех действий пользователей
 - [ ] Вебхуки &mdash; оповещение внешних систем при изменении состояния тогглов
-- [ ] Тогглы по расписанию &mdash; автоматическое включение/выключение в заданное время
+- [ ] Тогглы по расписанию &mdash; автоматическое включение / выключение в заданное время
 - [ ] Обнаружение устаревших тогглов &mdash; поиск тогглов, не менявшихся N дней
 - [ ] Поддержка Authentik &mdash; готовая интеграция как альтернативный OIDC-провайдер
-- [ ] Бэкенд на Quarkus &mdash; альтернативный легковесный runtime, готовый к использованию из коробки
-- [ ] Observability &mdash; встроенные метрики, трейсинг и health checks для бэкенда
-- [ ] Кастомизация дизайна &mdash; настройка цветов, логотипа и брендинга фронтенда через конфигурацию
+- [ ] Бэкенд на Quarkus &mdash; альтернативный легковесный runtime
+- [ ] Кастомизация дизайна &mdash; настройка цветов, логотипа и брендинга через конфигурацию
+
+---
+
+## Сообщество и поддержка
+
+- [GitHub Issues](https://github.com/homni-labs/feature-toggle/issues) &mdash; баг-репорты и запросы на фичи
+- [Telegram](https://t.me/zaytsev_dv) &mdash; вопросы и обратная связь
+- Email: zaytsev.dmitry9228@gmail.com
 
 ---
 

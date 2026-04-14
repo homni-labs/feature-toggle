@@ -1,50 +1,73 @@
 <div align="center">
 
-<img src="assets/feature_toggle_logo.jpeg" width="600" alt="Homni Feature Toggle">
+<table><tr>
+<td><img src="assets/feature_toggle_logo.jpeg" width="80" alt="Homni Feature Toggle"></td>
+<td>
+<h1>Homni Feature Toggle</h1>
+<p>Open-source, self-hosted feature flag platform with per-project RBAC, multi-environment control, and built-in observability.</p>
+</td>
+</tr></table>
 
-# Homni Feature Toggle
-
-Self-hosted feature flag platform with per-project RBAC, multi-environment control, and API key authentication.
+<p>
+  <a href="#quick-start">Quick Start</a> &middot;
+  <a href="http://localhost:8080/docs">Swagger UI</a> &middot;
+  <a href="#roadmap">Roadmap</a>
+</p>
 
 **[Документация на русском](README_RU.md)**
 
 [![Build](https://github.com/homni-labs/feature-toggle/actions/workflows/ci.yml/badge.svg)](https://github.com/homni-labs/feature-toggle/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![GitHub Release](https://img.shields.io/github/v/release/homni-labs/feature-toggle)](https://github.com/homni-labs/feature-toggle/releases)
-[![GitHub Stars](https://img.shields.io/github/stars/homni-labs/feature-toggle?style=social)](https://github.com/homni-labs/feature-toggle)
 [![Docker Pulls](https://img.shields.io/docker/pulls/zaytsevdv/homni-feature-toggle)](https://hub.docker.com/r/zaytsevdv/homni-feature-toggle)
+[![GitHub Stars](https://img.shields.io/github/stars/homni-labs/feature-toggle?style=social)](https://github.com/homni-labs/feature-toggle)
 
 </div>
 
 ---
 
-## Screenshots
+## Table of Contents
 
-> Coming soon &mdash; screenshots of the dashboard, toggle management, and project settings will be added here.
+- [Why Homni?](#why-homni)
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Architecture](#architecture)
+- [Tech Stack](#tech-stack)
+- [Observability](#observability)
+- [API](#api)
+- [Configuration](#configuration)
+- [Permissions](#permissions)
+- [Local Development](#local-development)
+- [Contributing](#contributing)
+- [Roadmap](#roadmap)
+- [Community & Support](#community--support)
+- [License](#license)
 
 ---
 
 ## Why Homni?
 
-Most feature toggle solutions are either SaaS-only or lack proper access control. Homni gives you:
+Most feature flag tools are SaaS-only, charge per seat, or lack granular access control. Homni is different:
 
 - **Full ownership** &mdash; deploy on your infrastructure, no vendor lock-in, no usage limits, no data leaving your network
 - **Per-project isolation** &mdash; each project has its own toggles, environments, team members, and API keys
 - **Granular RBAC** &mdash; Platform Admin, Project Admin, Editor, Reader &mdash; clear permission boundaries at every level
 - **Environment-aware toggles** &mdash; create custom environments per project, not limited to DEV / STAGING / PROD
 - **Contract-first API** &mdash; OpenAPI 3.0 spec with code-generated controllers, Swagger UI, and scoped API keys
+- **Built-in observability** &mdash; Prometheus, Grafana, and Loki pre-configured out of the box with three ready-to-use dashboards
 
 ---
 
 ## Features
 
-- &#x1F512; **OIDC Authentication** &mdash; Keycloak out of the box with a custom login page, compatible with any OpenID Connect provider. OAuth 2.1 + PKCE
-- &#x1F4C1; **Project Isolation** &mdash; each project is a self-contained workspace with its own toggles, environments, members, and API keys
-- &#x1F6E1; **Granular RBAC** &mdash; Platform Admin, Project Admin, Editor, Reader with a fine-grained permissions matrix
-- &#x1F30D; **Multi-Environment Control** &mdash; platform-wide default environments configured at startup; pick which ones to bootstrap into each new project, and add custom ones per project later
-- &#x1F511; **API Key Authentication** &mdash; scoped read-only tokens with optional expiration for CI/CD pipelines and external services
-- &#x1F4D6; **OpenAPI 3.0** &mdash; full API contract with interactive Swagger UI at `/docs`
-- &#x1F5A5; **Admin Dashboard** &mdash; full-featured Flutter Web UI for managing projects, toggles, environments, members, and API keys
+- &#x1F512; **[OIDC Authentication](#configuration)** &mdash; Keycloak with a custom branded SSO login page (dark & light themes) out of the box. Compatible with any OpenID Connect provider (Authentik, Auth0, Okta, etc.). OAuth 2.1 + PKCE
+- &#x1F4C1; **[Project Isolation](#architecture)** &mdash; each project is a self-contained workspace with its own toggles, environments, members, and API keys
+- &#x1F6E1; **[Granular RBAC](#permissions)** &mdash; Platform Admin, Project Admin, Editor, Reader with a fine-grained permissions matrix
+- &#x1F30D; **[Multi-Environment Control](#configuration)** &mdash; platform-wide default environments configured at startup; pick which ones to bootstrap into each new project, and add custom ones per project later
+- &#x1F511; **[API Key Authentication](#api)** &mdash; scoped read-only tokens with optional expiration for CI/CD pipelines and external services
+- &#x1F4D6; **[OpenAPI 3.0](#api)** &mdash; full API contract with interactive Swagger UI at `/docs`
+- &#x1F5A5; **[Admin Dashboard](#architecture)** &mdash; full-featured Flutter Web UI for managing projects, toggles, environments, members, and API keys
+- &#x1F4CA; **[Built-in Observability](#observability)** &mdash; Prometheus metrics, Grafana dashboards, Loki log aggregation, and Promtail &mdash; all pre-configured and ready to use
 
 ---
 
@@ -57,7 +80,7 @@ git clone https://github.com/homni-labs/feature-toggle.git
 cd feature-toggle
 ```
 
-**2. Start infrastructure** (PostgreSQL + Keycloak + Backend)
+**2. Start infrastructure** (PostgreSQL + Keycloak + Backend + Observability)
 
 ```bash
 docker compose up -d
@@ -77,66 +100,102 @@ flutter run -d chrome --web-port 3000
 | Backend API | [localhost:8080](http://localhost:8080) | Bearer JWT |
 | Swagger UI | [localhost:8080/docs](http://localhost:8080/docs) | &mdash; |
 | Keycloak Admin | [localhost:8180](http://localhost:8180) | `admin` / `admin` |
+| Grafana | [localhost:3001](http://localhost:3001) | `admin` / `admin` |
+| Prometheus | [localhost:9090](http://localhost:9090) | &mdash; |
 
-> Pre-configured test users: `admin` / `admin` (Platform Admin), `editor` / `editor`, `reader` / `reader`.
-
----
-
-## Local Development
-
-### Prerequisites
-
-| Tool | Version | |
-|------|---------|---|
-| Java | 21+ | [adoptium.net](https://adoptium.net) |
-| Maven | 3.9+ | [maven.apache.org](https://maven.apache.org) |
-| Flutter | &ge; 3.2 | [flutter.dev](https://flutter.dev) |
-| Docker & Compose | Latest | [docs.docker.com](https://docs.docker.com) |
-
-### Backend
-
-Start only the infrastructure services:
+> **Test users (Keycloak):** `admin` / `admin` (Platform Admin), `editor` / `editor`, `reader` / `reader`.
 
 ```bash
-docker compose up -d postgres keycloak
-```
-
-Run the backend from source (defaults match the Compose setup, no extra configuration needed):
-
-```bash
-cd backend
-mvn spring-boot:run
-```
-
-The backend starts on port **8080**. Liquibase runs migrations automatically on startup.
-
-### Frontend
-
-```bash
-cd frontend
-flutter pub get
-flutter run -d chrome --web-port 3000
-```
-
-The frontend starts on port **3000**. Default config points to `localhost:8080` (API) and `localhost:8180` (Keycloak) &mdash; no extra configuration needed.
-
-### Verify everything works
-
-```bash
-# Backend health check
+# Verify the backend is running
 curl http://localhost:8080/actuator/health
-# Expected: {"status":"UP"}
+# {"status":"UP"}
 ```
 
-- Swagger UI: open [localhost:8080/docs](http://localhost:8080/docs)
-- Frontend: open [localhost:3000](http://localhost:3000), log in with `admin` / `admin`
+> [!TIP]
+> All default values are pre-configured for local development &mdash; no `.env` files or manual setup required.
 
 ---
 
 ## Architecture
 
-- **Backend** &mdash; Hexagonal Architecture (Ports & Adapters) with strict DDD. The domain layer has zero framework dependencies. See [backend/README.md](backend/README.md) for details.
-- **Frontend** &mdash; Clean Architecture with feature-based modules (auth, projects, toggles, environments, members, API keys, users). BLoC/Cubit state management with sealed states. See [frontend/README.md](frontend/README.md) for details.
+```
+                          ┌───────────┐
+                          │  Browser  │
+                          └─────┬─────┘
+                                │
+                   ┌────────────┼────────────┐
+                   │            │             │
+            ┌──────┴──────┐    │     ┌───────┴───────┐
+            │  Frontend   │    │     │     SSO       │
+            │  Dashboard  │◄───┘     │  OIDC Provider│
+            │   :3000     │          │   :8180       │
+            └──────┬──────┘          └───────┬───────┘
+                   │                         │
+                   │    REST API + JWT        │
+                   └────────────┬─────────────┘
+                                │
+                     ┌──────────┴──────────┐
+                     │      Backend        │
+                     │  Hexagonal / DDD    │
+                     │      :8080          │
+                     └──────────┬──────────┘
+                                │
+                     ┌──────────┴──────────┐
+                     │     Database        │
+                     │      :5432          │
+                     └─────────────────────┘
+
+  ┌─ Observability ─────────────────────────────────────┐
+  │                                                     │
+  │  Metrics    :9090  ◄── Backend, SSO, Database       │
+  │  Logs       :3100  ◄── All containers               │
+  │  Dashboards :3001  ──► 3 pre-built dashboards       │
+  │                                                     │
+  └─────────────────────────────────────────────────────┘
+```
+
+**Backend** &mdash; Hexagonal Architecture (Ports & Adapters) with strict Domain-Driven Design. The domain layer has zero framework dependencies; use-cases are pure orchestrators; repositories implement outbound ports via JDBC. See [backend/README.md](backend/README.md) for details.
+
+**Frontend** &mdash; Clean Architecture with feature-based modules (auth, projects, toggles, environments, members, API keys, users). BLoC/Cubit state management with sealed states and functional error handling. OIDC/PKCE authentication with redirect to the SSO login page. See [frontend/README.md](frontend/README.md) for details.
+
+---
+
+## Tech Stack
+
+| Layer | Technologies |
+|-------|-------------|
+| Backend | Java, Spring Boot, Spring Security, OAuth2, Liquibase, OpenAPI Generator |
+| Database | PostgreSQL |
+| Auth | Keycloak (bundled example, works with any OIDC provider) |
+| Frontend | Flutter Web, flutter_bloc (Cubit), fpdart, go_router |
+| Observability | Prometheus, Grafana, Loki, Promtail |
+| Infra | Docker, Docker Compose, Nginx |
+
+---
+
+## Observability
+
+Homni ships with a production-grade observability stack. Everything is pre-configured &mdash; just `docker compose up` and open Grafana.
+
+**Pre-built Grafana dashboards** (in `observability/grafana/dashboards/`):
+
+| Dashboard | Metrics |
+|-----------|---------|
+| Spring Boot | HTTP request rates, latencies (p50 / p95 / p99), JVM memory, GC pauses |
+| Keycloak | Authentication events, active sessions, token operations |
+| PostgreSQL | Active connections, query performance, database size |
+
+**Metrics pipeline:** Backend exposes `/actuator/prometheus` (Micrometer) &rarr; Prometheus scrapes every 10s &rarr; Grafana visualizes.
+
+**Log pipeline:** All Docker containers &rarr; Promtail &rarr; Loki &rarr; Grafana Explore view.
+
+| Component | URL | Purpose |
+|-----------|-----|---------|
+| Grafana | [localhost:3001](http://localhost:3001) | Dashboards & log exploration |
+| Prometheus | [localhost:9090](http://localhost:9090) | Raw metrics & PromQL queries |
+
+> [!NOTE]
+> The dashboards in `observability/` are ready-to-use examples. Customize them or add your own via Grafana provisioning.
 
 ---
 
@@ -146,7 +205,21 @@ Authentication: **Bearer JWT** (OIDC) or **`X-API-Key`** header.
 
 Full OpenAPI 3.0 spec: [`backend/src/main/resources/openapi/api.yaml`](backend/src/main/resources/openapi/api.yaml)
 
-Interactive Swagger UI available at [`/docs`](http://localhost:8080/docs) when the backend is running.
+Interactive Swagger UI: [`/docs`](http://localhost:8080/docs) (when backend is running)
+
+**Error response format** (consistent envelope):
+
+```json
+{
+  "payload": {
+    "code": "NOT_FOUND",
+    "message": "Toggle not found"
+  },
+  "meta": {
+    "timestamp": "2026-04-14T12:00:00Z"
+  }
+}
+```
 
 ---
 
@@ -165,27 +238,31 @@ All variables have sensible defaults for local development.
 | `DB_PASSWORD` | `homni` | Database password |
 | `OIDC_ISSUER_URI` | `http://localhost:8180/realms/feature-toggle` | OIDC issuer URI |
 | `OIDC_ADMIN_EMAIL` | `admin@homni.local` | First admin email (bootstrapped on first login) |
-| `APP_DEFAULT_ENVIRONMENTS` | `DEV,TEST,PROD` | Comma-separated list of default environment names that can be bootstrapped into a new project at creation. Each name must match `^[A-Z][A-Z0-9_]*$` (max 50 chars). Set to an empty string to disable defaults entirely. The list is validated on startup &mdash; the application refuses to boot if any name is invalid or duplicated. |
+| `APP_DEFAULT_ENVIRONMENTS` | `DEV,TEST,PROD` | Comma-separated default environment names. Each must match `^[A-Z][A-Z0-9_]*$` (max 50 chars). Validated on startup. |
 | `CORS_ORIGINS` | `*` | Allowed CORS origins |
 | `LOG_LEVEL` | `DEBUG` | Application log level |
+| `OBSERVABILITY_ENABLED` | `true` | Enable Prometheus metrics endpoint |
+| `PROMETHEUS_URL` | `http://localhost:9090` | Prometheus server URL |
 
-> **Default environments**: when a Platform Admin creates a project, the UI shows checkboxes for each name from `APP_DEFAULT_ENVIRONMENTS`. The selected ones are materialized as independent rows inside the new project &mdash; deleting `DEV` from one project does not affect any other project. Defaults live only in config (the single source of truth); they are never duplicated as table rows.
+> **Default environments:** when creating a project, the UI shows checkboxes for each name from `APP_DEFAULT_ENVIRONMENTS`. Selected ones are materialized as independent rows inside the new project &mdash; deleting `DEV` from one project does not affect any other. Defaults live only in config (the single source of truth).
 
 ### Frontend
 
-Compile-time constants passed via `--dart-define`. Defaults work out of the box for local development.
+Runtime configuration loaded from `/config.json` at startup. Defaults work out of the box for local development.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `API_BASE_URL` | `http://localhost:8080` | Backend API URL |
-| `OIDC_ISSUER` | `http://localhost:8180/realms/feature-toggle` | OIDC issuer |
-| `OIDC_CLIENT_ID` | `feature-toggle-frontend` | OIDC client ID |
-| `OIDC_REDIRECT_URI` | `http://localhost:3000/callback` | OIDC redirect URI |
-| `OIDC_POST_LOGOUT_REDIRECT_URI` | `http://localhost:3000/` | Post-logout redirect URI |
+| `apiBaseUrl` | `http://localhost:8081` | Backend API URL |
+| `oidcIssuer` | `http://localhost:8180/realms/feature-toggle` | OIDC issuer |
+| `oidcClientId` | `feature-toggle-frontend` | OIDC client ID |
+| `oidcRedirectUri` | `http://localhost:3000/callback` | OIDC redirect URI |
+| `oidcPostLogoutRedirectUri` | `http://localhost:3000/` | Post-logout redirect URI |
 
 ### Bring Your Own SSO
 
-If you use your own OIDC provider instead of the bundled Keycloak, make sure the provider has a user with the email you want as the first platform administrator. Then set that email in the backend environment:
+The bundled Keycloak in `sso/` is an example setup with pre-configured test users and custom login themes (dark & light). **Homni works with any OIDC/OAuth provider** &mdash; Authentik, Auth0, Okta, Google Workspace, or any other provider that supports OpenID Connect.
+
+To use your own provider:
 
 ```yaml
 # docker-compose.yml
@@ -193,14 +270,6 @@ backend:
   environment:
     OIDC_ISSUER_URI: https://your-sso.example.com/realms/your-realm
     OIDC_ADMIN_EMAIL: your-admin@example.com
-```
-
-Or as an environment variable when running from source:
-
-```bash
-OIDC_ISSUER_URI=https://your-sso.example.com/realms/your-realm \
-OIDC_ADMIN_EMAIL=your-admin@example.com \
-mvn spring-boot:run
 ```
 
 On first login with that email, the user is automatically promoted to **Platform Admin**.
@@ -224,6 +293,66 @@ On first login with that email, the user is automatically promoted to **Platform
 
 ---
 
+## Local Development
+
+### Prerequisites
+
+| Tool | Version |
+|------|---------|
+| Java | 21+ |
+| Maven | 3.9+ |
+| Flutter | 3.2+ |
+| Docker & Compose | Latest |
+
+### Backend
+
+Start only the infrastructure services:
+
+```bash
+docker compose up -d postgres keycloak
+```
+
+Run the backend from source (defaults match the Compose setup):
+
+```bash
+cd backend
+mvn spring-boot:run
+```
+
+The backend starts on port **8080**. Liquibase runs migrations automatically on startup.
+
+### Frontend
+
+```bash
+cd frontend
+flutter pub get
+flutter run -d chrome --web-port 3000
+```
+
+The frontend starts on port **3000**. Default config points to `localhost:8081` (API) and `localhost:8180` (Keycloak).
+
+### Verify
+
+```bash
+curl http://localhost:8080/actuator/health
+# {"status":"UP"}
+```
+
+- Swagger UI: [localhost:8080/docs](http://localhost:8080/docs)
+- Frontend: [localhost:3000](http://localhost:3000), log in with `admin` / `admin`
+
+### With Observability
+
+To run the full observability stack during local development:
+
+```bash
+docker compose up -d postgres keycloak prometheus grafana loki promtail postgres-exporter
+```
+
+Grafana will be available at [localhost:3001](http://localhost:3001) with all three dashboards pre-configured.
+
+---
+
 ## Contributing
 
 1. Fork the repository
@@ -233,9 +362,9 @@ On first login with that email, the user is automatically promoted to **Platform
 
 Please [open an issue](https://github.com/homni-labs/feature-toggle/issues) first for major changes to discuss what you'd like to improve.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+If you have questions, ideas, or suggestions about the project &mdash; feel free to reach out via [Telegram](https://t.me/zaytsev_dv) or email at zaytsev.dmitry9228@gmail.com.
 
-**Security** &mdash; if you discover a vulnerability, please **do not** open a public issue. Reach out directly via [Telegram](https://t.me/zaytsev_dv) or email at zaytsev.dmitry9228@gmail.com.
+**Security** &mdash; if you discover a vulnerability, please **do not** open a public issue. Use the same contacts above.
 
 ---
 
@@ -244,12 +373,19 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 - [ ] Java SDK &mdash; native client library
 - [ ] Audit log &mdash; track all user actions
 - [ ] Webhooks &mdash; notify external systems on toggle state changes
-- [ ] Scheduled toggles &mdash; auto-enable/disable at a specific time
+- [ ] Scheduled toggles &mdash; auto-enable / disable at a specific time
 - [ ] Stale toggle detection &mdash; find toggles that haven't changed in N days
 - [ ] Authentik support &mdash; out-of-the-box integration as an alternative OIDC provider
-- [ ] Quarkus backend &mdash; alternative lightweight runtime, ready to use out of the box
-- [ ] Observability &mdash; built-in metrics, tracing, and health checks for the backend
+- [ ] Quarkus backend &mdash; alternative lightweight runtime
 - [ ] Frontend theming &mdash; customizable colors, logo, and branding via configuration
+
+---
+
+## Community & Support
+
+- [GitHub Issues](https://github.com/homni-labs/feature-toggle/issues) &mdash; bug reports and feature requests
+- [Telegram](https://t.me/zaytsev_dv) &mdash; direct questions and feedback
+- Email: zaytsev.dmitry9228@gmail.com
 
 ---
 
