@@ -4,6 +4,7 @@
  */
 package com.homni.togli.sdk.internal;
 
+import com.homni.togli.sdk.FeatureToggle;
 import com.homni.togli.sdk.TogliClient;
 import com.homni.togli.sdk.application.port.out.TogliApiPort;
 import com.homni.togli.sdk.domain.exception.TogliException;
@@ -16,6 +17,8 @@ import com.homni.togli.sdk.domain.model.TogglePage;
 import com.homni.togli.sdk.infrastructure.cache.ToggleCache;
 import com.homni.togli.sdk.infrastructure.config.TogliConfiguration;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -149,6 +152,47 @@ final class DefaultTogliClient implements TogliClient {
     @Override
     public ProjectInfo projectInfo() {
         return project;
+    }
+
+    /** {@inheritDoc} */
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T proxy(Class<T> type, T enabled, T disabled) {
+        Objects.requireNonNull(type, "type must not be null");
+        Objects.requireNonNull(enabled, "enabled must not be null");
+        Objects.requireNonNull(disabled, "disabled must not be null");
+
+        if (!type.isInterface()) {
+            throw new IllegalArgumentException(type.getName() + " must be an interface");
+        }
+
+        return (T) Proxy.newProxyInstance(
+                type.getClassLoader(),
+                new Class<?>[]{type},
+                (proxy, method, args) -> {
+                    if (method.getDeclaringClass() == Object.class) {
+                        return method.invoke(enabled, args);
+                    }
+
+                    FeatureToggle annotation = method.getAnnotation(FeatureToggle.class);
+                    if (annotation == null) {
+                        return method.invoke(enabled, args);
+                    }
+
+                    String env = annotation.environment().isEmpty()
+                            ? config.defaultEnvironment
+                            : annotation.environment();
+
+                    Object target = (env != null && isEnabled(annotation.name(), env))
+                            ? enabled : disabled;
+
+                    try {
+                        return method.invoke(target, args);
+                    } catch (InvocationTargetException e) {
+                        throw e.getCause();
+                    }
+                }
+        );
     }
 
     /** {@inheritDoc} */

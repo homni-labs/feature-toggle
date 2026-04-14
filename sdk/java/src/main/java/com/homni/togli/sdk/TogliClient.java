@@ -144,6 +144,41 @@ public interface TogliClient extends AutoCloseable {
     <T> T evaluate(String toggleName, String environmentName, Supplier<T> enabled, Supplier<T> disabled);
 
     /**
+     * Creates a dynamic proxy that routes method calls based on toggle state.
+     *
+     * <p>Methods annotated with {@link FeatureToggle} are routed:
+     * <ul>
+     *   <li>toggle ON &rarr; calls the method on the {@code enabled} implementation</li>
+     *   <li>toggle OFF &rarr; calls the method on the {@code disabled} implementation</li>
+     * </ul>
+     *
+     * <p>Methods <b>without</b> the annotation always call the {@code enabled}
+     * (primary) implementation.
+     *
+     * <pre>{@code
+     * public interface CheckoutService {
+     *     @FeatureToggle(name = "new-checkout")
+     *     PaymentResult checkout(Order order);
+     * }
+     *
+     * CheckoutService service = client.proxy(
+     *     CheckoutService.class,
+     *     new NewCheckout(),
+     *     new LegacyCheckout());
+     *
+     * service.checkout(order); // routed by toggle state
+     * }</pre>
+     *
+     * @param <T>      the interface type
+     * @param type     the interface class, must not be {@code null}
+     * @param enabled  implementation used when the toggle is ON, must not be {@code null}
+     * @param disabled implementation used when the toggle is OFF, must not be {@code null}
+     * @return a proxy that routes calls based on toggle state
+     * @throws IllegalArgumentException if {@code type} is not an interface
+     */
+    <T> T proxy(Class<T> type, T enabled, T disabled);
+
+    /**
      * Forces an immediate cache refresh.
      *
      * <p>If caching is disabled, this method is a no-op.

@@ -68,7 +68,7 @@ Most feature flag tools are SaaS-only, charge per seat, or lack granular access 
 - &#x1F4D6; **[OpenAPI 3.0](#api)** &mdash; full API contract with interactive Swagger UI at `/docs`
 - &#x1F5A5; **[Admin Dashboard](#architecture)** &mdash; full-featured Flutter Web UI for managing projects, toggles, environments, members, and API keys
 - &#x1F4CA; **[Built-in Observability](#observability)** &mdash; Prometheus metrics, Grafana dashboards, Loki log aggregation, and Promtail &mdash; all pre-configured and ready to use
-- &#x2615; **[Java SDK](#sdk)** &mdash; zero-dependency client library with background polling cache, `onError` callback, thread-safe
+- &#x2615; **[Java SDK](#sdk)** &mdash; zero-dependency client library with `isEnabled()`, `evaluate()`, interface proxy routing, background cache
 
 ---
 

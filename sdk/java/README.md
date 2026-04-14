@@ -14,7 +14,7 @@ Zero-dependency Java client for the [Togli](../../README.md) feature toggle plat
 
 - **Zero dependencies** &mdash; only `java.*` imports, Java 17+
 - **Thread-safe** with background polling cache
-- **Simple API** &mdash; `client.isEnabled("toggle", "PROD")`
+- **Simple API** &mdash; `client.isEnabled("toggle", "PROD")`, `evaluate()`, `proxy()`
 - **API Key authentication** &mdash; read-only, project-scoped
 - **Auto-refresh** &mdash; picks up toggle changes automatically
 - **Error listener** &mdash; `onError` callback without crashing
@@ -58,12 +58,35 @@ if (client.isEnabled("beta-feature", "DEV")) { ... }
 client.evaluate("new-checkout",
     () -> processNewCheckout(),     // toggle ON
     () -> processLegacyCheckout()); // toggle OFF
-
-// Fallback with return value
-String theme = client.evaluate("dark-mode",
-    () -> "dark",
-    () -> "light");
 ```
+
+### Interface Proxy
+
+Route entire service implementations based on toggle state using `@FeatureToggle` on interface methods:
+
+```java
+// 1. Define interface with @FeatureToggle
+public interface CheckoutService {
+
+    @FeatureToggle(name = "new-checkout")
+    PaymentResult checkout(Order order);
+}
+
+// 2. Two implementations
+public class NewCheckout implements CheckoutService { ... }
+public class LegacyCheckout implements CheckoutService { ... }
+
+// 3. Create proxy — SDK routes calls based on toggle state
+CheckoutService service = client.proxy(
+    CheckoutService.class,
+    new NewCheckout(),       // toggle ON  → here
+    new LegacyCheckout());   // toggle OFF → here
+
+// 4. Use as a normal service
+service.checkout(order);  // SDK checks toggle, routes automatically
+```
+
+If `environment` is not specified in the annotation, the `defaultEnvironment` from the builder is used. You can also set it explicitly: `@FeatureToggle(name = "dark-mode", environment = "PROD")`.
 
 > [!NOTE]
 > The client is designed to live for the entire application lifecycle. Resources are released automatically via a JVM shutdown hook &mdash; no need to call `close()` manually.
@@ -74,16 +97,16 @@ String theme = client.evaluate("dark-mode",
 
 ```java
 TogliClient client = TogliClients.builder()
-    .baseUrl("http://localhost:8080")         // required
-    .apiKey("hft_your_api_key")               // required
-    .projectSlug("my-project")                // required
-    .defaultEnvironment("PROD")              // for isEnabled(name) shorthand
-    .pollingInterval(Duration.ofMinutes(30))  // default: 60 min
-    .requestTimeout(Duration.ofSeconds(5))    // default: 10s
-    .connectTimeout(Duration.ofSeconds(3))    // default: 5s
-    .onError(e -> logger.warn(e.getMessage()))// error callback
-    .onReady(c -> logger.info("Loaded"))      // initialization callback
-    .cacheDisabled()                          // fetch on every call (no polling)
+    .baseUrl("http://localhost:8080")
+    .apiKey("hft_your_api_key")
+    .projectSlug("my-project")
+    .defaultEnvironment("PROD")
+    .pollingInterval(Duration.ofMinutes(30))
+    .requestTimeout(Duration.ofSeconds(5))
+    .connectTimeout(Duration.ofSeconds(3))
+    .onError(e -> logger.warn(e.getMessage()))
+    .onReady(c -> logger.info("Loaded"))
+    .cacheDisabled()
     .build();
 ```
 

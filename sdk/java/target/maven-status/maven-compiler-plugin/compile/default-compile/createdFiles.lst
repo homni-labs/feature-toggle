@@ -1,5 +1,6 @@
 com/homni/togli/sdk/infrastructure/http/HttpTogliApiAdapter.class
 com/homni/togli/sdk/infrastructure/cache/CacheFactory.class
+com/homni/togli/sdk/FeatureToggle.class
 com/homni/togli/sdk/infrastructure/http/JsonParser.class
 com/homni/togli/sdk/domain/model/EnvironmentInfo.class
 com/homni/togli/sdk/domain/exception/TogliServerException.class

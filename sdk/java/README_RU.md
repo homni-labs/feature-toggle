@@ -14,7 +14,7 @@ Zero-dependency Java-клиент для платформы [Togli](../../README
 
 - **Zero dependencies** &mdash; только `java.*` импорты, Java 17+
 - **Потокобезопасный** с фоновым кэшем и polling
-- **Простой API** &mdash; `client.isEnabled("toggle", "PROD")`
+- **Простой API** &mdash; `client.isEnabled("toggle", "PROD")`, `evaluate()`, `proxy()`
 - **API Key аутентификация** &mdash; read-only, привязан к проекту
 - **Auto-refresh** &mdash; подхватывает изменения тогглов автоматически
 - **Error listener** &mdash; `onError` callback без падения приложения
@@ -58,12 +58,35 @@ if (client.isEnabled("beta-feature", "DEV")) { ... }
 client.evaluate("new-checkout",
     () -> processNewCheckout(),     // тогл ON
     () -> processLegacyCheckout()); // тогл OFF
-
-// Fallback с возвратом значения
-String theme = client.evaluate("dark-mode",
-    () -> "dark",
-    () -> "light");
 ```
+
+### Interface Proxy
+
+Роутинг целых реализаций сервисов по состоянию тогла через `@FeatureToggle` на методах интерфейса:
+
+```java
+// 1. Определяем интерфейс с @FeatureToggle
+public interface CheckoutService {
+
+    @FeatureToggle(name = "new-checkout")
+    PaymentResult checkout(Order order);
+}
+
+// 2. Две реализации
+public class NewCheckout implements CheckoutService { ... }
+public class LegacyCheckout implements CheckoutService { ... }
+
+// 3. Создаём proxy — SDK роутит вызовы по состоянию тогла
+CheckoutService service = client.proxy(
+    CheckoutService.class,
+    new NewCheckout(),       // тогл ON  → сюда
+    new LegacyCheckout());   // тогл OFF → сюда
+
+// 4. Используем как обычный сервис
+service.checkout(order);  // SDK проверяет тогл, роутит автоматически
+```
+
+Если `environment` не указан в аннотации — используется `defaultEnvironment` из builder. Можно указать явно: `@FeatureToggle(name = "dark-mode", environment = "PROD")`.
 
 > [!NOTE]
 > Клиент рассчитан на весь жизненный цикл приложения. Ресурсы освобождаются автоматически через JVM shutdown hook &mdash; вызывать `close()` вручную не нужно.
@@ -74,16 +97,16 @@ String theme = client.evaluate("dark-mode",
 
 ```java
 TogliClient client = TogliClients.builder()
-    .baseUrl("http://localhost:8080")         // обязательно
-    .apiKey("hft_your_api_key")               // обязательно
-    .projectSlug("my-project")                // обязательно
-    .defaultEnvironment("PROD")              // для isEnabled(name) без env
-    .pollingInterval(Duration.ofMinutes(30))  // по умолчанию: 60 мин
-    .requestTimeout(Duration.ofSeconds(5))    // по умолчанию: 10с
-    .connectTimeout(Duration.ofSeconds(3))    // по умолчанию: 5с
-    .onError(e -> logger.warn(e.getMessage()))// callback при ошибке
-    .onReady(c -> logger.info("Loaded"))      // callback при инициализации
-    .cacheDisabled()                          // fetch на каждый вызов (без polling)
+    .baseUrl("http://localhost:8080")
+    .apiKey("hft_your_api_key")
+    .projectSlug("my-project")
+    .defaultEnvironment("PROD")
+    .pollingInterval(Duration.ofMinutes(30))
+    .requestTimeout(Duration.ofSeconds(5))
+    .connectTimeout(Duration.ofSeconds(3))
+    .onError(e -> logger.warn(e.getMessage()))
+    .onReady(c -> logger.info("Loaded"))
+    .cacheDisabled()
     .build();
 ```
 
