@@ -1,14 +1,8 @@
 <div align="center">
-<img src="assets/images/feature_toggle_flutter.jpeg" width="600" alt="Feature Toggle">
 
-# Feature Toggle Frontend
+# Homni Feature Toggle &mdash; Frontend
 
-Панель управления для [Homni Feature Toggle](https://github.com/homni-labs/feature-toggle) &mdash; Flutter Web, Clean Architecture, BLoC/Cubit, OIDC/PKCE.
-
-[![Flutter](https://img.shields.io/badge/Flutter-3.x-blue?logo=flutter)](https://flutter.dev)
-[![BLoC](https://img.shields.io/badge/State-BLoC-blueviolet)](https://bloclibrary.dev)
-[![Architecture](https://img.shields.io/badge/Architecture-Clean-teal)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](../LICENSE)
+Панель управления для Homni Feature Toggle.
 
 **[English documentation](README.md)** &middot; **[README проекта](../README_RU.md)**
 
@@ -32,6 +26,14 @@ lib/
         └── presentation/     Экраны, виджеты
 ```
 
+**Правило зависимостей:**
+
+```
+presentation → application → domain ← infrastructure
+```
+
+Domain ни от чего не зависит. Infrastructure реализует порты домена. Presentation общается только с application.
+
 ### Архитектурные решения
 
 | Решение | Обоснование |
@@ -40,29 +42,9 @@ lib/
 | **BLoC/Cubit** | Предсказуемый state management с sealed-классами &mdash; без булевых флагов, без неоднозначных состояний |
 | **Either&lt;Failure, T&gt;** | Ошибки &mdash; значения, не исключения. Каждый сбой типизирован, ничего не теряется |
 | **Value Objects** | `UserId`, `Email`, `ProjectRole` вместо строк &mdash; невалидное состояние невозможно |
-| **Один use-case = один класс** | Единственная ответственность, инъекция через конструктор, максимум 15 строк |
+| **Один use-case = один класс** | Единственная ответственность, инъекция через конструктор, ~15 строк |
 | **UI не знает об инфраструктуре** | Presentation-слой не имеет ни одного импорта HTTP, JSON или хранилища |
-
-### Правило зависимостей
-
-```
-presentation → application → domain ← infrastructure
-```
-
-Domain ни от чего не зависит. Infrastructure реализует порты домена. Presentation общается только с application.
-
----
-
-## Стек технологий
-
-| Слой | Технология | Почему |
-|------|-----------|--------|
-| Фреймворк | Flutter 3.x (Web) | Единая кодовая база, быстрая итерация, web-first |
-| State | flutter_bloc | Cubit + Dart 3 sealed states, предсказуемые rebuild-ы |
-| Ошибки | fpdart | `Either<Failure, T>` &mdash; функциональная обработка без исключений |
-| DI | get_it | Легковесный, без кодогенерации, lazy singletons |
-| Авторизация | OIDC/PKCE | Стандартный протокол, работает с Keycloak или любым провайдером |
-| HTTP | package:http | Минимальная зависимость, достаточная для REST |
+| **Contract-first API** | Контроллеры генерируются из OpenAPI-спецификации, не пишутся вручную |
 
 ---
 
@@ -92,4 +74,30 @@ Sealed-состояния и `Either<Failure, T>` работают вместе:
 
 ---
 
-<p align="center">Сделано с заботой в <a href="https://github.com/homni-labs">Homni Labs</a></p>
+## Модули
+
+| Модуль | Ответственность |
+|--------|----------------|
+| `auth` | OIDC/PKCE аутентификация, управление токенами |
+| `projects` | CRUD проектов, поиск, архивация |
+| `toggles` | CRUD тогглов, состояние per-environment |
+| `environments` | Управление окружениями в проекте |
+| `members` | Членство в проекте и назначение ролей |
+| `api_keys` | Выпуск и отзыв API-ключей |
+| `users` | Администрирование пользователей платформы |
+
+---
+
+## Разработка
+
+```bash
+cd frontend
+flutter pub get
+flutter run -d chrome --web-port 3000
+```
+
+Конфигурация загружается из `web/config.json` при старте &mdash; никаких `--dart-define` для локальной разработки не нужно.
+
+---
+
+<p align="center"><a href="../README_RU.md">&larr; К README проекта</a></p>

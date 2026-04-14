@@ -1,12 +1,8 @@
 <div align="center">
-<img src="assets/feature_toggle_logo_spring.jpeg" width="600" alt="Feature Toggle Logo">
 
-# Homni Feature Toggle Backend
+# Homni Feature Toggle &mdash; Backend
 
-[![Build](https://github.com/homni-labs/feature-toggle/actions/workflows/ci.yml/badge.svg)](https://github.com/homni-labs/feature-toggle/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](../LICENSE)
-
-> REST API powering Homni Feature Toggle &mdash; Spring Boot 3.4, Hexagonal Architecture, PostgreSQL, OpenAPI 3.0, OIDC + API key auth.
+REST API powering Homni Feature Toggle.
 
 **[Russian documentation](README_RU.md)** &middot; **[Project README](../README.md)**
 
@@ -19,23 +15,10 @@
 Hexagonal Architecture (Ports & Adapters) with strict DDD.
 
 ```
-domain/           Pure Java: aggregates, value objects, domain exceptions
-application/      Use-cases (one class = one operation) + port interfaces
-infrastructure/   Spring, JDBC adapters, REST controllers, security
+infrastructure  →  application  →  domain
 ```
 
-**`infrastructure` &rarr; `application` &rarr; `domain`** &mdash; the domain knows nothing about Spring, databases, or HTTP.
-
-| Decision | Rationale |
-|----------|-----------|
-| No Hibernate/JPA | Native SQL via `JdbcClient` &mdash; full control, no magic |
-| No Lombok | Explicit constructors, `public final` fields for value objects |
-| Always Valid | Domain objects validate invariants in constructors |
-| Composition Root | Use-cases wired via `@Configuration`, not `@Service` |
-
----
-
-## Project Structure
+The domain knows nothing about Spring, databases, or HTTP.
 
 ```
 src/main/java/com/homni/featuretoggle/
@@ -54,34 +37,16 @@ src/main/java/com/homni/featuretoggle/
     └── config/                    CompositionRootConfig, SecurityConfig, CORS
 ```
 
----
+### Design Decisions
 
-## Error Handling
-
-Domain exceptions map to HTTP status codes via `GlobalExceptionHandler`:
-
-| Exception | HTTP | Code |
-|-----------|------|------|
-| `DomainNotFoundException` | 404 | `NOT_FOUND` |
-| `DomainAccessDeniedException` | 403 | `FORBIDDEN` |
-| `DomainConflictException` | 409 | `CONFLICT` |
-| `DomainValidationException` | 422 | `VALIDATION_ERROR` |
-
-Security errors: `TOKEN_EXPIRED` (401), `UNAUTHORIZED` (401), `FORBIDDEN` (403).
-
-All error responses follow a consistent format:
-
-```json
-{
-  "payload": {
-    "code": "NOT_FOUND",
-    "message": "Toggle not found"
-  },
-  "meta": {
-    "timestamp": "2026-04-09T12:00:00Z"
-  }
-}
-```
+| Decision | Rationale |
+|----------|-----------|
+| No Hibernate/JPA | Native SQL via `JdbcClient` &mdash; full control, no magic |
+| No Lombok | Explicit constructors, `public final` fields for value objects |
+| Always Valid | Domain objects validate invariants in constructors |
+| Composition Root | Use-cases wired via `@Configuration`, not `@Service` |
+| One use-case = one class | Single responsibility, max ~15 lines of orchestration |
+| Contract-first API | Controllers generated from `openapi/api.yaml`, not hand-written |
 
 ---
 
@@ -97,29 +62,48 @@ Dual authentication chain:
 
 ---
 
+## Error Handling
+
+Domain exceptions map to HTTP status codes via `GlobalExceptionHandler`:
+
+| Exception | HTTP | Code |
+|-----------|------|------|
+| `DomainNotFoundException` | 404 | `NOT_FOUND` |
+| `DomainAccessDeniedException` | 403 | `FORBIDDEN` |
+| `DomainConflictException` | 409 | `CONFLICT` |
+| `DomainValidationException` | 422 | `VALIDATION_ERROR` |
+
+Security errors: `TOKEN_EXPIRED` (401), `UNAUTHORIZED` (401), `FORBIDDEN` (403).
+
+---
+
 ## Default Environments
 
-The platform exposes a configurable list of "default" environment names (`DEV`, `TEST`, `PROD`, ...) that can be bootstrapped into a new project at creation time. The list lives in `application.yml` under `app.environments.defaults` (overridable via the `APP_DEFAULT_ENVIRONMENTS` env variable).
+The platform exposes a configurable list of default environment names (`DEV`, `TEST`, `PROD`, ...) that can be bootstrapped into a new project at creation time. The list lives in `application.yml` under `app.environments.defaults` (overridable via `APP_DEFAULT_ENVIRONMENTS`).
 
-- **Single source of truth** &mdash; defaults live only in config, never in the database. Each project that selects them gets its own independent rows in the `environment` table, so deleting `DEV` from one project does not affect any other. Names sharing a string across projects are independent entities scoped to `(project_id, name)`.
-- **Fail-fast validation** &mdash; `EnvironmentDefaultsValidator` (an `ApplicationRunner`) validates each name on startup using the same `Environment.validateAndNormalize` rules as user-created envs &mdash; we never duplicate the regex. The application refuses to boot if any name violates `^[A-Z][A-Z0-9_]*$`, exceeds 50 characters, or duplicates another entry.
-- **API surface** &mdash; `GET /environments/defaults` returns the configured list to the UI. `POST /projects` accepts an optional `environments` array which must be a subset of the configured defaults; custom names at creation are rejected with `422 VALIDATION_ERROR`. Custom envs can still be added after creation via `POST /projects/{projectId}/environments`.
-- **Field semantics** &mdash; on `POST /projects`: omitting `environments` bootstraps **all** configured defaults (backward-compatible behaviour); passing an empty array explicitly opts out and creates the project with no environments; passing a non-empty subset bootstraps exactly those names.
-- **Empty list** &mdash; set `APP_DEFAULT_ENVIRONMENTS=` to disable defaults entirely; new projects will be created without any environments and the user must add them manually after creation.
+- **Single source of truth** &mdash; defaults live only in config, never in the database. Each project gets its own independent rows in the `environment` table.
+- **Fail-fast validation** &mdash; `EnvironmentDefaultsValidator` validates each name on startup using the same `Environment.validateAndNormalize` rules. The application refuses to boot if any name violates `^[A-Z][A-Z0-9_]*$`, exceeds 50 characters, or duplicates another entry.
+- **Field semantics** on `POST /projects`: omitting `environments` bootstraps **all** defaults; empty array opts out; non-empty subset bootstraps exactly those names.
 
 ---
 
-## Tech Stack
+## Development
 
-| | Technology |
-|-|-----------|
-| Runtime | Java 21, Spring Boot 3.4 |
-| Database | PostgreSQL 17, Liquibase |
-| Security | Spring Security, OAuth2 Resource Server (JWT) |
-| Auth Provider | Keycloak (or any OIDC provider) |
-| API | OpenAPI 3.0, code-generated controllers |
-| CI/CD | GitHub Actions &rarr; Docker Hub |
+```bash
+# Start dependencies
+docker compose up -d postgres keycloak
+
+# Run from source
+cd backend
+mvn spring-boot:run
+```
+
+The backend starts on port **8080**. Liquibase runs migrations automatically.
+
+API spec: [`src/main/resources/openapi/api.yaml`](src/main/resources/openapi/api.yaml)
+
+Swagger UI: [localhost:8080/docs](http://localhost:8080/docs)
 
 ---
 
-<p align="center">Made with care by <a href="https://github.com/homni-labs">Homni Labs</a></p>
+<p align="center"><a href="../README.md">&larr; Back to project</a></p>

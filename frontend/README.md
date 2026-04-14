@@ -1,16 +1,10 @@
 <div align="center">
-<img src="assets/images/feature_toggle_flutter.jpeg" width="600" alt="Feature Toggle">
 
-# Feature Toggle Frontend
+# Homni Feature Toggle &mdash; Frontend
 
-Admin dashboard for [Homni Feature Toggle](https://github.com/homni-labs/feature-toggle) &mdash; Flutter Web, Clean Architecture, BLoC/Cubit, OIDC/PKCE.
+Admin dashboard for Homni Feature Toggle.
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.x-blue?logo=flutter)](https://flutter.dev)
-[![BLoC](https://img.shields.io/badge/State-BLoC-blueviolet)](https://bloclibrary.dev)
-[![Architecture](https://img.shields.io/badge/Architecture-Clean-teal)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](../LICENSE)
-
-**[Документация на русском](README_RU.md)** &middot; **[Project README](../README.md)**
+**[Russian documentation](README_RU.md)** &middot; **[Project README](../README.md)**
 
 </div>
 
@@ -32,6 +26,14 @@ lib/
         └── presentation/     Screens, widgets
 ```
 
+**Dependency rule:**
+
+```
+presentation → application → domain ← infrastructure
+```
+
+Domain depends on nothing. Infrastructure implements domain ports. Presentation talks to application only.
+
 ### Design Decisions
 
 | Decision | Rationale |
@@ -40,29 +42,9 @@ lib/
 | **BLoC/Cubit** | Predictable state management with sealed classes &mdash; no boolean flags, no ambiguous states |
 | **Either&lt;Failure, T&gt;** | Errors are values, not exceptions. Every failure is typed, nothing is silently swallowed |
 | **Value Objects** | `UserId`, `Email`, `ProjectRole` instead of raw strings &mdash; invalid state is unrepresentable |
-| **One use-case = one class** | Single-responsibility, constructor-injected, max 15 lines |
+| **One use-case = one class** | Single-responsibility, constructor-injected, max ~15 lines |
 | **No infrastructure in UI** | Presentation layer has zero knowledge of HTTP, JSON, or storage |
-
-### Dependency Rule
-
-```
-presentation → application → domain ← infrastructure
-```
-
-Domain depends on nothing. Infrastructure implements domain ports. Presentation talks to application only.
-
----
-
-## Tech Stack
-
-| Layer | Technology | Why |
-|-------|-----------|-----|
-| Framework | Flutter 3.x (Web) | Single codebase, fast iteration, web-first |
-| State | flutter_bloc | Cubit + Dart 3 sealed states, predictable rebuilds |
-| Errors | fpdart | `Either<Failure, T>` &mdash; functional error handling without exceptions |
-| DI | get_it | Lightweight, no code generation, lazy singletons |
-| Auth | OIDC/PKCE | Standard protocol, works with Keycloak or any provider |
-| HTTP | package:http | Minimal dependency, sufficient for REST |
+| **Contract-first API** | Controllers generated from OpenAPI spec, not hand-written |
 
 ---
 
@@ -92,4 +74,30 @@ Sealed states and `Either<Failure, T>` work together:
 
 ---
 
-<p align="center">Made with care by <a href="https://github.com/homni-labs">Homni Labs</a></p>
+## Feature Modules
+
+| Module | Responsibility |
+|--------|---------------|
+| `auth` | OIDC/PKCE authentication, token management |
+| `projects` | Project CRUD, search, archive |
+| `toggles` | Feature toggle CRUD, per-environment state |
+| `environments` | Environment management per project |
+| `members` | Project membership and role assignment |
+| `api_keys` | API key issuance, revocation |
+| `users` | Platform user administration |
+
+---
+
+## Development
+
+```bash
+cd frontend
+flutter pub get
+flutter run -d chrome --web-port 3000
+```
+
+Runtime config is loaded from `web/config.json` at startup &mdash; no `--dart-define` flags needed for local development.
+
+---
+
+<p align="center"><a href="../README.md">&larr; Back to project</a></p>
