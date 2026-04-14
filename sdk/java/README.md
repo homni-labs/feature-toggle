@@ -46,13 +46,23 @@ TogliClient client = TogliClients.builder()
     .onReady(c -> logger.info("Togli loaded {} toggles", c.allToggles().size()))
     .build();
 
-// Simple — uses the default environment set in the builder
+// Simple check — uses the default environment
 if (client.isEnabled("dark-mode")) {
     renderDarkMode();
 }
 
-// Explicit environment — always works, even without defaultEnvironment
+// Explicit environment
 if (client.isEnabled("beta-feature", "DEV")) { ... }
+
+// Fallback — run different logic based on toggle state
+client.evaluate("new-checkout",
+    () -> processNewCheckout(),     // toggle ON
+    () -> processLegacyCheckout()); // toggle OFF
+
+// Fallback with return value
+String theme = client.evaluate("dark-mode",
+    () -> "dark",
+    () -> "light");
 ```
 
 > [!NOTE]

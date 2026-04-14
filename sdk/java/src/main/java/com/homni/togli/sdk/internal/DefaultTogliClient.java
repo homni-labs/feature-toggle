@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Default implementation of {@link TogliClient}.
@@ -148,6 +149,38 @@ final class DefaultTogliClient implements TogliClient {
     @Override
     public ProjectInfo projectInfo() {
         return project;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void evaluate(String toggleName, Runnable enabled, Runnable disabled) {
+        if (isEnabled(toggleName)) {
+            enabled.run();
+        } else {
+            disabled.run();
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void evaluate(String toggleName, String environmentName, Runnable enabled, Runnable disabled) {
+        if (isEnabled(toggleName, environmentName)) {
+            enabled.run();
+        } else {
+            disabled.run();
+        }
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public <T> T evaluate(String toggleName, Supplier<T> enabled, Supplier<T> disabled) {
+        return isEnabled(toggleName) ? enabled.get() : disabled.get();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public <T> T evaluate(String toggleName, String environmentName, Supplier<T> enabled, Supplier<T> disabled) {
+        return isEnabled(toggleName, environmentName) ? enabled.get() : disabled.get();
     }
 
     /** {@inheritDoc} */

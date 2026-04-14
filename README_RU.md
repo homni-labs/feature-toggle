@@ -178,6 +178,11 @@ TogliClient client = TogliClients.builder()
     .build();
 
 if (client.isEnabled("dark-mode")) { ... }
+
+// Fallback: тогл ON → новая логика, тогл OFF → старая
+client.evaluate("new-checkout",
+    () -> processNew(),
+    () -> processLegacy());
 ```
 
 Подробнее в [sdk/java/README_RU.md](sdk/java/README_RU.md).

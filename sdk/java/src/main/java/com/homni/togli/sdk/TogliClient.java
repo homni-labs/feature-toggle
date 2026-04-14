@@ -9,6 +9,7 @@ import com.homni.togli.sdk.domain.model.ProjectInfo;
 import com.homni.togli.sdk.domain.model.Toggle;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Primary entry point for the Togli feature toggle SDK.
@@ -85,6 +86,62 @@ public interface TogliClient extends AutoCloseable {
      * @return the project info, never {@code null}
      */
     ProjectInfo projectInfo();
+
+    /**
+     * Evaluates a toggle in the default environment and runs one of two actions.
+     *
+     * <pre>{@code
+     * client.evaluate("dark-mode",
+     *     () -> renderNewDesign(),
+     *     () -> renderOldDesign());
+     * }</pre>
+     *
+     * @param toggleName the toggle name (case-sensitive), must not be {@code null}
+     * @param enabled    action to run if the toggle is on
+     * @param disabled   action to run if the toggle is off
+     * @throws IllegalStateException if no default environment is configured
+     */
+    void evaluate(String toggleName, Runnable enabled, Runnable disabled);
+
+    /**
+     * Evaluates a toggle in the given environment and runs one of two actions.
+     *
+     * @param toggleName      the toggle name (case-sensitive), must not be {@code null}
+     * @param environmentName the environment name, must not be {@code null}
+     * @param enabled         action to run if the toggle is on
+     * @param disabled        action to run if the toggle is off
+     */
+    void evaluate(String toggleName, String environmentName, Runnable enabled, Runnable disabled);
+
+    /**
+     * Evaluates a toggle in the default environment and returns one of two values.
+     *
+     * <pre>{@code
+     * String theme = client.evaluate("dark-mode",
+     *     () -> "dark",
+     *     () -> "light");
+     * }</pre>
+     *
+     * @param <T>        the return type
+     * @param toggleName the toggle name (case-sensitive), must not be {@code null}
+     * @param enabled    supplier called if the toggle is on
+     * @param disabled   supplier called if the toggle is off
+     * @return the result of the chosen supplier
+     * @throws IllegalStateException if no default environment is configured
+     */
+    <T> T evaluate(String toggleName, Supplier<T> enabled, Supplier<T> disabled);
+
+    /**
+     * Evaluates a toggle in the given environment and returns one of two values.
+     *
+     * @param <T>             the return type
+     * @param toggleName      the toggle name (case-sensitive), must not be {@code null}
+     * @param environmentName the environment name, must not be {@code null}
+     * @param enabled         supplier called if the toggle is on
+     * @param disabled        supplier called if the toggle is off
+     * @return the result of the chosen supplier
+     */
+    <T> T evaluate(String toggleName, String environmentName, Supplier<T> enabled, Supplier<T> disabled);
 
     /**
      * Forces an immediate cache refresh.
