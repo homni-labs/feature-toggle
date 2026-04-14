@@ -31,6 +31,7 @@
 - [Features](#features)
 - [Quick Start](#quick-start)
 - [Architecture](#architecture)
+- [SDK](#sdk)
 - [Tech Stack](#tech-stack)
 - [Observability](#observability)
 - [API](#api)
@@ -67,6 +68,7 @@ Most feature flag tools are SaaS-only, charge per seat, or lack granular access 
 - &#x1F4D6; **[OpenAPI 3.0](#api)** &mdash; full API contract with interactive Swagger UI at `/docs`
 - &#x1F5A5; **[Admin Dashboard](#architecture)** &mdash; full-featured Flutter Web UI for managing projects, toggles, environments, members, and API keys
 - &#x1F4CA; **[Built-in Observability](#observability)** &mdash; Prometheus metrics, Grafana dashboards, Loki log aggregation, and Promtail &mdash; all pre-configured and ready to use
+- &#x2615; **[Java SDK](#sdk)** &mdash; zero-dependency client library with background polling cache, `onError` callback, thread-safe
 
 ---
 
@@ -155,6 +157,33 @@ curl http://localhost:8080/actuator/health
 
 ---
 
+## SDK
+
+Official client libraries for integrating Togli into your applications.
+
+| SDK | Language | Status |
+|-----|----------|--------|
+| [Java SDK](sdk/java/README.md) | Java 17+ | Available |
+
+### Java SDK
+
+Zero-dependency client library with background polling cache.
+
+```java
+TogliClient client = TogliClients.builder()
+    .baseUrl("http://localhost:8080")
+    .apiKey("hft_your_api_key")
+    .projectSlug("my-project")
+    .defaultEnvironment("PROD")
+    .build();
+
+if (client.isEnabled("dark-mode")) { ... }
+```
+
+See [sdk/java/README.md](sdk/java/README.md) for full documentation.
+
+---
+
 ## Tech Stack
 
 | Layer | Technologies |
@@ -163,6 +192,7 @@ curl http://localhost:8080/actuator/health
 | Database | PostgreSQL |
 | Auth | Keycloak (bundled example, works with any OIDC provider) |
 | Frontend | Flutter Web, flutter_bloc (Cubit), fpdart, go_router |
+| SDK | Java (zero-dependency, java.net.http, Proxy API) |
 | Observability | Prometheus, Grafana, Loki, Promtail |
 | Infra | Docker, Docker Compose, Nginx |
 
@@ -368,7 +398,7 @@ If you have questions, ideas, or suggestions about the project &mdash; feel free
 
 ## Roadmap
 
-- [ ] Java SDK &mdash; native client library
+- [x] Java SDK &mdash; zero-dependency client library ([sdk/java](sdk/java/README.md))
 - [ ] Audit log &mdash; track all user actions
 - [ ] Webhooks &mdash; notify external systems on toggle state changes
 - [ ] Scheduled toggles &mdash; auto-enable / disable at a specific time

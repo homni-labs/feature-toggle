@@ -31,6 +31,7 @@
 - [Возможности](#возможности)
 - [Быстрый старт](#быстрый-старт)
 - [Архитектура](#архитектура)
+- [SDK](#sdk)
 - [Технологический стек](#технологический-стек)
 - [Мониторинг](#мониторинг)
 - [API](#api)
@@ -67,6 +68,7 @@
 - &#x1F4D6; **[OpenAPI 3.0](#api)** &mdash; полный контракт API с интерактивным Swagger UI по адресу `/docs`
 - &#x1F5A5; **[Панель управления](#архитектура)** &mdash; полнофункциональный Flutter Web UI для управления проектами, тогглами, окружениями, участниками и API-ключами
 - &#x1F4CA; **[Встроенный мониторинг](#мониторинг)** &mdash; метрики Prometheus, дашборды Grafana, агрегация логов Loki и Promtail &mdash; всё настроено и готово к использованию
+- &#x2615; **[Java SDK](#sdk)** &mdash; zero-dependency клиентская библиотека с фоновым polling кэшем, `onError` callback, потокобезопасность
 
 ---
 
@@ -155,6 +157,33 @@ curl http://localhost:8080/actuator/health
 
 ---
 
+## SDK
+
+Официальные клиентские библиотеки для интеграции Togli в ваши приложения.
+
+| SDK | Язык | Статус |
+|-----|------|--------|
+| [Java SDK](sdk/java/README_RU.md) | Java 17+ | Доступен |
+
+### Java SDK
+
+Zero-dependency клиентская библиотека с фоновым polling кэшем.
+
+```java
+TogliClient client = TogliClients.builder()
+    .baseUrl("http://localhost:8080")
+    .apiKey("hft_your_api_key")
+    .projectSlug("my-project")
+    .defaultEnvironment("PROD")
+    .build();
+
+if (client.isEnabled("dark-mode")) { ... }
+```
+
+Подробнее в [sdk/java/README_RU.md](sdk/java/README_RU.md).
+
+---
+
 ## Технологический стек
 
 | Слой | Технологии |
@@ -163,6 +192,7 @@ curl http://localhost:8080/actuator/health
 | База данных | PostgreSQL |
 | Аутентификация | Keycloak (пример из коробки, работает с любым OIDC-провайдером) |
 | Frontend | Flutter Web, flutter_bloc (Cubit), fpdart, go_router |
+| SDK | Java (zero-dependency, java.net.http, Proxy API) |
 | Мониторинг | Prometheus, Grafana, Loki, Promtail |
 | Инфраструктура | Docker, Docker Compose, Nginx |
 
@@ -368,7 +398,7 @@ Grafana будет доступна по адресу [localhost:3001](http://lo
 
 ## Дорожная карта
 
-- [ ] Java SDK &mdash; нативная клиентская библиотека
+- [x] Java SDK &mdash; zero-dependency клиентская библиотека ([sdk/java](sdk/java/README.md))
 - [ ] Аудит-лог &mdash; отслеживание всех действий пользователей
 - [ ] Вебхуки &mdash; оповещение внешних систем при изменении состояния тогглов
 - [ ] Тогглы по расписанию &mdash; автоматическое включение / выключение в заданное время

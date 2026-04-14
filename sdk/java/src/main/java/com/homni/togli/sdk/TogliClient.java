@@ -1,0 +1,101 @@
+/*
+ * Copyright (c) Homni Labs
+ * Licensed under the MIT License
+ */
+package com.homni.togli.sdk;
+
+import com.homni.togli.sdk.domain.model.EnvironmentInfo;
+import com.homni.togli.sdk.domain.model.ProjectInfo;
+import com.homni.togli.sdk.domain.model.Toggle;
+
+import java.util.List;
+
+/**
+ * Primary entry point for the Togli feature toggle SDK.
+ *
+ * <p>Usage:
+ * <pre>{@code
+ * TogliClient client = TogliClients.builder()
+ *     .baseUrl("http://localhost:8080")
+ *     .apiKey("hft_your_api_key")
+ *     .projectSlug("my-project")
+ *     .onError(e -> logger.warn("Toggle error: {}", e.getMessage()))
+ *     .build();
+ *
+ * if (client.isEnabled("dark-mode", "PROD")) {
+ *     // feature is on
+ * }
+ * }</pre>
+ *
+ * @see TogliClients#builder()
+ */
+public interface TogliClient extends AutoCloseable {
+
+    /**
+     * Checks whether the named toggle is enabled in the default environment.
+     *
+     * <p>Requires a default environment to be set via
+     * {@code .defaultEnvironment("PROD")} in the builder. Returns {@code false}
+     * if the toggle does not exist or if any error occurs.
+     *
+     * @param toggleName the toggle name (case-sensitive), must not be {@code null}
+     * @return {@code true} if the toggle is enabled, {@code false} otherwise
+     * @throws IllegalStateException if no default environment is configured
+     */
+    boolean isEnabled(String toggleName);
+
+    /**
+     * Checks whether the named toggle is enabled in the given environment.
+     *
+     * <p>Returns {@code false} if the toggle does not exist, if the environment
+     * is not assigned to the toggle, or if any error occurs (network, server, etc.).
+     *
+     * @param toggleName      the toggle name (case-sensitive), must not be {@code null}
+     * @param environmentName the environment name to evaluate, must not be {@code null}
+     * @return {@code true} if the toggle is enabled, {@code false} otherwise
+     */
+    boolean isEnabled(String toggleName, String environmentName);
+
+    /**
+     * Retrieves the full toggle definition by name.
+     *
+     * @param toggleName the toggle name (case-sensitive), must not be {@code null}
+     * @return the toggle, never {@code null}
+     * @throws com.homni.togli.sdk.domain.exception.TogliNotFoundException if the toggle does not exist
+     */
+    Toggle toggle(String toggleName);
+
+    /**
+     * Returns all toggles in the project.
+     *
+     * @return an unmodifiable list of all toggles, never {@code null}
+     */
+    List<Toggle> allToggles();
+
+    /**
+     * Returns all environments in the project.
+     *
+     * @return an unmodifiable list of all environments, never {@code null}
+     */
+    List<EnvironmentInfo> allEnvironments();
+
+    /**
+     * Returns the cached project information.
+     *
+     * @return the project info, never {@code null}
+     */
+    ProjectInfo projectInfo();
+
+    /**
+     * Forces an immediate cache refresh.
+     *
+     * <p>If caching is disabled, this method is a no-op.
+     */
+    void refresh();
+
+    /**
+     * Closes this client and releases all resources (e.g. background polling threads).
+     */
+    @Override
+    void close();
+}
