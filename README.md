@@ -56,7 +56,7 @@ Most feature flag tools are SaaS-only, charge per seat, or lock you out of granu
 - **Granular RBAC** &mdash; Platform Admin, Project Admin, Editor, Reader &mdash; clear permission boundaries at every level
 - **Environment-aware toggles** &mdash; create custom environments per project, not limited to DEV / STAGING / PROD
 - **Contract-first API** &mdash; OpenAPI 3.0 spec with code-generated controllers, Swagger UI, and scoped API keys
-- **Built-in observability** &mdash; Prometheus, Grafana, and Loki pre-configured out of the box with three ready-to-use dashboards
+- **Built-in observability** &mdash; Prometheus, Grafana, and Loki pre-configured out of the box with five ready-to-use dashboards
 
 ---
 
@@ -154,7 +154,7 @@ curl http://localhost:8080/actuator/health
   │                                                     │
   │  Metrics     ◄── Backend, SSO, Database             │
   │  Logs        ◄── All containers                     │
-  │  Dashboards  ──► 3 pre-built dashboards             │
+  │  Dashboards  ──► 5 pre-built dashboards             │
   │                                                     │
   └─────────────────────────────────────────────────────┘
 ```
@@ -228,6 +228,8 @@ Togli comes with a full observability stack out of the box. Everything just work
 | Spring Boot | HTTP request rates, latencies (p50 / p95 / p99), JVM memory, GC pauses |
 | Keycloak | Authentication events, active sessions, token operations |
 | PostgreSQL | Active connections, query performance, database size |
+| Node Exporter | CPU, memory, disk, network of the host machine |
+| cAdvisor | Per-container CPU, memory, network usage |
 
 **Metrics pipeline:** Backend exposes `/actuator/prometheus` (Micrometer) &rarr; Prometheus scrapes every 10s &rarr; Grafana visualizes.
 

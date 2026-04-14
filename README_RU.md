@@ -56,7 +56,7 @@
 - **Гранулярный RBAC** &mdash; Администратор платформы, Администратор проекта, Редактор, Читатель &mdash; чёткие границы прав на каждом уровне
 - **Управление окружениями** &mdash; создавайте кастомные окружения для каждого проекта, не ограничиваясь DEV / STAGING / PROD
 - **API по контракту** &mdash; спецификация OpenAPI 3.0 с кодогенерацией контроллеров, Swagger UI и скоупированными API-ключами
-- **Встроенный мониторинг** &mdash; Prometheus, Grafana и Loki настроены из коробки с тремя готовыми дашбордами
+- **Встроенный мониторинг** &mdash; Prometheus, Grafana и Loki настроены из коробки с пятью готовыми дашбордами
 
 ---
 
@@ -154,7 +154,7 @@ curl http://localhost:8080/actuator/health
   │                                                     │
   │  Metrics     ◄── Backend, SSO, Database             │
   │  Logs        ◄── All containers                     │
-  │  Dashboards  ──► 3 pre-built dashboards             │
+  │  Dashboards  ──► 5 pre-built dashboards             │
   │                                                     │
   └─────────────────────────────────────────────────────┘
 ```
@@ -228,6 +228,8 @@ Togli идёт с полным стеком мониторинга из коро
 | Spring Boot | HTTP-запросы (RPS), латентность (p50 / p95 / p99), JVM-память, GC-паузы |
 | Keycloak | События аутентификации, активные сессии, операции с токенами |
 | PostgreSQL | Активные соединения, производительность запросов, размер БД |
+| Node Exporter | CPU, память, диск, сеть хост-машины |
+| cAdvisor | CPU, память, сеть per-container |
 
 **Пайплайн метрик:** Backend &rarr; `/actuator/prometheus` (Micrometer) &rarr; Prometheus (скрейпинг каждые 10 сек) &rarr; Grafana.
 
