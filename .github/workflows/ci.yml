@@ -6,9 +6,31 @@ on:
       - '**'
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      sdk: ${{ steps.filter.outputs.sdk }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
+            sdk:
+              - 'sdk/java/**'
+
   # ── Backend ────────────────────────────────────────────────
   backend-build:
     name: Backend — Build
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,6 +43,8 @@ jobs:
   # ── Frontend ───────────────────────────────────────────────
   frontend-build:
     name: Frontend — Build
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,6 +62,8 @@ jobs:
   # ── Java SDK ──────────────────────────────────────────────
   sdk-build:
     name: SDK — Build & Test
+    needs: changes
+    if: needs.changes.outputs.sdk == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -50,4 +76,3 @@ jobs:
 
       - run: mvn verify -B
         working-directory: ./sdk/java
-
