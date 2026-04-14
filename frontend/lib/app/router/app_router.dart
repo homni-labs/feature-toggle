@@ -14,6 +14,7 @@ import 'package:togli_app/features/toggles/presentation/screen/toggles_screen.da
 import 'package:togli_app/features/environments/presentation/screen/environments_screen.dart';
 import 'package:togli_app/features/members/presentation/screen/members_screen.dart';
 import 'package:togli_app/features/api_keys/presentation/screen/api_keys_screen.dart';
+import 'package:togli_app/features/api_keys/presentation/screen/api_key_clients_screen.dart';
 import 'package:togli_app/features/projects/presentation/screen/project_settings_screen.dart';
 
 abstract final class AppRoutes {
@@ -101,6 +102,20 @@ GoRouter createAppRouter() {
             path: '/projects/:slug/api-keys',
             pageBuilder: (_, __) =>
                 const NoTransitionPage(child: ApiKeysPage()),
+          ),
+          GoRoute(
+            path: '/projects/:slug/api-keys/:apiKeyId/clients',
+            pageBuilder: (context, state) {
+              final apiKeyId = state.pathParameters['apiKeyId']!;
+              final extra = state.extra as Map<String, dynamic>?;
+              return NoTransitionPage(
+                child: ApiKeyClientsPage(
+                  apiKeyId: apiKeyId,
+                  apiKeyName: extra?['name'] as String? ?? '',
+                  maskedToken: extra?['maskedToken'] as String? ?? '',
+                ),
+              );
+            },
           ),
           GoRoute(
             path: '/projects/:slug/settings',

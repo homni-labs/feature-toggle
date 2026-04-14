@@ -9,9 +9,13 @@
 
 package com.homni.togli.infrastructure.security;
 
+import com.homni.togli.application.port.out.ApiKeyClientRepositoryPort;
 import com.homni.togli.application.port.out.ApiKeyRepositoryPort;
 import com.homni.togli.domain.model.ApiKey;
+import com.homni.togli.domain.model.ApiKeyClient;
+import com.homni.togli.domain.model.ClientType;
 import com.homni.togli.domain.model.TokenHash;
+import jakarta.annotation.PreDestroy;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +29,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Authenticates requests carrying an {@code X-API-Key} header.
@@ -37,9 +44,18 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
     private static final String API_KEY_HEADER = "X-API-Key";
 
     private final ApiKeyRepositoryPort apiKeyRepository;
+    private final ApiKeyClientRepositoryPort apiKeyClientRepository;
+    private final ExecutorService trackingExecutor;
 
-    ApiKeyAuthFilter(ApiKeyRepositoryPort apiKeyRepository) {
+    ApiKeyAuthFilter(ApiKeyRepositoryPort apiKeyRepository,
+                     ApiKeyClientRepositoryPort apiKeyClientRepository) {
         this.apiKeyRepository = apiKeyRepository;
+        this.apiKeyClientRepository = apiKeyClientRepository;
+        this.trackingExecutor = Executors.newSingleThreadExecutor(r -> {
+            Thread t = new Thread(r, "togli-client-tracker");
+            t.setDaemon(true);
+            return t;
+        });
     }
 
     @Override
@@ -63,11 +79,49 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 log.debug("API key authenticated: name={}, project={}, role={}",
                         apiKey.name, apiKey.projectId.value, apiKey.projectRole);
+
+                String serviceName = request.getHeader("X-Togli-Service");
+                if (serviceName == null || serviceName.isBlank()) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    response.setContentType("application/json");
+                    response.getWriter().write(
+                        "{\"payload\":{\"code\":\"MISSING_SERVICE_HEADER\","
+                        + "\"message\":\"X-Togli-Service header is required when using API key authentication\"},"
+                        + "\"meta\":{\"timestamp\":\"" + java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC) + "\"}}");
+                    return; // Don't continue filter chain
+                }
+
+                String namespace = request.getHeader("X-Togli-Namespace");
+                String sdkHeader = request.getHeader("X-Togli-SDK");
+                ClientType clientType = sdkHeader != null ? ClientType.SDK : ClientType.REST;
+
+                trackingExecutor.execute(() -> {
+                    try {
+                        apiKeyClientRepository.upsert(new ApiKeyClient(
+                            apiKey.id, apiKey.projectId, clientType,
+                            sdkHeader, serviceName, namespace));
+                    } catch (Exception e) {
+                        log.warn("Failed to track API key client: {}", e.getMessage());
+                    }
+                });
             } else {
                 log.debug("API key not found or invalid");
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    @PreDestroy
+    void shutdown() {
+        trackingExecutor.shutdown();
+        try {
+            if (!trackingExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                trackingExecutor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            trackingExecutor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 }

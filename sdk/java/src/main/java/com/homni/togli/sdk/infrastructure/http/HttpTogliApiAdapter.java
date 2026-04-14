@@ -39,6 +39,8 @@ import com.homni.togli.sdk.infrastructure.config.TogliConfiguration;
  */
 public final class HttpTogliApiAdapter implements TogliApiPort {
 
+    private static final String VERSION = "0.1.0";
+
     private final HttpClient httpClient;
     private final ApiUrls urls;
     private final String apiKey;
@@ -116,13 +118,20 @@ public final class HttpTogliApiAdapter implements TogliApiPort {
     // ---- HTTP ----
 
     private JsonObject executeGet(String url) {
-        HttpRequest request = HttpRequest.newBuilder()
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .GET()
                 .header("X-API-Key", apiKey)
                 .header("Accept", "application/json")
-                .timeout(config.requestTimeout)
-                .build();
+                .header("X-Togli-Service", config.serviceName)
+                .header("X-Togli-SDK", "togli-java/" + VERSION)
+                .timeout(config.requestTimeout);
+
+        if (config.namespace != null) {
+            builder.header("X-Togli-Namespace", config.namespace);
+        }
+
+        HttpRequest request = builder.build();
 
         HttpResponse<String> response;
         try {

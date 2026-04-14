@@ -8,7 +8,7 @@
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
   "bruteForceProtected": true,
-  "loginTheme": "dark-theme",
+  "loginTheme": "light-theme",
   "clients": [
     {
       "clientId": "togli-frontend",
@@ -16,7 +16,7 @@
       "enabled": true,
       "publicClient": true,
       "attributes": {
-        "login_theme": "dark-theme"
+        "login_theme": "light-theme"
       },
       "directAccessGrantsEnabled": true,
       "standardFlowEnabled": true,

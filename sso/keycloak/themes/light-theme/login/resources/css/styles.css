@@ -1,0 +1,220 @@
+/* ================================================================
+   Togli — Light Theme (Comic Panel)
+   Keycloak Login Theme
+   ================================================================ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --coral:#EF7B6C;--coral-dark:#E8585A;--coral-light:#F4A393;
+  --teal:#4ABFBF;--green:#7BC67E;--purple:#BBA8D9;--yellow:#F5C842;
+  --cream:#EDE9E0;--cream-light:#F5F2EB;--cream-dark:#DDD8CC;
+  --navy:#2D3047;--navy-light:#4A4E6A;
+}
+html,body{width:100%;height:100%;font-family:'Inter',system-ui,sans-serif;color:var(--navy);overflow:hidden}
+
+/* ================================================================
+   Layout
+   ================================================================ */
+.page{display:flex;height:100vh;width:100%;background:var(--coral);overflow:hidden}
+
+/* ── Left Panel ─────────────────────────────────────────────── */
+.panel{
+  flex:1 1 0%;min-width:0;
+  position:relative;
+  background:var(--coral);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:24px;padding:40px;z-index:1;overflow:hidden;
+}
+.panel-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.panel-bg canvas{width:100%;height:100%}
+
+/* ── Logo ───────────────────────────────────────────────────── */
+.logo{
+  position:relative;z-index:2;
+  width:280px;height:280px;border-radius:50%;overflow:hidden;
+  background:var(--cream-light);flex-shrink:0;
+  border:5px solid #fff;
+  box-shadow:0 8px 0 rgba(0,0,0,.15),0 20px 50px rgba(0,0,0,.12);
+  opacity:0;transform:scale(.7) rotate(-5deg);filter:blur(5px);
+}
+.logo img{width:100%;height:100%;object-fit:cover;display:block}
+.loaded .logo{animation:popIn .6s .15s cubic-bezier(.34,1.56,.64,1) forwards}
+
+/* ── Tagline ────────────────────────────────────────────────── */
+.tagline{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'Fredoka',sans-serif;flex-shrink:0}
+.tl-row{display:flex;gap:12px;align-items:baseline;white-space:nowrap}
+.w{
+  display:inline-block;line-height:1.1;
+  opacity:0;transform:scale(2);filter:blur(6px);
+  will-change:transform,opacity,filter;
+}
+.loaded .w-f{animation:slam .4s .45s cubic-bezier(.22,.68,.36,1.15) forwards}
+.loaded .w-p{animation:slam .4s .65s cubic-bezier(.22,.68,.36,1.15) forwards}
+.loaded .w-t{animation:slam .4s .85s cubic-bezier(.22,.68,.36,1.15) forwards}
+.loaded .w-i{animation:slam .4s 1.55s cubic-bezier(.22,.68,.36,1.15) forwards}
+.loaded .w-g{animation:slam .4s 1.85s cubic-bezier(.22,.68,.36,1.15) forwards}
+.loaded .w-g::after{animation:drawLine .4s 2.35s ease-out forwards}
+
+.w-f{--r:-5deg;font-size:46px;font-weight:700;color:#fff;
+  -webkit-text-stroke:1.5px rgba(0,0,0,.15);paint-order:stroke fill;
+  text-shadow:0 3px 0 rgba(0,0,0,.12)}
+.w-p{--r:3deg;font-size:46px;font-weight:700;color:var(--yellow);
+  -webkit-text-stroke:1.5px rgba(0,0,0,.15);paint-order:stroke fill;
+  text-shadow:0 3px 0 rgba(0,0,0,.12)}
+.w-t{--r:4deg;font-size:46px;font-weight:700;color:#fff;
+  -webkit-text-stroke:1.5px rgba(0,0,0,.15);paint-order:stroke fill;
+  text-shadow:0 3px 0 rgba(0,0,0,.12)}
+.w-i{--r:0deg;font-size:20px;font-weight:600;color:rgba(255,255,255,.5)}
+.w-g{--r:-3deg;font-size:62px;font-weight:700;color:var(--green);position:relative;
+  -webkit-text-stroke:2px rgba(0,0,0,.15);paint-order:stroke fill;
+  text-shadow:0 4px 0 rgba(0,0,0,.15)}
+.w-g::after{
+  content:'';position:absolute;left:4%;right:4%;bottom:-6px;height:5px;border-radius:3px;
+  background:var(--green);border:1.5px solid rgba(0,0,0,.15);
+  transform:scaleX(0);transform-origin:left;
+}
+
+@keyframes popIn{to{opacity:1;transform:scale(1) rotate(0);filter:blur(0)}}
+@keyframes slam{
+  0%{opacity:0;transform:scale(2) rotate(var(--r,0deg));filter:blur(6px)}
+  55%{opacity:1;transform:scale(.92) rotate(calc(var(--r,0deg)*.3));filter:blur(0)}
+  100%{opacity:1;transform:scale(1) rotate(var(--r,0deg));filter:blur(0)}
+}
+@keyframes drawLine{to{transform:scaleX(1)}}
+
+/* ── Origin line ───────────────────────────────────────────── */
+.origin-line{
+  position:relative;z-index:2;
+  font-family:'Fredoka',sans-serif;font-size:22px;font-weight:700;
+  color:rgba(255,255,255,.55);
+  -webkit-text-stroke:1px rgba(0,0,0,.1);
+  paint-order:stroke fill;
+  text-shadow:0 2px 0 rgba(0,0,0,.08);
+  margin-top:24px;
+  text-align:center;
+  max-width:360px;
+  line-height:1.3;
+  opacity:0;
+}
+.loaded .origin-line{animation:originIn .5s 2.5s ease-out forwards}
+@keyframes originIn{to{opacity:1}}
+
+/* ── Right Side ─────────────────────────────────────────────── */
+.right{
+  width:0;flex-shrink:0;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--cream-light);
+  overflow:hidden;z-index:2;
+  border-left:0px solid var(--navy);
+  background-image:radial-gradient(var(--cream-dark) 1.5px,transparent 1.5px);
+  background-size:16px 16px;
+}
+.loaded .right{animation:rightExpand .9s 2.8s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes rightExpand{
+  to{width:56%;border-left-width:4px}
+}
+
+.right-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.right-bg canvas{width:100%;height:100%}
+
+/* ── Comic Book Form ────────────────────────────────────────── */
+.form-area{
+  position:relative;z-index:2;max-width:400px;width:400px;flex-shrink:0;
+  opacity:0;transform:translateY(24px) scale(.96);
+}
+.loaded .form-area{animation:formIn .55s 3.8s cubic-bezier(.34,1.2,.64,1) forwards}
+@keyframes formIn{to{opacity:1;transform:translateY(0) scale(1)}}
+
+.comic-card{
+  max-width:400px;width:100%;background:#fff;
+  border:5px solid var(--navy);border-radius:8px;padding:32px;
+  box-shadow:8px 8px 0 var(--navy);position:relative;
+  transform:rotate(-1deg);
+}
+.comic-card h2{
+  font-family:'Fredoka',sans-serif;font-size:30px;font-weight:700;
+  margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;
+}
+.comic-card .card-subtitle{font-size:13px;color:var(--navy-light);opacity:.5;margin-bottom:22px}
+
+.comic-fi{
+  width:100%;padding:14px 16px;margin-bottom:12px;
+  border:3px solid var(--navy);border-radius:6px;background:#fff;
+  font-family:'Fredoka',sans-serif;font-size:15px;color:var(--navy);
+  box-shadow:3px 3px 0 var(--cream-dark);transition:all .15s;outline:none;
+}
+.comic-fi:focus{box-shadow:3px 3px 0 var(--coral);border-color:var(--coral)}
+.comic-fi:nth-of-type(2):focus{box-shadow:3px 3px 0 var(--teal);border-color:var(--teal)}
+.comic-fi::placeholder{color:var(--navy-light);opacity:.3}
+
+.comic-btn{
+  width:100%;height:56px;border:4px solid var(--navy);border-radius:6px;
+  background:var(--yellow);color:var(--navy);cursor:pointer;
+  font-family:'Fredoka',sans-serif;font-size:18px;font-weight:700;
+  text-transform:uppercase;letter-spacing:2px;
+  box-shadow:5px 5px 0 var(--navy);transition:all .1s;margin-top:4px;
+}
+.comic-btn:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--navy)}
+.comic-btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--navy)}
+
+/* ── Skip animations when returning with error ────────────────── */
+.has-error .panel{flex:none;width:44%}
+.has-error .right{width:56%;border-left-width:4px}
+.has-error .logo{opacity:1;transform:none;filter:none}
+.has-error .w{opacity:1;transform:scale(1) rotate(var(--r,0deg));filter:none}
+.has-error .w-g::after{transform:scaleX(1)}
+.has-error .origin-line{opacity:1}
+.has-error .form-area{opacity:1;transform:none}
+.has-error .loaded .panel,
+.has-error .loaded .right,
+.has-error .loaded .logo,
+.has-error .loaded .w,
+.has-error .loaded .w-g::after,
+.has-error .loaded .origin-line,
+.has-error .loaded .form-area{animation:none !important}
+
+/* ── Alert / error ──────────────────────────────────────────── */
+.alert{
+  padding:14px 18px;border-radius:8px;font-size:14px;
+  margin-bottom:16px;border:3px solid;
+  font-family:'Fredoka',sans-serif;font-weight:600;
+  box-shadow:3px 3px 0 rgba(0,0,0,.08);
+  animation:alertShake .4s ease-out;
+}
+.alert-error{background:rgba(232,88,90,.12);border-color:var(--coral-dark);color:var(--coral-dark)}
+.alert-success{background:rgba(123,198,126,.12);border-color:var(--green);color:#3a7a3d}
+.alert-warning{background:rgba(245,200,66,.12);border-color:var(--yellow);color:#8a7020}
+.alert-info{background:rgba(74,191,191,.12);border-color:var(--teal);color:#2a8a8a}
+
+@keyframes alertShake{
+  0%{transform:translateX(0)}
+  20%{transform:translateX(-8px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(2px)}
+  100%{transform:translateX(0)}
+}
+
+/* ── Mobile ─────────────────────────────────────────────────── */
+@media(max-width:860px){
+  .page{flex-direction:column}
+  .panel{flex:1 1 100%}
+  .right{width:100%;height:0;border-left:none;border-top:0px solid var(--navy)}
+  .loaded .right{animation:rightExpandMob .9s 2.8s cubic-bezier(.4,0,.2,1) forwards}
+  @keyframes rightExpandMob{to{height:60vh;flex-shrink:0;border-top-width:4px}}
+  .logo{width:180px;height:180px}
+  .w-f,.w-p,.w-t{font-size:34px}
+  .w-g{font-size:48px}
+  .w-i{font-size:17px}
+  .form-area{width:auto;max-width:380px}
+}
+
+/* ── Accessibility ──────────────────────────────────────────── */
+@media(prefers-reduced-motion:reduce){
+  .logo,.w,.origin-line,.form-area,.right{
+    animation:none !important;opacity:1 !important;
+    transform:none !important;filter:none !important;
+  }
+  .w-g::after{animation:none !important;transform:scaleX(1) !important}
+  .right{width:56% !important;border-left-width:4px !important}
+}

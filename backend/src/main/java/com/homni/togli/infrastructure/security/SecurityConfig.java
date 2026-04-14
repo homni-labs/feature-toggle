@@ -116,7 +116,8 @@ public class SecurityConfig {
                 .map(String::trim)
                 .forEach(config::addAllowedOriginPattern);
         config.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "OPTIONS", "PUT", "PATCH"));
-        config.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-API-Key"));
+        config.setAllowedHeaders(List.of("Content-Type", "Authorization", "X-API-Key",
+                "X-Togli-Service", "X-Togli-Namespace", "X-Togli-SDK"));
         config.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

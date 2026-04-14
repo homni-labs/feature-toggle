@@ -18,15 +18,23 @@ public class TogliConfig {
             @Value("${togli.base-url}") String baseUrl,
             @Value("${togli.api-key}") String apiKey,
             @Value("${togli.project-slug}") String projectSlug,
-            @Value("${togli.default-environment}") String defaultEnv
+            @Value("${togli.default-environment}") String defaultEnv,
+            @Value("${togli.service-name}") String serviceName,
+            @Value("${togli.namespace:#{null}}") String namespace
     ) {
-        return TogliClients.builder()
+        var builder = TogliClients.builder()
                 .baseUrl(baseUrl)
                 .apiKey(apiKey)
                 .projectSlug(projectSlug)
+                .serviceName(serviceName)
                 .defaultEnvironment(defaultEnv)
                 .onError(e -> log.warn("Toggle error: {}", e.getMessage()))
-                .onReady(c -> log.info("Togli SDK ready — {} toggles loaded", c.allToggles().size()))
-                .build();
+                .onReady(c -> log.info("Togli SDK ready — {} toggles loaded", c.allToggles().size()));
+
+        if (namespace != null) {
+            builder.namespace(namespace);
+        }
+
+        return builder.build();
     }
 }

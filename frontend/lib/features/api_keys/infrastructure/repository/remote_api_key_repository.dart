@@ -9,8 +9,11 @@ import 'package:togli_app/core/domain/typedefs.dart';
 import 'package:togli_app/core/domain/value_objects/entity_id.dart';
 import 'package:togli_app/features/api_keys/domain/model/api_key.dart';
 import 'package:togli_app/features/api_keys/domain/port/api_key_repository.dart';
+import 'package:togli_app/features/api_keys/domain/model/api_key_client.dart';
 import 'package:togli_app/features/api_keys/infrastructure/dto/api_key_dto.dart';
+import 'package:togli_app/features/api_keys/infrastructure/dto/api_key_client_dto.dart';
 import 'package:togli_app/features/api_keys/infrastructure/mapper/api_key_mapper.dart';
+import 'package:togli_app/features/api_keys/infrastructure/mapper/api_key_client_mapper.dart';
 
 class RemoteApiKeyRepository implements ApiKeyRepository {
   RemoteApiKeyRepository({ApiKeyMapper? mapper})
@@ -145,6 +148,41 @@ class RemoteApiKeyRepository implements ApiKeyRepository {
       }
 
       return const Right(null);
+    } on Exception {
+      return const Left(NetworkFailure());
+    }
+  }
+
+  @override
+  FutureEither<List<ApiKeyClient>> getClients({
+    required String accessToken,
+    required ProjectId projectId,
+    required ApiKeyId apiKeyId,
+  }) async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse(
+              '${ApiConfig.baseUrl}/projects/${projectId.value}'
+              '/api-keys/${apiKeyId.value}/clients',
+            ),
+            headers: _headers(accessToken),
+          )
+          .timeout(_timeout);
+
+      if (response.statusCode != 200) {
+        return Left(_mapError(response));
+      }
+
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      final payload = json['payload'] as List<dynamic>;
+
+      final clients = payload
+          .map((e) => ApiKeyClientDto.fromJson(e as Map<String, dynamic>))
+          .map(ApiKeyClientMapper.toDomain)
+          .toList();
+
+      return Right(clients);
     } on Exception {
       return const Left(NetworkFailure());
     }

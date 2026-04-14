@@ -3,6 +3,9 @@ server:
 
 togli:
   base-url: http://localhost:8080
-  api-key: hft_your_api_key
-  project-slug: my-project
+  api-key: hft_JRpTlQR_PEPihD4sDEycV2QyPfFAoK4vK30zKqykyGM
+  project-slug: EXAMPLE
   default-environment: DEV
+  service-name: togli-example-app_2
+  namespace: prod
+  # namespace: production  # optional, uncomment for Kubernetes

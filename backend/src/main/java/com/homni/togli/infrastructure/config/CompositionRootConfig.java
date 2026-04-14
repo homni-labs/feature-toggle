@@ -10,6 +10,7 @@
 package com.homni.togli.infrastructure.config;
 
 import com.homni.togli.domain.model.EnvironmentDefaults;
+import com.homni.togli.application.port.out.ApiKeyClientRepositoryPort;
 import com.homni.togli.application.port.out.ApiKeyRepositoryPort;
 import com.homni.togli.application.port.out.AppUserRepositoryPort;
 import com.homni.togli.application.port.out.CallerPort;
@@ -29,9 +30,11 @@ import com.homni.togli.application.usecase.GetProjectBySlugUseCase;
 import com.homni.togli.application.usecase.FindToggleUseCase;
 import com.homni.togli.application.usecase.GetCurrentUserUseCase;
 import com.homni.togli.application.usecase.IssueApiKeyUseCase;
+import com.homni.togli.application.usecase.ListApiKeyClientsUseCase;
 import com.homni.togli.application.usecase.ListApiKeysUseCase;
 import com.homni.togli.application.usecase.ListEnvironmentsUseCase;
 import com.homni.togli.application.usecase.ListMembersUseCase;
+import com.homni.togli.application.usecase.ListProjectClientsUseCase;
 import com.homni.togli.application.usecase.ListProjectsUseCase;
 import com.homni.togli.application.usecase.ListTogglesUseCase;
 import com.homni.togli.application.usecase.ListUsersUseCase;
@@ -321,6 +324,32 @@ class CompositionRootConfig {
                                             ProjectRepositoryPort projects,
                                             CallerProjectAccessPort callerAccess) {
         return new DeleteApiKeyUseCase(apiKeys, projects, callerAccess);
+    }
+
+    /**
+     * Wires the ListApiKeyClientsUseCase.
+     *
+     * @param clients      API key client persistence port
+     * @param callerAccess caller project access port
+     * @return the wired use case
+     */
+    @Bean
+    ListApiKeyClientsUseCase listApiKeyClientsUseCase(ApiKeyClientRepositoryPort clients,
+                                                       CallerProjectAccessPort callerAccess) {
+        return new ListApiKeyClientsUseCase(clients, callerAccess);
+    }
+
+    /**
+     * Wires the ListProjectClientsUseCase.
+     *
+     * @param clients      API key client persistence port
+     * @param callerAccess caller project access port
+     * @return the wired use case
+     */
+    @Bean
+    ListProjectClientsUseCase listProjectClientsUseCase(ApiKeyClientRepositoryPort clients,
+                                                         CallerProjectAccessPort callerAccess) {
+        return new ListProjectClientsUseCase(clients, callerAccess);
     }
 
     // --- Environment use-cases ---

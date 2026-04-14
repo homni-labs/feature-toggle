@@ -1,0 +1,7 @@
+{
+  "apiBaseUrl": "http://localhost:8080",
+  "oidcIssuer": "http://localhost:8180/realms/togli",
+  "oidcClientId": "togli-frontend",
+  "oidcRedirectUri": "http://localhost:3000/callback",
+  "oidcPostLogoutRedirectUri": "http://localhost:3000/"
+}

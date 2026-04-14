@@ -155,7 +155,7 @@ class _ShellPageState extends State<ShellPage> {
       pageId = _PageId.environments;
     } else if (path.endsWith('/members')) {
       pageId = _PageId.members;
-    } else if (path.endsWith('/api-keys')) {
+    } else if (path.endsWith('/api-keys') || path.contains('/api-keys/')) {
       pageId = _PageId.apiKeys;
     } else if (path.endsWith('/settings')) {
       pageId = _PageId.settings;

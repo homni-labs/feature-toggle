@@ -431,13 +431,15 @@ If you have questions, ideas, or suggestions about the project &mdash; feel free
 
 ## 🗺 Roadmap
 
-- [ ] Publish Java SDK to Maven Central
-- [ ] Audit log &mdash; track all user actions
+- [ ] Percentage rollout &mdash; enable a toggle for N% of requests with consistent hashing
+- [ ] Snapshot & restore &mdash; save toggle states as a snapshot, one-click rollback if something breaks
+- [ ] Audit log &mdash; track all user actions with timeline view per toggle
 - [ ] Webhooks &mdash; notify external systems on toggle state changes
 - [ ] Scheduled toggles &mdash; auto-enable / disable at a specific time
 - [ ] Stale toggle detection &mdash; find toggles that haven't changed in N days
+- [ ] Toggle promotion pipeline &mdash; promote toggle state through environments (DEV &rarr; TEST &rarr; PROD)
+- [ ] Publish Java SDK to Maven Central
 - [ ] Authentik support &mdash; out-of-the-box integration as an alternative OIDC provider
-- [ ] Quarkus backend &mdash; alternative lightweight runtime
 - [ ] Frontend theming &mdash; customizable colors, logo, and branding via configuration
 
 ---

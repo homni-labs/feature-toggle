@@ -599,6 +599,54 @@ paths:
         '500':
           $ref: '#/components/responses/500'
 
+  /projects/{projectId}/api-keys/clients:
+    get:
+      tags: [API Keys]
+      operationId: listProjectClients
+      summary: List all API key clients in a project
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+      responses:
+        '200':
+          description: List of all clients
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyClientListResponse'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '500':
+          $ref: '#/components/responses/500'
+
+  /projects/{projectId}/api-keys/{apiKeyId}/clients:
+    get:
+      tags: [API Keys]
+      operationId: listApiKeyClients
+      summary: List clients for a specific API key
+      parameters:
+        - $ref: '#/components/parameters/projectId'
+        - name: apiKeyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of clients for this API key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyClientListResponse'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '500':
+          $ref: '#/components/responses/500'
+
   # ========== Members ==========
 
   /projects/{projectId}/members:
@@ -1255,6 +1303,13 @@ components:
           type: string
           format: date-time
           nullable: true
+        lastUsedAt:
+          type: string
+          format: date-time
+          nullable: true
+        clientCount:
+          type: integer
+          format: int64
 
     ApiKeyCreated:
       type: object
@@ -1298,6 +1353,48 @@ components:
       properties:
         payload:
           $ref: '#/components/schemas/ApiKeyCreated'
+        meta:
+          $ref: '#/components/schemas/ResponseMeta'
+
+    ApiKeyClient:
+      type: object
+      required: [id, apiKeyId, clientType, serviceName, firstSeenAt, lastSeenAt, requestCount]
+      properties:
+        id:
+          type: string
+          format: uuid
+        apiKeyId:
+          type: string
+          format: uuid
+        clientType:
+          type: string
+          enum: [SDK, REST]
+        sdkName:
+          type: string
+          nullable: true
+        serviceName:
+          type: string
+        namespace:
+          type: string
+          nullable: true
+        firstSeenAt:
+          type: string
+          format: date-time
+        lastSeenAt:
+          type: string
+          format: date-time
+        requestCount:
+          type: integer
+          format: int64
+
+    ApiKeyClientListResponse:
+      type: object
+      required: [payload, meta]
+      properties:
+        payload:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiKeyClient'
         meta:
           $ref: '#/components/schemas/ResponseMeta'
 

@@ -44,6 +44,8 @@ import 'package:togli_app/features/api_keys/application/usecase/issue_api_key_us
 import 'package:togli_app/features/api_keys/application/usecase/revoke_api_key_usecase.dart';
 import 'package:togli_app/features/api_keys/application/usecase/delete_api_key_usecase.dart';
 import 'package:togli_app/features/api_keys/application/bloc/api_keys_cubit.dart';
+import 'package:togli_app/features/api_keys/application/usecase/load_api_key_clients_usecase.dart';
+import 'package:togli_app/features/api_keys/application/bloc/api_key_clients_cubit.dart';
 
 import 'package:togli_app/features/users/domain/port/user_repository.dart';
 import 'package:togli_app/features/users/infrastructure/repository/remote_user_repository.dart';
@@ -145,6 +147,8 @@ void configureDependencies() {
       deleteApiKey: sl<DeleteApiKeyUseCase>(),
     ),
   );
+  sl.registerFactory(() => LoadApiKeyClientsUseCase(sl<ApiKeyRepository>()));
+  sl.registerFactory(() => ApiKeyClientsCubit(loadClients: sl<LoadApiKeyClientsUseCase>()));
 
   // ── Users ─────────────────────────────────────────────────────
   sl.registerLazySingleton<UserRepository>(() => RemoteUserRepository());

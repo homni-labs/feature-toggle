@@ -46,6 +46,8 @@ public final class TogliClientBuilder {
     private Consumer<TogliException> errorListener;
     private String defaultEnvironment;
     private Consumer<TogliClient> readyListener;
+    private String serviceName;
+    private String namespace;
 
     /**
      * Creates a new builder with default settings.
@@ -181,6 +183,30 @@ public final class TogliClientBuilder {
     }
 
     /**
+     * Sets the service name sent in the {@code X-Togli-Service} header.
+     * This is <b>required</b> — the backend rejects requests without it.
+     *
+     * @param serviceName the service name (e.g. "payment-service"), must not be {@code null}
+     * @return this builder
+     */
+    public TogliClientBuilder serviceName(String serviceName) {
+        this.serviceName = Objects.requireNonNull(serviceName, "serviceName must not be null");
+        return this;
+    }
+
+    /**
+     * Sets the Kubernetes namespace sent in the {@code X-Togli-Namespace} header.
+     * Optional — for non-Kubernetes environments, skip this.
+     *
+     * @param namespace the namespace (e.g. "production"), must not be {@code null}
+     * @return this builder
+     */
+    public TogliClientBuilder namespace(String namespace) {
+        this.namespace = Objects.requireNonNull(namespace, "namespace must not be null");
+        return this;
+    }
+
+    /**
      * Controls whether the cache performs an initial synchronous fetch
      * during {@link #build()}. Default: {@code true}.
      *
@@ -207,12 +233,14 @@ public final class TogliClientBuilder {
         validateRequired(baseUrl, "baseUrl");
         validateRequired(apiKey, "apiKey");
         validateRequired(projectSlug, "projectSlug");
+        validateRequired(serviceName, "serviceName");
 
         TogliConfiguration config = new TogliConfiguration(
                 baseUrl, apiKey, projectSlug,
                 pollingInterval, requestTimeout, connectTimeout,
                 cacheEnabled, eagerInit, errorListener,
-                defaultEnvironment, readyListener
+                defaultEnvironment, readyListener,
+                serviceName, namespace
         );
 
         TogliApiPort api = new HttpTogliApiAdapter(config);

@@ -53,6 +53,12 @@ public final class TogliConfiguration {
     /** Callback invoked after successful initialization. May be {@code null}. */
     public final Consumer<TogliClient> readyListener;
 
+    /** Service name sent in X-Togli-Service header. Required. */
+    public final String serviceName;
+
+    /** Kubernetes namespace sent in X-Togli-Namespace header. May be {@code null}. */
+    public final String namespace;
+
     private static final Duration DEFAULT_POLLING_INTERVAL = Duration.ofMinutes(60);
     private static final Duration DEFAULT_REQUEST_TIMEOUT = Duration.ofSeconds(10);
     private static final Duration DEFAULT_CONNECT_TIMEOUT = Duration.ofSeconds(5);
@@ -65,8 +71,8 @@ public final class TogliConfiguration {
      * @param apiKey      API key, must not be {@code null} or blank
      * @param projectSlug project slug, must not be {@code null} or blank
      */
-    public TogliConfiguration(String baseUrl, String apiKey, String projectSlug) {
-        this(baseUrl, apiKey, projectSlug, null, null, null, true, true, null, null, null);
+    public TogliConfiguration(String baseUrl, String apiKey, String projectSlug, String serviceName) {
+        this(baseUrl, apiKey, projectSlug, null, null, null, true, true, null, null, null, serviceName, null);
     }
 
     /**
@@ -83,6 +89,8 @@ public final class TogliConfiguration {
      * @param errorListener      callback for errors swallowed by {@code isEnabled()}, or {@code null}
      * @param defaultEnvironment default environment for single-arg {@code isEnabled()}, or {@code null}
      * @param readyListener      callback invoked after successful initialization, or {@code null}
+     * @param serviceName        service name for X-Togli-Service header, must not be {@code null} or blank
+     * @param namespace          Kubernetes namespace for X-Togli-Namespace header, or {@code null}
      */
     public TogliConfiguration(
             String baseUrl,
@@ -95,7 +103,9 @@ public final class TogliConfiguration {
             boolean eagerInit,
             Consumer<TogliException> errorListener,
             String defaultEnvironment,
-            Consumer<TogliClient> readyListener
+            Consumer<TogliClient> readyListener,
+            String serviceName,
+            String namespace
     ) {
         Objects.requireNonNull(baseUrl, "baseUrl must not be null");
         if (baseUrl.isBlank()) {
@@ -121,6 +131,13 @@ public final class TogliConfiguration {
         this.errorListener = errorListener;
         this.defaultEnvironment = defaultEnvironment;
         this.readyListener = readyListener;
+
+        Objects.requireNonNull(serviceName, "serviceName must not be null");
+        if (serviceName.isBlank()) {
+            throw new IllegalArgumentException("serviceName must not be blank");
+        }
+        this.serviceName = serviceName;
+        this.namespace = namespace;
 
         if (this.cacheEnabled && this.pollingInterval.compareTo(MIN_POLLING_INTERVAL) < 0) {
             throw new IllegalArgumentException(

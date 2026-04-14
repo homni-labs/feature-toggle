@@ -1,9 +1,3 @@
--- ═══════════════════════════════════════════════════════════════
--- Homni Feature Toggle — full database schema (single migration)
--- ═══════════════════════════════════════════════════════════════
-
--- ── Projects ──────────────────────────────────────────────────
-
 CREATE TABLE project (
     id          UUID           PRIMARY KEY,
     slug        VARCHAR(100)   NOT NULL UNIQUE,
@@ -13,8 +7,6 @@ CREATE TABLE project (
     created_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
     updated_at  TIMESTAMPTZ
 );
-
--- ── Users ─────────────────────────────────────────────────────
 
 CREATE TABLE app_user (
     id            UUID         PRIMARY KEY,
@@ -30,8 +22,6 @@ CREATE TABLE app_user (
 CREATE INDEX idx_app_user_oidc_subject ON app_user (oidc_subject);
 CREATE UNIQUE INDEX idx_app_user_email ON app_user (email);
 
--- ── Project membership ────────────────────────────────────────
-
 CREATE TABLE project_membership (
     id          UUID         PRIMARY KEY,
     project_id  UUID         NOT NULL REFERENCES project(id),
@@ -44,8 +34,6 @@ CREATE TABLE project_membership (
 
 CREATE INDEX idx_membership_user ON project_membership (user_id);
 
--- ── Environments ──────────────────────────────────────────────
-
 CREATE TABLE environment (
     id         UUID         PRIMARY KEY,
     project_id UUID         NOT NULL REFERENCES project(id),
@@ -54,8 +42,6 @@ CREATE TABLE environment (
 );
 
 CREATE UNIQUE INDEX uq_environment_project_name ON environment (project_id, name);
-
--- ── Feature toggles ───────────────────────────────────────────
 
 CREATE TABLE feature_toggle (
     id          UUID           PRIMARY KEY,
@@ -69,8 +55,6 @@ CREATE TABLE feature_toggle (
 CREATE INDEX idx_toggle_project ON feature_toggle (project_id);
 CREATE UNIQUE INDEX uq_toggle_project_name ON feature_toggle (project_id, name);
 
--- ── Toggle ↔ Environment (per-env on/off state) ──────────────
-
 CREATE TABLE toggle_environment (
     toggle_id      UUID    NOT NULL REFERENCES feature_toggle(id) ON DELETE CASCADE,
     environment_id UUID    NOT NULL REFERENCES environment(id) ON DELETE RESTRICT,
@@ -80,8 +64,6 @@ CREATE TABLE toggle_environment (
 
 CREATE INDEX idx_toggle_env_environment_id ON toggle_environment (environment_id);
 CREATE INDEX idx_toggle_env_enabled        ON toggle_environment (toggle_id, enabled);
-
--- ── API keys ──────────────────────────────────────────────────
 
 CREATE TABLE api_key (
     id           UUID         PRIMARY KEY,
@@ -97,3 +79,21 @@ CREATE TABLE api_key (
 CREATE INDEX idx_api_key_hash_active ON api_key (token_hash) WHERE active = true;
 CREATE INDEX idx_api_key_project     ON api_key (project_id);
 CREATE INDEX idx_api_key_created_at  ON api_key (created_at DESC);
+
+CREATE TABLE api_key_client (
+    id              UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    api_key_id      UUID         NOT NULL REFERENCES api_key(id) ON DELETE CASCADE,
+    project_id      UUID         NOT NULL REFERENCES project(id),
+    client_type     VARCHAR(20)  NOT NULL,
+    sdk_name        VARCHAR(100),
+    service_name    VARCHAR(255) NOT NULL,
+    namespace       VARCHAR(255),
+    first_seen_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    last_seen_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    request_count   BIGINT       NOT NULL DEFAULT 1
+);
+
+CREATE UNIQUE INDEX uq_api_key_client ON api_key_client (api_key_id, service_name, COALESCE(namespace, ''));
+CREATE INDEX idx_akc_api_key   ON api_key_client (api_key_id);
+CREATE INDEX idx_akc_project   ON api_key_client (project_id);
+CREATE INDEX idx_akc_last_seen ON api_key_client (last_seen_at DESC);
