@@ -13,6 +13,7 @@ import 'package:togli_app/core/domain/value_objects/project_role.dart';
 import 'package:togli_app/core/presentation/widgets/animated_background.dart';
 import 'package:togli_app/core/domain/failure.dart';
 import 'package:togli_app/features/projects/domain/port/project_repository.dart';
+import 'package:togli_app/app/config/app_config.dart';
 
 enum _PageId { toggles, environments, members, apiKeys, settings }
 enum _ProjectError { none, forbidden, notFound }
@@ -588,6 +589,15 @@ class _ProjectSidebar extends StatelessWidget {
                     ),
                   const SizedBox(height: 6),
                   _LogoutBtn(collapsed: collapsed, onTap: onLogout),
+                  const SizedBox(height: 8),
+                  Text(
+                    collapsed ? 'v${AppConfig.version}' : 'Togli ${AppConfig.version}',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: AppColors.navy.withOpacity(0.25),
+                      letterSpacing: 0.5,
+                    ),
+                  ),
                 ],
               ),
             ),

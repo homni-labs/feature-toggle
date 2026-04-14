@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.homni</groupId>
     <artifactId>togli-java-sdk</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>1.0.0-RC</version>
     <packaging>jar</packaging>
     <name>Togli Java SDK</name>
     <description>Zero-dependency Java client for the Togli feature toggle platform</description>
@@ -31,6 +31,12 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/homni-labs/feature-toggle</url>
+        </repository>
+    </distributionManagement>
     <build>
         <plugins>
             <plugin>

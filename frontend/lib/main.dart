@@ -7,6 +7,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:togli_app/app/app.dart';
+import 'package:togli_app/app/config/app_config.dart';
 import 'package:togli_app/app/config/runtime_config.dart';
 import 'package:togli_app/app/di/injection.dart';
 import 'package:togli_app/app/router/app_router.dart';
@@ -39,6 +40,7 @@ void main() {
       };
 
       await RuntimeConfig.load();
+      await AppConfig.init();
 
       configureDependencies();
 
