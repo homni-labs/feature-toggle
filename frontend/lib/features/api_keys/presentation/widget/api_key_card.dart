@@ -7,12 +7,14 @@ class ApiKeyCard extends StatelessWidget {
   final ApiKey apiKey;
   final VoidCallback? onRevoke;
   final VoidCallback? onDelete;
+  final VoidCallback? onViewClients;
 
   const ApiKeyCard({
     super.key,
     required this.apiKey,
     this.onRevoke,
     this.onDelete,
+    this.onViewClients,
   });
 
   static Color _roleColor(ProjectRole role) {
@@ -33,6 +35,14 @@ class ApiKeyCard extends StatelessWidget {
 
   static String _formatDate(DateTime dt) {
     return '${_months[dt.month - 1]} ${dt.day}, ${dt.year}';
+  }
+
+  static String _formatTimeAgo(DateTime dt) {
+    final diff = DateTime.now().difference(dt);
+    if (diff.inMinutes < 1) return 'just now';
+    if (diff.inMinutes < 60) return '${diff.inMinutes} min ago';
+    if (diff.inHours < 24) return '${diff.inHours} hours ago';
+    return '${diff.inDays} days ago';
   }
 
   @override
@@ -160,6 +170,39 @@ class ApiKeyCard extends StatelessWidget {
                           _RevokeButton(onTap: onRevoke!),
                         if (isRevoked && onDelete != null)
                           _DeleteButton(onTap: onDelete!),
+                      ],
+                    ),
+                  ),
+
+                  // Usage info
+                  Container(
+                    padding: const EdgeInsets.only(top: 10),
+                    margin: const EdgeInsets.only(top: 10),
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        top: BorderSide(
+                          color: Color(0xFFDDD8CC),
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            apiKey.lastUsedAt != null
+                                ? 'Last used: ${_formatTimeAgo(apiKey.lastUsedAt!)}'
+                                : 'Never used',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppColors.navy.withOpacity(0.45),
+                            ),
+                          ),
+                        ),
+                        _ServicesLink(
+                          count: apiKey.clientCount ?? 0,
+                          onTap: onViewClients,
+                        ),
                       ],
                     ),
                   ),
@@ -329,6 +372,56 @@ class _DeleteButtonState extends State<_DeleteButton> {
             Icons.delete_outline_rounded,
             size: 14,
             color: AppColors.coral,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ServicesLink extends StatefulWidget {
+  final int count;
+  final VoidCallback? onTap;
+  const _ServicesLink({required this.count, this.onTap});
+
+  @override
+  State<_ServicesLink> createState() => _ServicesLinkState();
+}
+
+class _ServicesLinkState extends State<_ServicesLink> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = widget.count > 0
+        ? '${widget.count} ${widget.count == 1 ? 'service' : 'services'}'
+        : 'No services';
+
+    if (widget.onTap == null || widget.count == 0) {
+      return Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          color: AppColors.navy.withOpacity(0.35),
+        ),
+      );
+    }
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovering = true),
+      onExit: (_) => setState(() => _hovering = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: AppColors.coral,
+            decoration:
+                _hovering ? TextDecoration.underline : TextDecoration.none,
+            decorationColor: AppColors.coral,
           ),
         ),
       ),

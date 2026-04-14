@@ -8,6 +8,8 @@ class ApiKeyDto {
   final bool active;
   final String createdAt;
   final String? expiresAt;
+  final String? lastUsedAt;
+  final int? clientCount;
 
   const ApiKeyDto({
     required this.id,
@@ -19,6 +21,8 @@ class ApiKeyDto {
     required this.active,
     required this.createdAt,
     this.expiresAt,
+    this.lastUsedAt,
+    this.clientCount,
   });
 
   factory ApiKeyDto.fromJson(Map<String, dynamic> json) {
@@ -32,6 +36,8 @@ class ApiKeyDto {
       active: json['active'] as bool,
       createdAt: json['createdAt'] as String,
       expiresAt: json['expiresAt'] as String?,
+      lastUsedAt: json['lastUsedAt'] as String?,
+      clientCount: json['clientCount'] as int?,
     );
   }
 }

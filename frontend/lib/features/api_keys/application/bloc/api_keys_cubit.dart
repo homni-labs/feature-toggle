@@ -127,6 +127,8 @@ class ApiKeysCubit extends Cubit<ApiKeysState> {
                 active: false,
                 createdAt: k.createdAt,
                 expiresAt: k.expiresAt,
+                lastUsedAt: k.lastUsedAt,
+                clientCount: k.clientCount,
               );
             }
             return k;

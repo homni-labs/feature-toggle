@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:togli_app/app/di/injection.dart';
@@ -160,6 +161,8 @@ class _ApiKeysView extends StatelessWidget {
                     canManage: canManage,
                     onRevoke: (apiKey) => _onRevoke(context, apiKey),
                     onDelete: (apiKey) => _onDelete(context, apiKey),
+                    onViewClients: (apiKey) =>
+                        _onViewClients(context, apiKey),
                   ),
           ),
         ],
@@ -195,6 +198,19 @@ class _ApiKeysView extends StatelessWidget {
     final authCubit = context.read<AuthCubit>();
     final cubit = context.read<ApiKeysCubit>();
     await ApiKeysPage._load(authCubit, cubit);
+  }
+
+  void _onViewClients(BuildContext context, ApiKey apiKey) {
+    final authState =
+        context.read<AuthCubit>().state as AuthAuthenticated;
+    final slug = authState.currentProject!.slug.value;
+    context.go(
+      '/projects/$slug/api-keys/${apiKey.id.value}/clients',
+      extra: {
+        'name': apiKey.name,
+        'maskedToken': apiKey.maskedToken,
+      },
+    );
   }
 
   Future<void> _onCreate(BuildContext context) async {
@@ -295,12 +311,14 @@ class _ApiKeyGrid extends StatelessWidget {
     required this.canManage,
     required this.onRevoke,
     required this.onDelete,
+    required this.onViewClients,
   });
 
   final ApiKeysLoaded state;
   final bool canManage;
   final void Function(ApiKey) onRevoke;
   final void Function(ApiKey) onDelete;
+  final void Function(ApiKey) onViewClients;
 
   @override
   Widget build(BuildContext context) {
@@ -332,6 +350,9 @@ class _ApiKeyGrid extends StatelessWidget {
                             : null,
                         onDelete: canManage && !apiKey.active
                             ? () => onDelete(apiKey)
+                            : null,
+                        onViewClients: apiKey.active
+                            ? () => onViewClients(apiKey)
                             : null,
                       ),
                     ),

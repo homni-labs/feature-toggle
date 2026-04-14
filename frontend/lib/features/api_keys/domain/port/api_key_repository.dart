@@ -1,6 +1,7 @@
 import 'package:togli_app/core/domain/typedefs.dart';
 import 'package:togli_app/core/domain/value_objects/entity_id.dart';
 import 'package:togli_app/features/api_keys/domain/model/api_key.dart';
+import 'package:togli_app/features/api_keys/domain/model/api_key_client.dart';
 
 class PagedApiKeys {
   final List<ApiKey> items;
@@ -40,6 +41,12 @@ abstract class ApiKeyRepository {
   });
 
   FutureEither<void> delete({
+    required String accessToken,
+    required ProjectId projectId,
+    required ApiKeyId apiKeyId,
+  });
+
+  FutureEither<List<ApiKeyClient>> getClients({
     required String accessToken,
     required ProjectId projectId,
     required ApiKeyId apiKeyId,

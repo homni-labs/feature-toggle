@@ -11,6 +11,8 @@ class ApiKey {
   final bool active;
   final DateTime createdAt;
   final DateTime? expiresAt;
+  final DateTime? lastUsedAt;
+  final int? clientCount;
 
   const ApiKey({
     required this.id,
@@ -22,6 +24,8 @@ class ApiKey {
     required this.active,
     required this.createdAt,
     this.expiresAt,
+    this.lastUsedAt,
+    this.clientCount,
   });
 
   String get roleLabel => role.label;

@@ -15,6 +15,8 @@ class ApiKeyMapper {
       active: dto.active,
       createdAt: DateTime.parse(dto.createdAt),
       expiresAt: dto.expiresAt != null ? DateTime.parse(dto.expiresAt!) : null,
+      lastUsedAt: dto.lastUsedAt != null ? DateTime.parse(dto.lastUsedAt!) : null,
+      clientCount: dto.clientCount,
     );
   }
 
