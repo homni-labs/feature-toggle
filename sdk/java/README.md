@@ -261,4 +261,10 @@ Hexagonal Architecture. Domain layer is pure Java with zero framework imports.
 
 ---
 
+## Examples
+
+See [Spring Boot example](../examples/spring-boot/) &mdash; REST app demonstrating every SDK feature via HTTP endpoints.
+
+---
+
 <p align="center"><a href="../../README.md">&larr; Back to project</a></p>

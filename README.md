@@ -185,7 +185,7 @@ client.evaluate("new-checkout",
     () -> processLegacy());
 ```
 
-See [sdk/java/README.md](sdk/java/README.md) for full documentation.
+See [sdk/java/README.md](sdk/java/README.md) for full documentation and [Spring Boot example](sdk/examples/spring-boot/) to try it live.
 
 ---
 

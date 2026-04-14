@@ -1,0 +1,8 @@
+server:
+  port: 8090
+
+togli:
+  base-url: http://localhost:8080
+  api-key: hft_your_api_key
+  project-slug: my-project
+  default-environment: DEV

@@ -261,4 +261,10 @@ com.homni.togli.sdk/
 
 ---
 
+## Примеры
+
+См. [Spring Boot пример](../examples/spring-boot/) &mdash; REST-приложение демонстрирующее все возможности SDK через HTTP-эндпоинты.
+
+---
+
 <p align="center"><a href="../../README_RU.md">&larr; К README проекта</a></p>
