@@ -403,6 +403,7 @@ If you have questions, ideas, or suggestions about the project &mdash; feel free
 
 ## Roadmap
 
+- [ ] Publish Java SDK to Maven Central
 - [ ] Audit log &mdash; track all user actions
 - [ ] Webhooks &mdash; notify external systems on toggle state changes
 - [ ] Scheduled toggles &mdash; auto-enable / disable at a specific time
