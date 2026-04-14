@@ -19,7 +19,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Backend](https://img.shields.io/docker/v/zaytsevdv/togli-backend?label=backend&sort=semver)](https://hub.docker.com/r/zaytsevdv/togli-backend)
 [![Frontend](https://img.shields.io/docker/v/zaytsevdv/togli-frontend?label=frontend&sort=semver)](https://hub.docker.com/r/zaytsevdv/togli-frontend)
-
+[![Java SDK](https://img.shields.io/github/v/tag/homni-labs/feature-toggle?filter=sdk/java/*&label=java-sdk&sort=semver)](https://github.com/homni-labs/feature-toggle/packages)
 
 </div>
 
@@ -183,9 +183,9 @@ curl http://localhost:8080/actuator/health
 
 Official client libraries for integrating Togli into your applications.
 
-| SDK | Language | Status |
-|-----|----------|--------|
-| [Java SDK](sdk/java/README.md) | Java 21+ | Available |
+| SDK | Language | Status | Package |
+|-----|----------|--------|---------|
+| [Java SDK](sdk/java/README.md) | Java 21+ | Available | [GitHub Packages](https://github.com/homni-labs/feature-toggle/packages) |
 
 ### Java SDK
 
