@@ -60,7 +60,7 @@ Most feature flag tools are SaaS-only, charge per seat, or lack granular access 
 
 ## Features
 
-- &#x1F512; **[OIDC Authentication](#configuration)** &mdash; Keycloak with a custom branded SSO login page (dark & light themes) out of the box. Compatible with any OpenID Connect provider (Authentik, Auth0, Okta, etc.). OAuth 2.1 + PKCE
+- &#x1F512; **[OIDC Authentication](#configuration)** &mdash; Keycloak with a custom branded SSO login page out of the box. Compatible with any OpenID Connect provider (Authentik, Auth0, Okta, etc.). OAuth 2.1 + PKCE
 - &#x1F4C1; **[Project Isolation](#architecture)** &mdash; each project is a self-contained workspace with its own toggles, environments, members, and API keys
 - &#x1F6E1; **[Granular RBAC](#permissions)** &mdash; Platform Admin, Project Admin, Editor, Reader with a fine-grained permissions matrix
 - &#x1F30D; **[Multi-Environment Control](#configuration)** &mdash; platform-wide default environments configured at startup; pick which ones to bootstrap into each new project, and add custom ones per project later
@@ -112,7 +112,7 @@ curl http://localhost:8080/actuator/health
 ```
 
 > [!TIP]
-> All default values are pre-configured for local development &mdash; no `.env` files or manual setup required.
+> All default values are pre-configured for local development &mdash; works out of the box without any `.env` file. To customize, copy `.env.example` to `.env` and edit as needed.
 
 ---
 
@@ -128,7 +128,6 @@ curl http://localhost:8080/actuator/health
             ┌──────┴──────┐    │     ┌───────┴───────┐
             │  Frontend   │    │     │     SSO       │
             │  Dashboard  │◄───┘     │  OIDC Provider│
-            │   :3000     │          │   :8180       │
             └──────┬──────┘          └───────┬───────┘
                    │                         │
                    │    REST API + JWT        │
@@ -136,20 +135,17 @@ curl http://localhost:8080/actuator/health
                                 │
                      ┌──────────┴──────────┐
                      │      Backend        │
-                     │  Hexagonal / DDD    │
-                     │      :8080          │
                      └──────────┬──────────┘
                                 │
                      ┌──────────┴──────────┐
                      │     Database        │
-                     │      :5432          │
                      └─────────────────────┘
 
   ┌─ Observability ─────────────────────────────────────┐
   │                                                     │
-  │  Metrics    :9090  ◄── Backend, SSO, Database       │
-  │  Logs       :3100  ◄── All containers               │
-  │  Dashboards :3001  ──► 3 pre-built dashboards       │
+  │  Metrics     ◄── Backend, SSO, Database             │
+  │  Logs        ◄── All containers                     │
+  │  Dashboards  ──► 3 pre-built dashboards             │
   │                                                     │
   └─────────────────────────────────────────────────────┘
 ```
@@ -260,7 +256,7 @@ Runtime configuration loaded from `/config.json` at startup. Defaults work out o
 
 ### Bring Your Own SSO
 
-The bundled Keycloak in `sso/` is an example setup with pre-configured test users and custom login themes (dark & light). **Homni works with any OIDC/OAuth provider** &mdash; Authentik, Auth0, Okta, Google Workspace, or any other provider that supports OpenID Connect.
+The bundled Keycloak in `sso/` is an example setup with pre-configured test users and a custom login theme. **Homni works with any OIDC/OAuth provider** &mdash; Authentik, Auth0, Okta, Google Workspace, or any other provider that supports OpenID Connect.
 
 To use your own provider:
 
@@ -273,6 +269,9 @@ backend:
 ```
 
 On first login with that email, the user is automatically promoted to **Platform Admin**.
+
+> [!NOTE]
+> Users are managed in your SSO provider (Keycloak or your own). When a user logs in to Togli for the first time, their account is automatically created in the system. No manual user registration is required.
 
 ---
 

@@ -8,7 +8,7 @@
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
   "bruteForceProtected": true,
-  "loginTheme": "light-theme",
+  "loginTheme": "dark-theme",
   "clients": [
     {
       "clientId": "togli-frontend",
@@ -16,7 +16,7 @@
       "enabled": true,
       "publicClient": true,
       "attributes": {
-        "login_theme": "light-theme"
+        "login_theme": "dark-theme"
       },
       "directAccessGrantsEnabled": true,
       "standardFlowEnabled": true,
@@ -167,37 +167,6 @@
           "temporary": false
         }
       ]
-    },
-    {
-      "username": "reader2",
-      "email": "reader2@homni.local",
-      "emailVerified": true,
-      "enabled": true,
-      "firstName": "Reader2",
-      "lastName": "User",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "reader2",
-          "temporary": false
-        }
-      ]
-    },
-    {
-      "username": "reader3",
-      "email": "reader3@homni.local",
-      "emailVerified": true,
-      "enabled": true,
-      "firstName": "Reader3",
-      "lastName": "User",
-      "credentials": [
-        {
-          "type": "password",
-          "value": "reader3",
-          "temporary": false
-        }
-      ]
     }
-
   ]
 }
