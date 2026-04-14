@@ -10,7 +10,6 @@
 
 <p>
   <a href="#быстрый-старт">Быстрый старт</a> &middot;
-  <a href="http://localhost:8080/docs">Swagger UI</a> &middot;
   <a href="#дорожная-карта">Roadmap</a>
 </p>
 

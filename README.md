@@ -10,7 +10,6 @@
 
 <p>
   <a href="#quick-start">Quick Start</a> &middot;
-  <a href="http://localhost:8080/docs">Swagger UI</a> &middot;
   <a href="#roadmap">Roadmap</a>
 </p>
 
