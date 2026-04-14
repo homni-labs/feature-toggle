@@ -17,9 +17,9 @@
 
 [![Build](https://github.com/homni-labs/feature-toggle/actions/workflows/ci.yml/badge.svg)](https://github.com/homni-labs/feature-toggle/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![GitHub Release](https://img.shields.io/github/v/release/homni-labs/feature-toggle)](https://github.com/homni-labs/feature-toggle/releases)
-[![Docker Pulls](https://img.shields.io/docker/pulls/zaytsevdv/homni-togli)](https://hub.docker.com/r/zaytsevdv/homni-togli)
-[![GitHub Stars](https://img.shields.io/github/stars/homni-labs/feature-toggle?style=social)](https://github.com/homni-labs/feature-toggle)
+[![Backend](https://img.shields.io/docker/v/zaytsevdv/togli-backend?label=backend&sort=semver)](https://hub.docker.com/r/zaytsevdv/togli-backend)
+[![Frontend](https://img.shields.io/docker/v/zaytsevdv/togli-frontend?label=frontend&sort=semver)](https://hub.docker.com/r/zaytsevdv/togli-frontend)
+
 
 </div>
 
@@ -80,6 +80,26 @@ Most feature flag tools are SaaS-only, charge per seat, or lock you out of granu
 
 ## 🚀 Quick Start
 
+### Option A: Pull from Docker Hub (recommended)
+
+Pre-built images are available on Docker Hub — no need to build anything locally:
+
+```bash
+docker pull zaytsevdv/togli-backend:latest
+docker pull zaytsevdv/togli-frontend:latest
+```
+
+Then use them in your `docker-compose.yml`:
+
+```yaml
+backend:
+  image: zaytsevdv/togli-backend:latest
+frontend:
+  image: zaytsevdv/togli-frontend:latest
+```
+
+### Option B: Build from source
+
 **1. Clone the repository**
 
 ```bash
@@ -87,18 +107,10 @@ git clone https://github.com/homni-labs/feature-toggle.git
 cd feature-toggle
 ```
 
-**2. Start infrastructure** (PostgreSQL + Keycloak + Backend + Observability)
+**2. Start all services** (PostgreSQL + Keycloak + Backend + Frontend + Observability)
 
 ```bash
-docker compose up -d
-```
-
-**3. Start the frontend**
-
-```bash
-cd frontend
-flutter pub get
-flutter run -d chrome --web-port 3000
+docker compose up -d --build
 ```
 
 | Service | URL | Credentials |
@@ -212,6 +224,7 @@ See [sdk/java/README.md](sdk/java/README.md) for full documentation and [Spring 
 | SDK | Java (zero-dependency, java.net.http, Proxy API) |
 | Observability | Prometheus, Grafana, Loki, Promtail |
 | Infra | Docker, Docker Compose, Nginx |
+| Docker Images | [togli-backend](https://hub.docker.com/r/zaytsevdv/togli-backend), [togli-frontend](https://hub.docker.com/r/zaytsevdv/togli-frontend) |
 
 ---
 

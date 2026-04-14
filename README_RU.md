@@ -17,9 +17,9 @@
 
 [![Build](https://github.com/homni-labs/feature-toggle/actions/workflows/ci.yml/badge.svg)](https://github.com/homni-labs/feature-toggle/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![GitHub Release](https://img.shields.io/github/v/release/homni-labs/feature-toggle)](https://github.com/homni-labs/feature-toggle/releases)
-[![Docker Pulls](https://img.shields.io/docker/pulls/zaytsevdv/homni-togli)](https://hub.docker.com/r/zaytsevdv/homni-togli)
-[![GitHub Stars](https://img.shields.io/github/stars/homni-labs/feature-toggle?style=social)](https://github.com/homni-labs/feature-toggle)
+[![Backend](https://img.shields.io/docker/v/zaytsevdv/togli-backend?label=backend&sort=semver)](https://hub.docker.com/r/zaytsevdv/togli-backend)
+[![Frontend](https://img.shields.io/docker/v/zaytsevdv/togli-frontend?label=frontend&sort=semver)](https://hub.docker.com/r/zaytsevdv/togli-frontend)
+
 
 </div>
 
@@ -80,6 +80,26 @@
 
 ## 🚀 Быстрый старт
 
+### Вариант A: Скачать из Docker Hub (рекомендуется)
+
+Готовые образы доступны в публичном Docker Hub — ничего собирать не нужно:
+
+```bash
+docker pull zaytsevdv/togli-backend:latest
+docker pull zaytsevdv/togli-frontend:latest
+```
+
+Используйте их в `docker-compose.yml`:
+
+```yaml
+backend:
+  image: zaytsevdv/togli-backend:latest
+frontend:
+  image: zaytsevdv/togli-frontend:latest
+```
+
+### Вариант B: Сборка из исходников
+
 **1. Клонируйте репозиторий**
 
 ```bash
@@ -87,18 +107,10 @@ git clone https://github.com/homni-labs/feature-toggle.git
 cd feature-toggle
 ```
 
-**2. Запустите инфраструктуру** (PostgreSQL + Keycloak + Backend + Мониторинг)
+**2. Запустите все сервисы** (PostgreSQL + Keycloak + Backend + Frontend + Мониторинг)
 
 ```bash
-docker compose up -d
-```
-
-**3. Запустите фронтенд**
-
-```bash
-cd frontend
-flutter pub get
-flutter run -d chrome --web-port 3000
+docker compose up -d --build
 ```
 
 | Сервис | URL | Учётные данные |
@@ -212,6 +224,7 @@ client.evaluate("new-checkout",
 | SDK | Java (zero-dependency, java.net.http, Proxy API) |
 | Мониторинг | Prometheus, Grafana, Loki, Promtail |
 | Инфраструктура | Docker, Docker Compose, Nginx |
+| Docker-образы | [togli-backend](https://hub.docker.com/r/zaytsevdv/togli-backend), [togli-frontend](https://hub.docker.com/r/zaytsevdv/togli-frontend) |
 
 ---
 
