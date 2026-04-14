@@ -1,7 +1,7 @@
 <div align="center">
 
 <table><tr>
-<td><img src="assets/feature_toggle_logo.jpeg" width="80" alt="Homni Togli"></td>
+<td><img src="assets/feature_toggle_logo.jpeg" width="250" alt="Homni Togli"></td>
 <td>
 <h1>Homni Togli</h1>
 <p>Open-source, self-hosted feature flag platform with per-project RBAC, multi-environment control, and built-in observability.</p>
@@ -28,7 +28,7 @@
 
 ## Table of Contents
 
-- [Why Homni?](#why-homni)
+- [Why Togli?](#why-togli)
 - [Features](#features)
 - [Quick Start](#quick-start)
 - [Architecture](#architecture)
@@ -45,9 +45,9 @@
 
 ---
 
-## Why Homni?
+## Why Togli?
 
-Most feature flag tools are SaaS-only, charge per seat, or lack granular access control. Homni is different:
+Most feature flag tools are SaaS-only, charge per seat, or lack granular access control. Togli is different:
 
 - **Full ownership** &mdash; deploy on your infrastructure, no vendor lock-in, no usage limits, no data leaving your network
 - **Per-project isolation** &mdash; each project has its own toggles, environments, team members, and API keys
@@ -171,7 +171,7 @@ curl http://localhost:8080/actuator/health
 
 ## Observability
 
-Homni ships with a production-grade observability stack. Everything is pre-configured &mdash; just `docker compose up` and open Grafana.
+Togli ships with a production-grade observability stack. Everything is pre-configured &mdash; just `docker compose up` and open Grafana.
 
 **Pre-built Grafana dashboards** (in `observability/grafana/dashboards/`):
 
@@ -256,7 +256,7 @@ Runtime configuration loaded from `/config.json` at startup. Defaults work out o
 
 ### Bring Your Own SSO
 
-The bundled Keycloak in `sso/` is an example setup with pre-configured test users and a custom login theme. **Homni works with any OIDC/OAuth provider** &mdash; Authentik, Auth0, Okta, Google Workspace, or any other provider that supports OpenID Connect.
+The bundled Keycloak in `sso/` is an example setup with pre-configured test users and a custom login theme. **Togli works with any OIDC/OAuth provider** &mdash; Authentik, Auth0, Okta, Google Workspace, or any other provider that supports OpenID Connect.
 
 To use your own provider:
 
