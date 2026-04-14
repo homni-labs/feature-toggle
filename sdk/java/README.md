@@ -12,7 +12,7 @@ Zero-dependency Java client for [Togli](../../README.md). No magic, no framework
 
 ## ✨ Features
 
-- **Zero dependencies** &mdash; only `java.*` imports, Java 17+
+- **Zero dependencies** &mdash; only `java.*` imports, Java 21+
 - **Thread-safe** with background polling cache
 - **Simple API** &mdash; `client.isEnabled("toggle", "PROD")`, `evaluate()`, `proxy()`
 - **API Key authentication** &mdash; read-only, project-scoped

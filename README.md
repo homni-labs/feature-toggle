@@ -185,7 +185,7 @@ Official client libraries for integrating Togli into your applications.
 
 | SDK | Language | Status |
 |-----|----------|--------|
-| [Java SDK](sdk/java/README.md) | Java 17+ | Available |
+| [Java SDK](sdk/java/README.md) | Java 21+ | Available |
 
 ### Java SDK
 

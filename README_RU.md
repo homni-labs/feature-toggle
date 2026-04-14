@@ -185,7 +185,7 @@ curl http://localhost:8080/actuator/health
 
 | SDK | Язык | Статус |
 |-----|------|--------|
-| [Java SDK](sdk/java/README_RU.md) | Java 17+ | Доступен |
+| [Java SDK](sdk/java/README_RU.md) | Java 21+ | Доступен |
 
 ### Java SDK
 
