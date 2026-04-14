@@ -2,7 +2,7 @@
 
 # Togli Java SDK
 
-Zero-dependency Java client for the [Togli](../../README.md) feature toggle platform.
+Zero-dependency Java client for [Togli](../../README.md). No magic, no frameworks — just works.
 
 **[Russian documentation](README_RU.md)** &middot; **[Project README](../../README.md)**
 
@@ -10,7 +10,7 @@ Zero-dependency Java client for the [Togli](../../README.md) feature toggle plat
 
 ---
 
-## Features
+## ✨ Features
 
 - **Zero dependencies** &mdash; only `java.*` imports, Java 17+
 - **Thread-safe** with background polling cache
@@ -21,7 +21,7 @@ Zero-dependency Java client for the [Togli](../../README.md) feature toggle plat
 
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Maven
 
@@ -93,7 +93,7 @@ If `environment` is not specified in the annotation, the `defaultEnvironment` fr
 
 ---
 
-## Configuration
+## ⚙️ Configuration
 
 ```java
 TogliClient client = TogliClients.builder()
@@ -132,7 +132,7 @@ TogliClient client = TogliClients.builder()
 
 ---
 
-## Startup Behavior
+## ⚡ Startup Behavior
 
 On `build()`, the SDK:
 
@@ -144,9 +144,9 @@ If the API key is invalid or revoked &rarr; `TogliAuthenticationException` (fail
 
 ---
 
-## Auto-Refresh
+## 🔄 Auto-Refresh
 
-The SDK polls the backend periodically (default: every 60 minutes) and picks up all changes automatically:
+The SDK keeps your toggles fresh by polling the backend (default: every 60 minutes) and picks up all changes automatically:
 
 - Toggle enabled / disabled
 - New toggles created
@@ -157,7 +157,7 @@ Call `client.refresh()` to force an immediate refresh.
 
 ---
 
-## API Reference
+## 📖 API Reference
 
 | Method | Returns | Description |
 |--------|---------|-------------|
@@ -176,9 +176,9 @@ All `evaluate` and `proxy` methods also have overloads with explicit environment
 
 ---
 
-## Error Handling
+## 🛡 Error Handling
 
-`isEnabled()` **never throws** and **never crashes** your application. On any error (network failure, server 500, timeout) it silently returns `false`.
+`isEnabled()` **never throws** and **never crashes** your app. On any error (network failure, server 500, timeout) it silently returns `false`.
 
 But errors don't disappear &mdash; the `onError` callback lets you observe them without affecting the return value:
 
@@ -222,7 +222,7 @@ The listener itself is wrapped in a safety net &mdash; even if it throws, the SD
 
 ---
 
-## Architecture
+## 🏗 Architecture
 
 ```
 com.homni.togli.sdk/
@@ -274,13 +274,13 @@ Hexagonal Architecture. Domain layer is pure Java with zero framework imports.
 
 ---
 
-## Thread Safety
+## 🔒 Thread Safety
 
 `TogliClient` instances are fully thread-safe. Share one instance across all threads in your application. The polling cache uses a volatile reference swap &mdash; reads are lock-free.
 
 ---
 
-## Examples
+## 📋 Examples
 
 See [Spring Boot example](../examples/spring-boot/) &mdash; REST app demonstrating every SDK feature via HTTP endpoints.
 

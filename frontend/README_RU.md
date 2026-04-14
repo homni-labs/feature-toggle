@@ -10,7 +10,7 @@
 
 ---
 
-## Архитектура
+## 🏗 Архитектура
 
 Clean Architecture с модульной структурой по фичам. Каждый из 7 модулей полностью изолирован и содержит собственные слои: domain, application, infrastructure, presentation.
 
@@ -32,9 +32,9 @@ lib/
 presentation → application → domain ← infrastructure
 ```
 
-Domain ни от чего не зависит. Infrastructure реализует порты домена. Presentation общается только с application.
+Domain ни от чего не зависит. Infrastructure реализует порты домена. Presentation общается только с application. Без компромиссов, без утечек.
 
-### Архитектурные решения
+### 🎯 Архитектурные решения
 
 | Решение | Обоснование |
 |---------|-------------|
@@ -47,7 +47,7 @@ Domain ни от чего не зависит. Infrastructure реализует
 
 ---
 
-## Auth Flow
+## 🔑 Auth Flow
 
 OIDC Authorization Code с PKCE (S256):
 
@@ -60,7 +60,7 @@ OIDC Authorization Code с PKCE (S256):
 
 ---
 
-## Паттерн состояний
+## 🔄 Паттерн состояний
 
 Sealed-состояния и `Either<Failure, T>` работают вместе:
 
@@ -73,7 +73,7 @@ Sealed-состояния и `Either<Failure, T>` работают вместе:
 
 ---
 
-## Обработка ошибок
+## 🛡 Обработка ошибок
 
 Ошибки проходят от HTTP-ответа до UI через типизированные значения &mdash; исключения не пересекают границы слоёв.
 
@@ -102,7 +102,7 @@ HTTP status code
 
 ---
 
-## Модули
+## 📦 Модули
 
 | Модуль | Ответственность |
 |--------|----------------|
@@ -116,7 +116,7 @@ HTTP status code
 
 ---
 
-## Разработка
+## 💻 Разработка
 
 ```bash
 cd frontend

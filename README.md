@@ -45,9 +45,11 @@
 
 ---
 
-## Why Togli?
+<a id="why-togli"></a>
 
-Most feature flag tools are SaaS-only, charge per seat, or lack granular access control. Togli is different:
+## 💡 Why Togli?
+
+Most feature flag tools are SaaS-only, charge per seat, or lock you out of granular access control. Togli takes a different path:
 
 - **Full ownership** &mdash; deploy on your infrastructure, no vendor lock-in, no usage limits, no data leaving your network
 - **Per-project isolation** &mdash; each project has its own toggles, environments, team members, and API keys
@@ -58,7 +60,9 @@ Most feature flag tools are SaaS-only, charge per seat, or lack granular access 
 
 ---
 
-## Features
+<a id="features"></a>
+
+## ✨ Features
 
 - &#x1F512; **[OIDC Authentication](#configuration)** &mdash; Keycloak with a custom branded SSO login page out of the box. Compatible with any OpenID Connect provider (Authentik, Auth0, Okta, etc.). OAuth 2.1 + PKCE
 - &#x1F4C1; **[Project Isolation](#architecture)** &mdash; each project is a self-contained workspace with its own toggles, environments, members, and API keys
@@ -72,7 +76,9 @@ Most feature flag tools are SaaS-only, charge per seat, or lack granular access 
 
 ---
 
-## Quick Start
+<a id="quick-start"></a>
+
+## 🚀 Quick Start
 
 **1. Clone the repository**
 
@@ -117,7 +123,9 @@ curl http://localhost:8080/actuator/health
 
 ---
 
-## Architecture
+<a id="architecture"></a>
+
+## 🏗 Architecture
 
 ```
                           ┌───────────┐
@@ -157,7 +165,9 @@ curl http://localhost:8080/actuator/health
 
 ---
 
-## SDK
+<a id="sdk"></a>
+
+## 🔌 SDK
 
 Official client libraries for integrating Togli into your applications.
 
@@ -189,7 +199,9 @@ See [sdk/java/README.md](sdk/java/README.md) for full documentation and [Spring 
 
 ---
 
-## Tech Stack
+<a id="tech-stack"></a>
+
+## 🛠 Tech Stack
 
 | Layer | Technologies |
 |-------|-------------|
@@ -203,9 +215,11 @@ See [sdk/java/README.md](sdk/java/README.md) for full documentation and [Spring 
 
 ---
 
-## Observability
+<a id="observability"></a>
 
-Togli ships with a production-grade observability stack. Everything is pre-configured &mdash; just `docker compose up` and open Grafana.
+## 📊 Observability
+
+Togli comes with a full observability stack out of the box. Everything just works &mdash; just `docker compose up` and open Grafana.
 
 **Pre-built Grafana dashboards** (in `observability/grafana/dashboards/`):
 
@@ -229,7 +243,9 @@ Togli ships with a production-grade observability stack. Everything is pre-confi
 
 ---
 
-## API
+<a id="api"></a>
+
+## 📡 API
 
 Authentication: **Bearer JWT** (OIDC) or **`X-API-Key`** header.
 
@@ -253,11 +269,13 @@ Interactive Swagger UI: [`/docs`](http://localhost:8080/docs) (when backend is r
 
 ---
 
-## Configuration
+<a id="configuration"></a>
+
+## ⚙️ Configuration
 
 ### Backend
 
-All variables have sensible defaults for local development.
+Everything works out of the box — no config needed for local dev.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -278,7 +296,7 @@ All variables have sensible defaults for local development.
 
 ### Frontend
 
-Runtime configuration loaded from `/config.json` at startup. Defaults work out of the box for local development.
+Frontend config is loaded from `/config.json` at startup. Works out of the box — no manual setup needed.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -309,7 +327,9 @@ On first login with that email, the user is automatically promoted to **Platform
 
 ---
 
-## Permissions
+<a id="permissions"></a>
+
+## 🔐 Permissions
 
 | Action | Platform Admin | Project Admin | Editor | Reader | API Key |
 |--------|:-:|:-:|:-:|:-:|:-:|
@@ -326,7 +346,9 @@ On first login with that email, the user is automatically promoted to **Platform
 
 ---
 
-## Local Development
+<a id="local-development"></a>
+
+## 💻 Local Development
 
 ### Prerequisites
 
@@ -386,7 +408,9 @@ Grafana will be available at [localhost:3001](http://localhost:3001) with all th
 
 ---
 
-## Contributing
+<a id="contributing"></a>
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -401,7 +425,9 @@ If you have questions, ideas, or suggestions about the project &mdash; feel free
 
 ---
 
-## Roadmap
+<a id="roadmap"></a>
+
+## 🗺 Roadmap
 
 - [ ] Publish Java SDK to Maven Central
 - [ ] Audit log &mdash; track all user actions
@@ -414,7 +440,9 @@ If you have questions, ideas, or suggestions about the project &mdash; feel free
 
 ---
 
-## Community & Support
+<a id="community--support"></a>
+
+## 💬 Community & Support
 
 - [GitHub Issues](https://github.com/homni-labs/feature-toggle/issues) &mdash; bug reports and feature requests
 - [Telegram](https://t.me/zaytsev_dv) &mdash; direct questions and feedback

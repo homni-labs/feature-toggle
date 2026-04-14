@@ -10,9 +10,9 @@ Admin dashboard for Homni Togli.
 
 ---
 
-## Architecture
+## 🏗 Architecture
 
-Clean Architecture with feature-based modularization. Each of the 7 feature modules is fully isolated with its own domain, application, infrastructure, and presentation layers.
+Clean Architecture with feature-based modules. Each of the 7 modules is fully isolated with its own domain, application, infrastructure, and presentation layers.
 
 ```
 lib/
@@ -32,9 +32,9 @@ lib/
 presentation → application → domain ← infrastructure
 ```
 
-Domain depends on nothing. Infrastructure implements domain ports. Presentation talks to application only.
+Domain depends on nothing. Infrastructure implements domain ports. Presentation only talks to application. No shortcuts, no leaks.
 
-### Design Decisions
+### 🎯 Design Decisions
 
 | Decision | Rationale |
 |----------|-----------|
@@ -47,7 +47,7 @@ Domain depends on nothing. Infrastructure implements domain ports. Presentation 
 
 ---
 
-## Auth Flow
+## 🔑 Auth Flow
 
 OIDC Authorization Code with PKCE (S256):
 
@@ -60,7 +60,7 @@ OIDC Authorization Code with PKCE (S256):
 
 ---
 
-## State Pattern
+## 🔄 State Pattern
 
 Sealed states and `Either<Failure, T>` work together:
 
@@ -73,7 +73,7 @@ Sealed states and `Either<Failure, T>` work together:
 
 ---
 
-## Error Handling
+## 🛡 Error Handling
 
 Errors flow from HTTP response to UI through typed values &mdash; no exceptions cross layer boundaries.
 
@@ -102,7 +102,7 @@ Every repository method returns `FutureEither<T>` &mdash; no `try/catch` in cubi
 
 ---
 
-## Feature Modules
+## 📦 Feature Modules
 
 | Module | Responsibility |
 |--------|---------------|
@@ -116,7 +116,7 @@ Every repository method returns `FutureEither<T>` &mdash; no `try/catch` in cubi
 
 ---
 
-## Development
+## 💻 Development
 
 ```bash
 cd frontend

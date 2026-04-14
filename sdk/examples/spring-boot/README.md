@@ -1,8 +1,8 @@
 # Togli SDK Example — Spring Boot
 
-E-commerce store that uses feature toggles to control UI theme, checkout flow, shipping, and promotions.
+A mini e-commerce store powered by feature toggles. Flip a toggle in the Togli dashboard — the store behavior changes instantly.
 
-## Prerequisites
+## 📋 Prerequisites
 
 1. Togli backend running (`docker compose up -d` from project root)
 2. A project with an API key (create via dashboard at [localhost:3000](http://localhost:3000), or via [Swagger UI](http://localhost:8080/docs), or directly in the database)
@@ -14,7 +14,7 @@ E-commerce store that uses feature toggles to control UI theme, checkout flow, s
 
    The example uses `DEV` as the default environment (configured in `application.yml`). Make sure your project has a `DEV` environment and the toggles are assigned to it. If you use a different environment, update `togli.default-environment` in `application.yml` accordingly.
 
-## Run
+## 🚀 Run
 
 ```bash
 # Build SDK and add to local Maven repository (~/.m2)
@@ -27,7 +27,7 @@ mvn spring-boot:run
 
 Edit `src/main/resources/application.yml` to set your API key and project slug.
 
-## Endpoints
+## 📡 Endpoints
 
 | URL | Feature | SDK Method |
 |-----|---------|------------|
@@ -37,7 +37,7 @@ Edit `src/main/resources/application.yml` to set your API key and project slug.
 | `GET /store/banner` | Promo banner text | `evaluate()` with `Runnable` |
 | `GET /store/debug` | All toggles + project info | `allToggles()` + `projectInfo()` |
 
-## Try It
+## 🧪 Try It
 
 ```bash
 # Which theme is active?

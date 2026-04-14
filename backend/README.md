@@ -10,15 +10,15 @@ REST API powering Homni Togli.
 
 ---
 
-## Architecture
+## 🏗 Architecture
 
-Hexagonal Architecture (Ports & Adapters) with strict DDD.
+Hexagonal Architecture (Ports & Adapters) with strict DDD. Clean layers, no shortcuts.
 
 ```
 infrastructure  →  application  →  domain
 ```
 
-The domain knows nothing about Spring, databases, or HTTP.
+The domain layer is pure Java — no Spring, no HTTP, no database imports. Just business logic.
 
 ```
 src/main/java/com/homni/togli/
@@ -37,7 +37,7 @@ src/main/java/com/homni/togli/
     └── config/                    CompositionRootConfig, SecurityConfig, CORS
 ```
 
-### Design Decisions
+### 🎯 Design Decisions
 
 | Decision | Rationale |
 |----------|-----------|
@@ -50,7 +50,7 @@ src/main/java/com/homni/togli/
 
 ---
 
-## Security
+## 🔒 Security
 
 Dual authentication chain:
 
@@ -62,7 +62,7 @@ Dual authentication chain:
 
 ---
 
-## Error Handling
+## 🛡 Error Handling
 
 Domain exceptions map to HTTP status codes via `GlobalExceptionHandler`:
 
@@ -77,7 +77,7 @@ Security errors: `TOKEN_EXPIRED` (401), `UNAUTHORIZED` (401), `FORBIDDEN` (403).
 
 ---
 
-## Default Environments
+## 🌍 Default Environments
 
 The platform exposes a configurable list of default environment names (`DEV`, `TEST`, `PROD`, ...) that can be bootstrapped into a new project at creation time. The list lives in `application.yml` under `app.environments.defaults` (overridable via `APP_DEFAULT_ENVIRONMENTS`).
 
@@ -87,7 +87,7 @@ The platform exposes a configurable list of default environment names (`DEV`, `T
 
 ---
 
-## Database
+## 🗄 Database
 
 7 tables managed by Liquibase migrations:
 
@@ -112,7 +112,7 @@ All IDs are UUIDs. Timestamps are `TIMESTAMPTZ`. Cascade deletes on `toggle_envi
 
 ---
 
-## Development
+## 💻 Development
 
 ```bash
 # Start dependencies
