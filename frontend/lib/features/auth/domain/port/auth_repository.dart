@@ -1,5 +1,5 @@
-import 'package:feature_toggle_app/core/domain/typedefs.dart';
-import 'package:feature_toggle_app/features/auth/domain/model/user.dart';
+import 'package:togli_app/core/domain/typedefs.dart';
+import 'package:togli_app/features/auth/domain/model/user.dart';
 
 abstract class AuthRepository {
   Future<void> discover();

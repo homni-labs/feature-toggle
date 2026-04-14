@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 
-import 'package:feature_toggle_app/features/auth/domain/port/auth_repository.dart'
+import 'package:togli_app/features/auth/domain/port/auth_repository.dart'
     as port;
 
 /// Stores OAuth tokens in browser sessionStorage.

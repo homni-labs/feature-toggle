@@ -1,4 +1,4 @@
-import 'package:feature_toggle_app/app/theme/app_colors.dart';
+import 'package:togli_app/app/theme/app_colors.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:feature_toggle_app/app/app.dart';
-import 'package:feature_toggle_app/app/config/runtime_config.dart';
-import 'package:feature_toggle_app/app/di/injection.dart';
-import 'package:feature_toggle_app/app/router/app_router.dart';
-import 'package:feature_toggle_app/features/auth/application/bloc/auth_cubit.dart';
+import 'package:togli_app/app/app.dart';
+import 'package:togli_app/app/config/runtime_config.dart';
+import 'package:togli_app/app/di/injection.dart';
+import 'package:togli_app/app/router/app_router.dart';
+import 'package:togli_app/features/auth/application/bloc/auth_cubit.dart';
 
 void main() {
   usePathUrlStrategy();
@@ -47,7 +47,7 @@ void main() {
 
       sl.registerLazySingleton<GoRouter>(() => createAppRouter());
 
-      runApp(const FeatureToggleApp());
+      runApp(const TogliApp());
     },
     (error, stack) {
       if (kDebugMode) {

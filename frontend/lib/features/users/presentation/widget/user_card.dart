@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:feature_toggle_app/features/auth/domain/model/user.dart';
-import 'package:feature_toggle_app/app/theme/app_colors.dart';
+import 'package:togli_app/features/auth/domain/model/user.dart';
+import 'package:togli_app/app/theme/app_colors.dart';
 
 const _months = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',

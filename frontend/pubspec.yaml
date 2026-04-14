@@ -1,5 +1,5 @@
-name: feature_toggle_app
-description: Feature Toggle — management dashboard.
+name: togli_app
+description: Togli — management dashboard.
 publish_to: 'none'
 version: 1.0.0+1
 

@@ -3,12 +3,12 @@ import 'dart:convert';
 import 'package:fpdart/fpdart.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:feature_toggle_app/app/config/app_config.dart';
-import 'package:feature_toggle_app/core/domain/failure.dart';
-import 'package:feature_toggle_app/features/auth/domain/model/user.dart';
-import 'package:feature_toggle_app/features/auth/domain/port/auth_repository.dart';
-import 'package:feature_toggle_app/features/auth/infrastructure/dto/user_dto.dart';
-import 'package:feature_toggle_app/features/auth/infrastructure/mapper/user_mapper.dart';
+import 'package:togli_app/app/config/app_config.dart';
+import 'package:togli_app/core/domain/failure.dart';
+import 'package:togli_app/features/auth/domain/model/user.dart';
+import 'package:togli_app/features/auth/domain/port/auth_repository.dart';
+import 'package:togli_app/features/auth/infrastructure/dto/user_dto.dart';
+import 'package:togli_app/features/auth/infrastructure/mapper/user_mapper.dart';
 
 class RemoteUserProfileRepository implements UserProfileRepository {
   final UserMapper _mapper;

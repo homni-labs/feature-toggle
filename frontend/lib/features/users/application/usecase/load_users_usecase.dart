@@ -1,5 +1,5 @@
-import 'package:feature_toggle_app/core/domain/typedefs.dart';
-import 'package:feature_toggle_app/features/users/domain/port/user_repository.dart';
+import 'package:togli_app/core/domain/typedefs.dart';
+import 'package:togli_app/features/users/domain/port/user_repository.dart';
 
 class LoadUsersUseCase {
   final UserRepository _repo;

@@ -1,5 +1,5 @@
-import 'package:feature_toggle_app/core/domain/failure.dart';
-import 'package:feature_toggle_app/features/toggles/domain/model/feature_toggle.dart';
+import 'package:togli_app/core/domain/failure.dart';
+import 'package:togli_app/features/toggles/domain/model/feature_toggle.dart';
 
 sealed class TogglesState {
   const TogglesState();

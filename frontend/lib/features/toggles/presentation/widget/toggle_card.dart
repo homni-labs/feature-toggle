@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:feature_toggle_app/app/theme/app_colors.dart';
-import 'package:feature_toggle_app/features/toggles/domain/model/feature_toggle.dart';
-import 'package:feature_toggle_app/features/toggles/domain/model/toggle_environment.dart';
+import 'package:togli_app/app/theme/app_colors.dart';
+import 'package:togli_app/features/toggles/domain/model/feature_toggle.dart';
+import 'package:togli_app/features/toggles/domain/model/toggle_environment.dart';
 
 /// Tile-style toggle card matching `app-redesign.html` Toggles section.
 ///

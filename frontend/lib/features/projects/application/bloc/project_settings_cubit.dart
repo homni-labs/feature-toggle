@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:feature_toggle_app/features/projects/application/bloc/project_settings_state.dart';
-import 'package:feature_toggle_app/features/projects/application/usecase/update_project_usecase.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/projects/application/bloc/project_settings_state.dart';
+import 'package:togli_app/features/projects/application/usecase/update_project_usecase.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
 
 class ProjectSettingsCubit extends Cubit<ProjectSettingsState> {
   final UpdateProjectUseCase _updateProject;

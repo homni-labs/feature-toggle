@@ -5,9 +5,9 @@ import 'package:crypto/crypto.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:feature_toggle_app/app/config/env.dart';
-import 'package:feature_toggle_app/core/domain/failure.dart';
-import 'package:feature_toggle_app/features/auth/domain/port/auth_repository.dart';
+import 'package:togli_app/app/config/env.dart';
+import 'package:togli_app/core/domain/failure.dart';
+import 'package:togli_app/features/auth/domain/port/auth_repository.dart';
 
 /// Endpoints parsed from the OIDC discovery document.
 class OidcEndpoints {

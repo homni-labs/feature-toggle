@@ -1,11 +1,11 @@
 {
-  "name": "Feature Toggle",
-  "short_name": "FT",
+  "name": "Togli",
+  "short_name": "Togli",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0D0D1A",
   "theme_color": "#EF7B6C",
-  "description": "Feature Toggle Application",
+  "description": "Togli Application",
   "orientation": "portrait-primary",
   "prefer_related_applications": false
 }

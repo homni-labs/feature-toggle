@@ -1,6 +1,6 @@
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/email.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/platform_role.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/core/domain/value_objects/email.dart';
+import 'package:togli_app/core/domain/value_objects/platform_role.dart';
 
 class User {
   final UserId id;

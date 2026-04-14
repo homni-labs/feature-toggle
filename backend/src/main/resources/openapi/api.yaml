@@ -1,7 +1,7 @@
 openapi: 3.0.1
 
 info:
-  title: Homni Feature Toggle API
+  title: Homni Togli API
   version: '2.0.0'
   description: Per-project feature toggle management with RBAC and API key authentication.
 

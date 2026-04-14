@@ -1,5 +1,5 @@
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/toggles/domain/model/toggle_environment.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/toggles/domain/model/toggle_environment.dart';
 
 class FeatureToggle {
   final ToggleId id;

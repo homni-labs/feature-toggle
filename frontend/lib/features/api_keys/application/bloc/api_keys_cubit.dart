@@ -1,13 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/project_role.dart';
-import 'package:feature_toggle_app/features/api_keys/application/bloc/api_keys_state.dart';
-import 'package:feature_toggle_app/features/api_keys/application/usecase/delete_api_key_usecase.dart';
-import 'package:feature_toggle_app/features/api_keys/application/usecase/issue_api_key_usecase.dart';
-import 'package:feature_toggle_app/features/api_keys/application/usecase/load_api_keys_usecase.dart';
-import 'package:feature_toggle_app/features/api_keys/application/usecase/revoke_api_key_usecase.dart';
-import 'package:feature_toggle_app/features/api_keys/domain/model/api_key.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/core/domain/value_objects/project_role.dart';
+import 'package:togli_app/features/api_keys/application/bloc/api_keys_state.dart';
+import 'package:togli_app/features/api_keys/application/usecase/delete_api_key_usecase.dart';
+import 'package:togli_app/features/api_keys/application/usecase/issue_api_key_usecase.dart';
+import 'package:togli_app/features/api_keys/application/usecase/load_api_keys_usecase.dart';
+import 'package:togli_app/features/api_keys/application/usecase/revoke_api_key_usecase.dart';
+import 'package:togli_app/features/api_keys/domain/model/api_key.dart';
 
 class ApiKeysCubit extends Cubit<ApiKeysState> {
   final LoadApiKeysUseCase _loadApiKeys;

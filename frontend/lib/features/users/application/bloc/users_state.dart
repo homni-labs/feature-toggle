@@ -1,5 +1,5 @@
-import 'package:feature_toggle_app/core/domain/failure.dart';
-import 'package:feature_toggle_app/features/auth/domain/model/user.dart';
+import 'package:togli_app/core/domain/failure.dart';
+import 'package:togli_app/features/auth/domain/model/user.dart';
 
 sealed class UsersState {
   const UsersState();

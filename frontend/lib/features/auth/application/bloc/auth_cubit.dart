@@ -3,10 +3,10 @@ import 'dart:html' as html;
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:feature_toggle_app/core/domain/value_objects/project_role.dart';
-import 'package:feature_toggle_app/features/auth/application/bloc/auth_state.dart';
-import 'package:feature_toggle_app/features/auth/domain/port/auth_repository.dart';
-import 'package:feature_toggle_app/features/projects/domain/model/project.dart';
+import 'package:togli_app/core/domain/value_objects/project_role.dart';
+import 'package:togli_app/features/auth/application/bloc/auth_state.dart';
+import 'package:togli_app/features/auth/domain/port/auth_repository.dart';
+import 'package:togli_app/features/projects/domain/model/project.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _authRepo;

@@ -1,6 +1,6 @@
-import 'package:feature_toggle_app/core/domain/value_objects/project_role.dart';
-import 'package:feature_toggle_app/features/auth/domain/model/user.dart';
-import 'package:feature_toggle_app/features/projects/domain/model/project.dart';
+import 'package:togli_app/core/domain/value_objects/project_role.dart';
+import 'package:togli_app/features/auth/domain/model/user.dart';
+import 'package:togli_app/features/projects/domain/model/project.dart';
 
 sealed class AuthState {
   const AuthState();

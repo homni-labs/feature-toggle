@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:feature_toggle_app/features/api_keys/domain/model/api_key.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/project_role.dart';
-import 'package:feature_toggle_app/app/theme/app_colors.dart';
+import 'package:togli_app/features/api_keys/domain/model/api_key.dart';
+import 'package:togli_app/core/domain/value_objects/project_role.dart';
+import 'package:togli_app/app/theme/app_colors.dart';
 
 class ApiKeyCard extends StatelessWidget {
   final ApiKey apiKey;

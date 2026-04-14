@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'package:fpdart/fpdart.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:feature_toggle_app/app/config/app_config.dart';
-import 'package:feature_toggle_app/core/domain/failure.dart';
-import 'package:feature_toggle_app/core/domain/typedefs.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/api_keys/domain/model/api_key.dart';
-import 'package:feature_toggle_app/features/api_keys/domain/port/api_key_repository.dart';
-import 'package:feature_toggle_app/features/api_keys/infrastructure/dto/api_key_dto.dart';
-import 'package:feature_toggle_app/features/api_keys/infrastructure/mapper/api_key_mapper.dart';
+import 'package:togli_app/app/config/app_config.dart';
+import 'package:togli_app/core/domain/failure.dart';
+import 'package:togli_app/core/domain/typedefs.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/api_keys/domain/model/api_key.dart';
+import 'package:togli_app/features/api_keys/domain/port/api_key_repository.dart';
+import 'package:togli_app/features/api_keys/infrastructure/dto/api_key_dto.dart';
+import 'package:togli_app/features/api_keys/infrastructure/mapper/api_key_mapper.dart';
 
 class RemoteApiKeyRepository implements ApiKeyRepository {
   RemoteApiKeyRepository({ApiKeyMapper? mapper})

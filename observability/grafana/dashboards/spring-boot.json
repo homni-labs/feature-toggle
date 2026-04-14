@@ -35,7 +35,7 @@
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"feature_toggle_backend\"}[5m])) by (status)",
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"togli_backend\"}[5m])) by (status)",
           "legendFormat": "{{status}}"
         }
       ],
@@ -64,11 +64,11 @@
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"feature_toggle_backend\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"togli_backend\"}[5m])) by (le))",
           "legendFormat": "p95"
         },
         {
-          "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{application=\"feature_toggle_backend\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{application=\"togli_backend\"}[5m])) by (le))",
           "legendFormat": "p99"
         }
       ],
@@ -96,7 +96,7 @@
       "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
       "targets": [
         {
-          "expr": "sum(rate(http_server_requests_seconds_count{application=\"feature_toggle_backend\", status=~\"5..\"}[5m])) / sum(rate(http_server_requests_seconds_count{application=\"feature_toggle_backend\"}[5m])) * 100",
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"togli_backend\", status=~\"5..\"}[5m])) / sum(rate(http_server_requests_seconds_count{application=\"togli_backend\"}[5m])) * 100",
           "legendFormat": "Error Rate"
         }
       ],
@@ -130,11 +130,11 @@
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "jvm_gc_live_data_size_bytes{application=\"feature_toggle_backend\"}",
+          "expr": "jvm_gc_live_data_size_bytes{application=\"togli_backend\"}",
           "legendFormat": "Live Data (after GC)"
         },
         {
-          "expr": "jvm_gc_max_data_size_bytes{application=\"feature_toggle_backend\"}",
+          "expr": "jvm_gc_max_data_size_bytes{application=\"togli_backend\"}",
           "legendFormat": "Max Data Size"
         }
       ],
@@ -161,11 +161,11 @@
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "jvm_memory_used_bytes{application=\"feature_toggle_backend\", area=\"heap\"}",
+          "expr": "jvm_memory_used_bytes{application=\"togli_backend\", area=\"heap\"}",
           "legendFormat": "Used {{id}}"
         },
         {
-          "expr": "jvm_memory_max_bytes{application=\"feature_toggle_backend\", area=\"heap\"}",
+          "expr": "jvm_memory_max_bytes{application=\"togli_backend\", area=\"heap\"}",
           "legendFormat": "Max {{id}}"
         }
       ],
@@ -192,15 +192,15 @@
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "jvm_buffer_memory_used_bytes{application=\"feature_toggle_backend\", id=\"direct\"}",
+          "expr": "jvm_buffer_memory_used_bytes{application=\"togli_backend\", id=\"direct\"}",
           "legendFormat": "Direct Used"
         },
         {
-          "expr": "jvm_buffer_total_capacity_bytes{application=\"feature_toggle_backend\", id=\"direct\"}",
+          "expr": "jvm_buffer_total_capacity_bytes{application=\"togli_backend\", id=\"direct\"}",
           "legendFormat": "Direct Capacity"
         },
         {
-          "expr": "jvm_memory_used_bytes{application=\"feature_toggle_backend\", area=\"nonheap\"}",
+          "expr": "jvm_memory_used_bytes{application=\"togli_backend\", area=\"nonheap\"}",
           "legendFormat": "Non-Heap {{id}}"
         }
       ],
@@ -227,11 +227,11 @@
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "jvm_gc_pause_seconds_max{application=\"feature_toggle_backend\"}",
+          "expr": "jvm_gc_pause_seconds_max{application=\"togli_backend\"}",
           "legendFormat": "Max {{cause}} {{action}}"
         },
         {
-          "expr": "histogram_quantile(0.99, sum(rate(jvm_gc_pause_seconds_bucket{application=\"feature_toggle_backend\"}[5m])) by (le, cause, action))",
+          "expr": "histogram_quantile(0.99, sum(rate(jvm_gc_pause_seconds_bucket{application=\"togli_backend\"}[5m])) by (le, cause, action))",
           "legendFormat": "p99 {{cause}} {{action}}"
         }
       ],
@@ -258,7 +258,7 @@
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "rate(jvm_gc_pause_seconds_count{application=\"feature_toggle_backend\"}[5m])",
+          "expr": "rate(jvm_gc_pause_seconds_count{application=\"togli_backend\"}[5m])",
           "legendFormat": "{{cause}} {{action}}"
         }
       ],
@@ -285,15 +285,15 @@
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "jvm_threads_live_threads{application=\"feature_toggle_backend\"}",
+          "expr": "jvm_threads_live_threads{application=\"togli_backend\"}",
           "legendFormat": "Live"
         },
         {
-          "expr": "jvm_threads_daemon_threads{application=\"feature_toggle_backend\"}",
+          "expr": "jvm_threads_daemon_threads{application=\"togli_backend\"}",
           "legendFormat": "Daemon"
         },
         {
-          "expr": "jvm_threads_peak_threads{application=\"feature_toggle_backend\"}",
+          "expr": "jvm_threads_peak_threads{application=\"togli_backend\"}",
           "legendFormat": "Peak"
         }
       ],
@@ -327,19 +327,19 @@
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "hikaricp_connections_active{application=\"feature_toggle_backend\"}",
+          "expr": "hikaricp_connections_active{application=\"togli_backend\"}",
           "legendFormat": "Active"
         },
         {
-          "expr": "hikaricp_connections_idle{application=\"feature_toggle_backend\"}",
+          "expr": "hikaricp_connections_idle{application=\"togli_backend\"}",
           "legendFormat": "Idle"
         },
         {
-          "expr": "hikaricp_connections_pending{application=\"feature_toggle_backend\"}",
+          "expr": "hikaricp_connections_pending{application=\"togli_backend\"}",
           "legendFormat": "Pending"
         },
         {
-          "expr": "hikaricp_connections_max{application=\"feature_toggle_backend\"}",
+          "expr": "hikaricp_connections_max{application=\"togli_backend\"}",
           "legendFormat": "Max"
         }
       ],
@@ -366,7 +366,7 @@
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "rate(hikaricp_connections_acquire_seconds_sum{application=\"feature_toggle_backend\"}[5m]) / rate(hikaricp_connections_acquire_seconds_count{application=\"feature_toggle_backend\"}[5m])",
+          "expr": "rate(hikaricp_connections_acquire_seconds_sum{application=\"togli_backend\"}[5m]) / rate(hikaricp_connections_acquire_seconds_count{application=\"togli_backend\"}[5m])",
           "legendFormat": "Avg Acquire Time"
         }
       ],
@@ -402,11 +402,11 @@
       "options": { "legend": { "calcs": ["mean", "lastNotNull"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "process_cpu_usage{application=\"feature_toggle_backend\"}",
+          "expr": "process_cpu_usage{application=\"togli_backend\"}",
           "legendFormat": "Process CPU"
         },
         {
-          "expr": "system_cpu_usage{application=\"feature_toggle_backend\"}",
+          "expr": "system_cpu_usage{application=\"togli_backend\"}",
           "legendFormat": "System CPU"
         }
       ],
@@ -433,15 +433,15 @@
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "executor_active_threads{application=\"feature_toggle_backend\"}",
+          "expr": "executor_active_threads{application=\"togli_backend\"}",
           "legendFormat": "Active {{name}}"
         },
         {
-          "expr": "executor_queued_tasks{application=\"feature_toggle_backend\"}",
+          "expr": "executor_queued_tasks{application=\"togli_backend\"}",
           "legendFormat": "Queued {{name}}"
         },
         {
-          "expr": "executor_pool_size_threads{application=\"feature_toggle_backend\"}",
+          "expr": "executor_pool_size_threads{application=\"togli_backend\"}",
           "legendFormat": "Pool Size {{name}}"
         }
       ],
@@ -468,11 +468,11 @@
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "process_files_open_files{application=\"feature_toggle_backend\"}",
+          "expr": "process_files_open_files{application=\"togli_backend\"}",
           "legendFormat": "Open"
         },
         {
-          "expr": "process_files_max_files{application=\"feature_toggle_backend\"}",
+          "expr": "process_files_max_files{application=\"togli_backend\"}",
           "legendFormat": "Max"
         }
       ],
@@ -498,7 +498,7 @@
       "options": { "colorMode": "value", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
       "targets": [
         {
-          "expr": "process_uptime_seconds{application=\"feature_toggle_backend\"}",
+          "expr": "process_uptime_seconds{application=\"togli_backend\"}",
           "legendFormat": "Uptime"
         }
       ],
@@ -512,7 +512,7 @@
   "time": { "from": "now-1h", "to": "now" },
   "timepicker": {},
   "timezone": "browser",
-  "title": "feature_toggle_backend",
-  "uid": "feature-toggle-backend",
+  "title": "togli_backend",
+  "uid": "togli-backend",
   "version": 1
 }

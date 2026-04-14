@@ -3,21 +3,21 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:feature_toggle_app/app/di/injection.dart';
-import 'package:feature_toggle_app/app/theme/app_colors.dart';
-import 'package:feature_toggle_app/core/domain/failure.dart';
-import 'package:feature_toggle_app/core/presentation/widgets/app_snackbar.dart';
-import 'package:feature_toggle_app/core/presentation/widgets/comic_button.dart';
-import 'package:feature_toggle_app/core/presentation/widgets/forbidden_page.dart';
-import 'package:feature_toggle_app/features/auth/application/bloc/auth_cubit.dart';
-import 'package:feature_toggle_app/features/auth/application/bloc/auth_state.dart';
-import 'package:feature_toggle_app/features/api_keys/application/bloc/api_keys_cubit.dart';
-import 'package:feature_toggle_app/features/api_keys/application/bloc/api_keys_state.dart';
-import 'package:feature_toggle_app/features/api_keys/domain/model/api_key.dart';
-import 'package:feature_toggle_app/features/api_keys/presentation/widget/api_key_card.dart';
-import 'package:feature_toggle_app/features/api_keys/presentation/widget/api_key_dialog.dart'
+import 'package:togli_app/app/di/injection.dart';
+import 'package:togli_app/app/theme/app_colors.dart';
+import 'package:togli_app/core/domain/failure.dart';
+import 'package:togli_app/core/presentation/widgets/app_snackbar.dart';
+import 'package:togli_app/core/presentation/widgets/comic_button.dart';
+import 'package:togli_app/core/presentation/widgets/forbidden_page.dart';
+import 'package:togli_app/features/auth/application/bloc/auth_cubit.dart';
+import 'package:togli_app/features/auth/application/bloc/auth_state.dart';
+import 'package:togli_app/features/api_keys/application/bloc/api_keys_cubit.dart';
+import 'package:togli_app/features/api_keys/application/bloc/api_keys_state.dart';
+import 'package:togli_app/features/api_keys/domain/model/api_key.dart';
+import 'package:togli_app/features/api_keys/presentation/widget/api_key_card.dart';
+import 'package:togli_app/features/api_keys/presentation/widget/api_key_dialog.dart'
     show ApiKeyDialog, ApiKeyDialogResult;
-import 'package:feature_toggle_app/features/api_keys/presentation/widget/raw_token_dialog.dart'
+import 'package:togli_app/features/api_keys/presentation/widget/raw_token_dialog.dart'
     show RawTokenDialog;
 
 class ApiKeysPage extends StatelessWidget {

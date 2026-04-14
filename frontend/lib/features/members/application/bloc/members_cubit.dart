@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/members/application/bloc/members_state.dart';
-import 'package:feature_toggle_app/features/members/application/usecase/load_members_usecase.dart';
-import 'package:feature_toggle_app/features/members/application/usecase/remove_member_usecase.dart';
-import 'package:feature_toggle_app/features/members/application/usecase/upsert_member_usecase.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/members/application/bloc/members_state.dart';
+import 'package:togli_app/features/members/application/usecase/load_members_usecase.dart';
+import 'package:togli_app/features/members/application/usecase/remove_member_usecase.dart';
+import 'package:togli_app/features/members/application/usecase/upsert_member_usecase.dart';
 class MembersCubit extends Cubit<MembersState> {
   final LoadMembersUseCase _loadMembers;
   final UpsertMemberUseCase _upsertMember;

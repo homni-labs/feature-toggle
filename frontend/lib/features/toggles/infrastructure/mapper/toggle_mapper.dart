@@ -1,7 +1,7 @@
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/toggles/domain/model/feature_toggle.dart';
-import 'package:feature_toggle_app/features/toggles/domain/model/toggle_environment.dart';
-import 'package:feature_toggle_app/features/toggles/infrastructure/dto/feature_toggle_dto.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/toggles/domain/model/feature_toggle.dart';
+import 'package:togli_app/features/toggles/domain/model/toggle_environment.dart';
+import 'package:togli_app/features/toggles/infrastructure/dto/feature_toggle_dto.dart';
 
 class ToggleMapper {
   FeatureToggle toDomain(FeatureToggleDto dto) {

@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'package:fpdart/fpdart.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:feature_toggle_app/app/config/app_config.dart';
-import 'package:feature_toggle_app/core/domain/failure.dart';
-import 'package:feature_toggle_app/core/domain/typedefs.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/auth/domain/model/user.dart';
-import 'package:feature_toggle_app/features/auth/infrastructure/dto/user_dto.dart';
-import 'package:feature_toggle_app/features/auth/infrastructure/mapper/user_mapper.dart';
-import 'package:feature_toggle_app/features/users/domain/port/user_repository.dart';
+import 'package:togli_app/app/config/app_config.dart';
+import 'package:togli_app/core/domain/failure.dart';
+import 'package:togli_app/core/domain/typedefs.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/auth/domain/model/user.dart';
+import 'package:togli_app/features/auth/infrastructure/dto/user_dto.dart';
+import 'package:togli_app/features/auth/infrastructure/mapper/user_mapper.dart';
+import 'package:togli_app/features/users/domain/port/user_repository.dart';
 
 class RemoteUserRepository implements UserRepository {
   RemoteUserRepository({UserMapper? mapper})

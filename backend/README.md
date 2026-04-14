@@ -1,8 +1,8 @@
 <div align="center">
 
-# Homni Feature Toggle &mdash; Backend
+# Homni Togli &mdash; Backend
 
-REST API powering Homni Feature Toggle.
+REST API powering Homni Togli.
 
 **[Russian documentation](README_RU.md)** &middot; **[Project README](../README.md)**
 
@@ -21,7 +21,7 @@ infrastructure  →  application  →  domain
 The domain knows nothing about Spring, databases, or HTTP.
 
 ```
-src/main/java/com/homni/featuretoggle/
+src/main/java/com/homni/togli/
 ├── domain/
 │   ├── model/          Aggregates, value objects, enums
 │   └── exception/      Domain exceptions (NotFound, AccessDenied, Conflict, Validation)
@@ -84,6 +84,31 @@ The platform exposes a configurable list of default environment names (`DEV`, `T
 - **Single source of truth** &mdash; defaults live only in config, never in the database. Each project gets its own independent rows in the `environment` table.
 - **Fail-fast validation** &mdash; `EnvironmentDefaultsValidator` validates each name on startup using the same `Environment.validateAndNormalize` rules. The application refuses to boot if any name violates `^[A-Z][A-Z0-9_]*$`, exceeds 50 characters, or duplicates another entry.
 - **Field semantics** on `POST /projects`: omitting `environments` bootstraps **all** defaults; empty array opts out; non-empty subset bootstraps exactly those names.
+
+---
+
+## Database
+
+7 tables managed by Liquibase migrations:
+
+```
+project
+├── feature_toggle ──* toggle_environment *── environment
+├── project_membership *── app_user
+└── api_key
+```
+
+| Table | Key columns | Notes |
+|-------|------------|-------|
+| `project` | `id`, `slug` (unique), `name`, `archived` | Aggregate root |
+| `app_user` | `id`, `oidc_subject` (unique), `email` (unique), `platform_role` | Auto-created on OIDC login |
+| `project_membership` | `project_id`, `user_id`, `role` | Unique per `(project, user)` |
+| `environment` | `project_id`, `name` | Unique per `(project, name)` |
+| `feature_toggle` | `project_id`, `name` | Unique per `(project, name)` |
+| `toggle_environment` | `toggle_id`, `environment_id`, `enabled` | Composite PK, per-env state |
+| `api_key` | `project_id`, `token_hash` (unique), `active`, `expires_at` | SHA-256 hashed, filtered index on active keys |
+
+All IDs are UUIDs. Timestamps are `TIMESTAMPTZ`. Cascade deletes on `toggle_environment` (via toggle) and `project_membership` (via user).
 
 ---
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:feature_toggle_app/app/theme/app_colors.dart';
-import 'package:feature_toggle_app/features/environments/domain/model/environment.dart'
+import 'package:togli_app/app/theme/app_colors.dart';
+import 'package:togli_app/features/environments/domain/model/environment.dart'
     as env_model;
 
 /// Color tile environment card matching pages-redesign.html.

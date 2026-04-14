@@ -1,6 +1,6 @@
-import 'package:feature_toggle_app/core/domain/typedefs.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/api_keys/domain/port/api_key_repository.dart';
+import 'package:togli_app/core/domain/typedefs.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/api_keys/domain/port/api_key_repository.dart';
 
 class DeleteApiKeyUseCase {
   final ApiKeyRepository _repo;

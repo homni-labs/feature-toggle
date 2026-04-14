@@ -1,0 +1,71 @@
+/*
+ * (\(\
+ * ( -.-)    I'm watching you.
+ * o_(")(")  Don't write crappy code.
+ *
+ * Copyright (c) Homni Labs
+ * Licensed under the MIT License
+ */
+
+package com.homni.togli.application.usecase;
+
+import com.homni.togli.application.port.out.ApiKeyRepositoryPort;
+import com.homni.togli.application.port.out.CallerProjectAccessPort;
+import com.homni.togli.application.port.out.ProjectRepositoryPort;
+import com.homni.togli.domain.exception.EntityNotFoundException;
+import com.homni.togli.domain.exception.ProjectArchivedException;
+import com.homni.togli.domain.model.IssuedApiKey;
+import com.homni.togli.domain.model.Permission;
+import com.homni.togli.domain.model.ProjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.Instant;
+
+/**
+ * Issues a read-only API key bound to a project.
+ */
+public final class IssueApiKeyUseCase {
+
+    private static final Logger log = LoggerFactory.getLogger(IssueApiKeyUseCase.class);
+
+    private final ApiKeyRepositoryPort apiKeys;
+    private final ProjectRepositoryPort projects;
+    private final CallerProjectAccessPort callerAccess;
+
+    /**
+     * @param apiKeys      API key persistence port
+     * @param projects     project persistence port
+     * @param callerAccess caller's project access resolver
+     */
+    public IssueApiKeyUseCase(ApiKeyRepositoryPort apiKeys,
+                               ProjectRepositoryPort projects,
+                               CallerProjectAccessPort callerAccess) {
+        this.apiKeys = apiKeys;
+        this.projects = projects;
+        this.callerAccess = callerAccess;
+    }
+
+    /**
+     * Issues a read-only API key for the project.
+     *
+     * @param projectId owning project identity
+     * @param name      key name (1-255 chars)
+     * @param expiresAt expiration, or {@code null}
+     * @return the issued key with raw token
+     * @throws com.homni.togli.domain.exception.InsufficientPermissionException if access lacks MANAGE_MEMBERS
+     * @throws ProjectArchivedException if the project is archived
+     * @throws com.homni.togli.domain.exception.DomainValidationException if the name is invalid
+     */
+    public IssuedApiKey execute(ProjectId projectId, String name, Instant expiresAt) {
+        log.debug("Issuing API key: project={}, name={}", projectId.value, name);
+        callerAccess.resolve(projectId).ensure(Permission.MANAGE_MEMBERS);
+        projects.findById(projectId)
+                .orElseThrow(() -> new EntityNotFoundException("Project", projectId.value))
+                .ensureNotArchived();
+        IssuedApiKey issued = new IssuedApiKey(projectId, name, expiresAt);
+        apiKeys.save(issued.apiKey);
+        log.debug("API key issued: id={}, project={}", issued.apiKey.id.value, projectId.value);
+        return issued;
+    }
+}

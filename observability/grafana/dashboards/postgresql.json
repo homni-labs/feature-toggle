@@ -32,7 +32,7 @@
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "pg_stat_activity_count{datname=\"homni_feature_toggle\"}",
+          "expr": "pg_stat_activity_count{datname=~\"$database\"}",
           "legendFormat": "Active ({{state}})"
         }
       ],
@@ -60,7 +60,7 @@
       "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
       "targets": [
         {
-          "expr": "sum(pg_stat_activity_count{datname=\"homni_feature_toggle\"}) / pg_settings_max_connections * 100",
+          "expr": "sum(pg_stat_activity_count{datname=~\"$database\"}) / scalar(pg_settings_max_connections) * 100",
           "legendFormat": "Connection Usage %"
         }
       ],
@@ -94,11 +94,11 @@
       "options": { "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "rate(pg_stat_database_xact_commit{datname=\"homni_feature_toggle\"}[5m])",
+          "expr": "rate(pg_stat_database_xact_commit{datname=~\"$database\"}[5m])",
           "legendFormat": "Commits/s"
         },
         {
-          "expr": "rate(pg_stat_database_xact_rollback{datname=\"homni_feature_toggle\"}[5m])",
+          "expr": "rate(pg_stat_database_xact_rollback{datname=~\"$database\"}[5m])",
           "legendFormat": "Rollbacks/s"
         }
       ],
@@ -126,7 +126,7 @@
       "options": { "colorMode": "background", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
       "targets": [
         {
-          "expr": "pg_stat_database_blks_hit{datname=\"homni_feature_toggle\"} / (pg_stat_database_blks_hit{datname=\"homni_feature_toggle\"} + pg_stat_database_blks_read{datname=\"homni_feature_toggle\"}) * 100",
+          "expr": "pg_stat_database_blks_hit{datname=~\"$database\"} / (pg_stat_database_blks_hit{datname=~\"$database\"} + pg_stat_database_blks_read{datname=~\"$database\"}) * 100",
           "legendFormat": "Cache Hit Ratio"
         }
       ],
@@ -160,7 +160,7 @@
       "options": { "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "rate(pg_stat_database_deadlocks{datname=\"homni_feature_toggle\"}[5m])",
+          "expr": "rate(pg_stat_database_deadlocks{datname=~\"$database\"}[5m])",
           "legendFormat": "Deadlocks/s"
         }
       ],
@@ -187,7 +187,7 @@
       "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
       "targets": [
         {
-          "expr": "rate(pg_stat_database_temp_bytes{datname=\"homni_feature_toggle\"}[5m])",
+          "expr": "rate(pg_stat_database_temp_bytes{datname=~\"$database\"}[5m])",
           "legendFormat": "Temp Bytes/s"
         }
       ],
@@ -222,7 +222,7 @@
       "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
       "targets": [
         {
-          "expr": "pg_database_size_bytes{datname=\"homni_feature_toggle\"}",
+          "expr": "pg_database_size_bytes{datname=~\"$database\"}",
           "legendFormat": "Database Size"
         }
       ],
@@ -232,7 +232,19 @@
   ],
   "schemaVersion": 39,
   "tags": ["postgresql", "database"],
-  "templating": { "list": [] },
+  "templating": { "list": [
+    {
+      "current": { "selected": false, "text": "All", "value": "$__all" },
+      "datasource": { "type": "prometheus", "uid": "PBFA97CFB590B2093" },
+      "definition": "label_values(pg_stat_database_xact_commit, datname)",
+      "includeAll": true,
+      "multi": false,
+      "name": "database",
+      "query": { "query": "label_values(pg_stat_database_xact_commit, datname)" },
+      "refresh": 2,
+      "type": "query"
+    }
+  ] },
   "time": { "from": "now-1h", "to": "now" },
   "timepicker": {},
   "timezone": "browser",

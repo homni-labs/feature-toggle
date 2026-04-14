@@ -3,13 +3,13 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'feature_toggle_backend'
+  - job_name: 'togli_backend'
     metrics_path: '/actuator/prometheus'
     scrape_interval: 10s
     static_configs:
-      - targets: ['host.docker.internal:8081']
+      - targets: ['backend.myapp.svc.cluster.local:8080']
         labels:
-          service: 'feature_toggle_backend'
+          service: 'togli_backend'
 
   - job_name: 'keycloak'
     metrics_path: '/metrics'
@@ -25,3 +25,22 @@ scrape_configs:
       - targets: ['postgres-exporter:9187']
         labels:
           service: 'postgres'
+
+  - job_name: 'node'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          service: 'node'
+
+  - job_name: 'cadvisor'
+    scheme: https
+    tls_config:
+      insecure_skip_verify: true
+    bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+    metrics_path: /metrics/cadvisor
+    kubernetes_sd_configs:
+      - role: node
+    relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)

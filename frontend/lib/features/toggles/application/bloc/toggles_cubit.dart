@@ -1,12 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/toggles/application/bloc/toggles_state.dart';
-import 'package:feature_toggle_app/features/toggles/application/usecase/create_toggle_usecase.dart';
-import 'package:feature_toggle_app/features/toggles/application/usecase/delete_toggle_usecase.dart';
-import 'package:feature_toggle_app/features/toggles/application/usecase/load_toggles_usecase.dart';
-import 'package:feature_toggle_app/features/toggles/application/usecase/update_toggle_usecase.dart';
-import 'package:feature_toggle_app/features/toggles/domain/model/feature_toggle.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/toggles/application/bloc/toggles_state.dart';
+import 'package:togli_app/features/toggles/application/usecase/create_toggle_usecase.dart';
+import 'package:togli_app/features/toggles/application/usecase/delete_toggle_usecase.dart';
+import 'package:togli_app/features/toggles/application/usecase/load_toggles_usecase.dart';
+import 'package:togli_app/features/toggles/application/usecase/update_toggle_usecase.dart';
+import 'package:togli_app/features/toggles/domain/model/feature_toggle.dart';
 
 class TogglesCubit extends Cubit<TogglesState> {
   final LoadTogglesUseCase _loadToggles;

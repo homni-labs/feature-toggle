@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'package:fpdart/fpdart.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:feature_toggle_app/app/config/app_config.dart';
-import 'package:feature_toggle_app/core/domain/failure.dart';
-import 'package:feature_toggle_app/core/domain/typedefs.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/members/domain/model/project_membership.dart';
-import 'package:feature_toggle_app/features/members/domain/port/member_repository.dart';
-import 'package:feature_toggle_app/features/members/infrastructure/dto/project_membership_dto.dart';
-import 'package:feature_toggle_app/features/members/infrastructure/mapper/membership_mapper.dart';
+import 'package:togli_app/app/config/app_config.dart';
+import 'package:togli_app/core/domain/failure.dart';
+import 'package:togli_app/core/domain/typedefs.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/members/domain/model/project_membership.dart';
+import 'package:togli_app/features/members/domain/port/member_repository.dart';
+import 'package:togli_app/features/members/infrastructure/dto/project_membership_dto.dart';
+import 'package:togli_app/features/members/infrastructure/mapper/membership_mapper.dart';
 
 class RemoteMemberRepository implements MemberRepository {
   RemoteMemberRepository({MembershipMapper? mapper})

@@ -1,6 +1,6 @@
-import 'package:feature_toggle_app/core/domain/typedefs.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/projects/domain/model/project.dart';
+import 'package:togli_app/core/domain/typedefs.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/projects/domain/model/project.dart';
 
 abstract class ProjectRepository {
   /// Returns a page of projects visible to the caller. Filters compose:

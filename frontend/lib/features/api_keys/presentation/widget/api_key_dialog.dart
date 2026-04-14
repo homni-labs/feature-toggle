@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:feature_toggle_app/app/theme/app_colors.dart';
+import 'package:togli_app/app/theme/app_colors.dart';
 
 class ApiKeyDialogResult {
   final String name;

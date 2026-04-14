@@ -1,7 +1,7 @@
-import 'package:feature_toggle_app/core/domain/typedefs.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/projects/domain/model/project.dart';
-import 'package:feature_toggle_app/features/projects/domain/port/project_repository.dart';
+import 'package:togli_app/core/domain/typedefs.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/projects/domain/model/project.dart';
+import 'package:togli_app/features/projects/domain/port/project_repository.dart';
 
 class UpdateProjectUseCase {
   final ProjectRepository _repo;

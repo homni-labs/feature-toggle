@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'package:fpdart/fpdart.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:feature_toggle_app/app/config/app_config.dart';
-import 'package:feature_toggle_app/core/domain/failure.dart';
-import 'package:feature_toggle_app/core/domain/typedefs.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/environments/domain/model/environment.dart';
-import 'package:feature_toggle_app/features/environments/domain/port/environment_repository.dart';
-import 'package:feature_toggle_app/features/environments/infrastructure/dto/environment_dto.dart';
-import 'package:feature_toggle_app/features/environments/infrastructure/mapper/environment_mapper.dart';
+import 'package:togli_app/app/config/app_config.dart';
+import 'package:togli_app/core/domain/failure.dart';
+import 'package:togli_app/core/domain/typedefs.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/environments/domain/model/environment.dart';
+import 'package:togli_app/features/environments/domain/port/environment_repository.dart';
+import 'package:togli_app/features/environments/infrastructure/dto/environment_dto.dart';
+import 'package:togli_app/features/environments/infrastructure/mapper/environment_mapper.dart';
 
 class RemoteEnvironmentRepository implements EnvironmentRepository {
   RemoteEnvironmentRepository({EnvironmentMapper? mapper})

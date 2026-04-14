@@ -1,8 +1,8 @@
 <div align="center">
 
-# Homni Feature Toggle &mdash; Backend
+# Homni Togli &mdash; Backend
 
-REST API для Homni Feature Toggle.
+REST API для Homni Togli.
 
 **[English documentation](README.md)** &middot; **[README проекта](../README_RU.md)**
 
@@ -21,7 +21,7 @@ infrastructure  →  application  →  domain
 Домен ничего не знает о Spring, базах данных или HTTP.
 
 ```
-src/main/java/com/homni/featuretoggle/
+src/main/java/com/homni/togli/
 ├── domain/
 │   ├── model/          Агрегаты, value objects, enum-ы
 │   └── exception/      Доменные исключения (NotFound, AccessDenied, Conflict, Validation)
@@ -84,6 +84,31 @@ src/main/java/com/homni/featuretoggle/
 - **Единый источник истины** &mdash; дефолты живут только в конфиге, никогда в БД. Каждый проект получает свои независимые строки в таблице `environment`.
 - **Fail-fast валидация** &mdash; `EnvironmentDefaultsValidator` валидирует каждое имя на старте теми же правилами `Environment.validateAndNormalize`. Приложение не поднимется, если хотя бы одно имя нарушает `^[A-Z][A-Z0-9_]*$`, длиннее 50 символов или встречается дважды.
 - **Семантика поля** в `POST /projects`: отсутствие `environments` создаёт **все** дефолты; пустой массив — явный отказ; непустое подмножество — только перечисленные.
+
+---
+
+## База данных
+
+7 таблиц, управляемых миграциями Liquibase:
+
+```
+project
+├── feature_toggle ──* toggle_environment *── environment
+├── project_membership *── app_user
+└── api_key
+```
+
+| Таблица | Ключевые колонки | Примечания |
+|---------|-----------------|------------|
+| `project` | `id`, `slug` (unique), `name`, `archived` | Корневой агрегат |
+| `app_user` | `id`, `oidc_subject` (unique), `email` (unique), `platform_role` | Создаётся автоматически при OIDC-логине |
+| `project_membership` | `project_id`, `user_id`, `role` | Уникально по `(project, user)` |
+| `environment` | `project_id`, `name` | Уникально по `(project, name)` |
+| `feature_toggle` | `project_id`, `name` | Уникально по `(project, name)` |
+| `toggle_environment` | `toggle_id`, `environment_id`, `enabled` | Композитный PK, состояние per-env |
+| `api_key` | `project_id`, `token_hash` (unique), `active`, `expires_at` | SHA-256 хеш, filtered index по активным ключам |
+
+Все ID — UUID. Временные метки — `TIMESTAMPTZ`. Каскадное удаление на `toggle_environment` (через toggle) и `project_membership` (через user).
 
 ---
 

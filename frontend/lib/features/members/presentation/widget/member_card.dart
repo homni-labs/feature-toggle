@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:feature_toggle_app/app/theme/app_colors.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/project_role.dart';
-import 'package:feature_toggle_app/features/members/domain/model/project_membership.dart';
+import 'package:togli_app/app/theme/app_colors.dart';
+import 'package:togli_app/core/domain/value_objects/project_role.dart';
+import 'package:togli_app/features/members/domain/model/project_membership.dart';
 
 /// Compact card-row for a project member, matching Users V5 Grouped style.
 ///

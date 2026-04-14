@@ -1,10 +1,10 @@
-<#-- Custom Feature Toggle login theme -->
+<#-- Custom Togli login theme -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Feature Toggle — Sign In</title>
+    <title>Togli — Sign In</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
@@ -36,7 +36,7 @@
         <div class="branding">
             <div class="logo-wrap">
                 <div class="logo-circle">
-                    <img src="${url.resourcesPath}/img/logo.jpeg" alt="Feature Toggle" class="logo-img">
+                    <img src="${url.resourcesPath}/img/logo.jpeg" alt="Togli" class="logo-img">
                 </div>
             </div>
             <div class="tagline" aria-label="feature plus toggle is togli">

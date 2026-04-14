@@ -3,16 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'package:feature_toggle_app/app/di/injection.dart';
-import 'package:feature_toggle_app/app/router/app_router.dart';
-import 'package:feature_toggle_app/features/auth/application/bloc/auth_cubit.dart';
-import 'package:feature_toggle_app/features/auth/application/bloc/auth_state.dart';
-import 'package:feature_toggle_app/app/theme/app_colors.dart';
-import 'package:feature_toggle_app/app/theme/app_theme.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/project_role.dart';
-import 'package:feature_toggle_app/core/presentation/widgets/animated_background.dart';
-import 'package:feature_toggle_app/core/domain/failure.dart';
-import 'package:feature_toggle_app/features/projects/domain/port/project_repository.dart';
+import 'package:togli_app/app/di/injection.dart';
+import 'package:togli_app/app/router/app_router.dart';
+import 'package:togli_app/features/auth/application/bloc/auth_cubit.dart';
+import 'package:togli_app/features/auth/application/bloc/auth_state.dart';
+import 'package:togli_app/app/theme/app_colors.dart';
+import 'package:togli_app/app/theme/app_theme.dart';
+import 'package:togli_app/core/domain/value_objects/project_role.dart';
+import 'package:togli_app/core/presentation/widgets/animated_background.dart';
+import 'package:togli_app/core/domain/failure.dart';
+import 'package:togli_app/features/projects/domain/port/project_repository.dart';
 
 enum _PageId { toggles, environments, members, apiKeys, settings }
 enum _ProjectError { none, forbidden, notFound }

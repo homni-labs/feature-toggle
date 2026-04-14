@@ -2,22 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:feature_toggle_app/app/di/injection.dart';
-import 'package:feature_toggle_app/app/theme/app_colors.dart';
-import 'package:feature_toggle_app/app/theme/app_theme.dart';
-import 'package:feature_toggle_app/core/presentation/widgets/animated_background.dart';
-import 'package:feature_toggle_app/features/auth/application/bloc/auth_cubit.dart';
-import 'package:feature_toggle_app/features/auth/application/bloc/auth_state.dart';
+import 'package:togli_app/app/di/injection.dart';
+import 'package:togli_app/app/theme/app_colors.dart';
+import 'package:togli_app/app/theme/app_theme.dart';
+import 'package:togli_app/core/presentation/widgets/animated_background.dart';
+import 'package:togli_app/features/auth/application/bloc/auth_cubit.dart';
+import 'package:togli_app/features/auth/application/bloc/auth_state.dart';
 
-class FeatureToggleApp extends StatelessWidget {
-  const FeatureToggleApp({super.key});
+class TogliApp extends StatelessWidget {
+  const TogliApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: sl<AuthCubit>(),
       child: MaterialApp.router(
-        title: 'Feature Toggle',
+        title: 'Togli',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light(),
         routerConfig: sl<GoRouter>(),

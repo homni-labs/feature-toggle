@@ -1,11 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/projects/application/bloc/projects_state.dart';
-import 'package:feature_toggle_app/features/projects/application/usecase/create_project_usecase.dart';
-import 'package:feature_toggle_app/features/projects/application/usecase/load_projects_usecase.dart';
-import 'package:feature_toggle_app/features/projects/application/usecase/update_project_usecase.dart';
-import 'package:feature_toggle_app/features/projects/domain/model/project.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/projects/application/bloc/projects_state.dart';
+import 'package:togli_app/features/projects/application/usecase/create_project_usecase.dart';
+import 'package:togli_app/features/projects/application/usecase/load_projects_usecase.dart';
+import 'package:togli_app/features/projects/application/usecase/update_project_usecase.dart';
+import 'package:togli_app/features/projects/domain/model/project.dart';
 
 class ProjectsCubit extends Cubit<ProjectsState> {
   final LoadProjectsUseCase _loadProjects;

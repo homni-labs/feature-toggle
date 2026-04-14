@@ -3,18 +3,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:feature_toggle_app/app/di/injection.dart';
-import 'package:feature_toggle_app/app/router/app_shell.dart';
-import 'package:feature_toggle_app/app/router/shell_page.dart';
-import 'package:feature_toggle_app/features/auth/application/bloc/auth_cubit.dart';
-import 'package:feature_toggle_app/features/auth/application/bloc/auth_state.dart';
-import 'package:feature_toggle_app/features/projects/presentation/screen/projects_screen.dart';
-import 'package:feature_toggle_app/features/users/presentation/screen/users_screen.dart';
-import 'package:feature_toggle_app/features/toggles/presentation/screen/toggles_screen.dart';
-import 'package:feature_toggle_app/features/environments/presentation/screen/environments_screen.dart';
-import 'package:feature_toggle_app/features/members/presentation/screen/members_screen.dart';
-import 'package:feature_toggle_app/features/api_keys/presentation/screen/api_keys_screen.dart';
-import 'package:feature_toggle_app/features/projects/presentation/screen/project_settings_screen.dart';
+import 'package:togli_app/app/di/injection.dart';
+import 'package:togli_app/app/router/app_shell.dart';
+import 'package:togli_app/app/router/shell_page.dart';
+import 'package:togli_app/features/auth/application/bloc/auth_cubit.dart';
+import 'package:togli_app/features/auth/application/bloc/auth_state.dart';
+import 'package:togli_app/features/projects/presentation/screen/projects_screen.dart';
+import 'package:togli_app/features/users/presentation/screen/users_screen.dart';
+import 'package:togli_app/features/toggles/presentation/screen/toggles_screen.dart';
+import 'package:togli_app/features/environments/presentation/screen/environments_screen.dart';
+import 'package:togli_app/features/members/presentation/screen/members_screen.dart';
+import 'package:togli_app/features/api_keys/presentation/screen/api_keys_screen.dart';
+import 'package:togli_app/features/projects/presentation/screen/project_settings_screen.dart';
 
 abstract final class AppRoutes {
   static const projects = '/projects';

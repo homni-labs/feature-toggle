@@ -1,7 +1,7 @@
 {
   "apiBaseUrl": "http://localhost:8081",
-  "oidcIssuer": "http://localhost:8180/realms/feature-toggle",
-  "oidcClientId": "feature-toggle-frontend",
+  "oidcIssuer": "http://localhost:8180/realms/togli",
+  "oidcClientId": "togli-frontend",
   "oidcRedirectUri": "http://localhost:3000/callback",
   "oidcPostLogoutRedirectUri": "http://localhost:3000/"
 }

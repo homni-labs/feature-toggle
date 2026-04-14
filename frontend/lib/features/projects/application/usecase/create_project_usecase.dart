@@ -1,6 +1,6 @@
-import 'package:feature_toggle_app/core/domain/typedefs.dart';
-import 'package:feature_toggle_app/features/projects/domain/model/project.dart';
-import 'package:feature_toggle_app/features/projects/domain/port/project_repository.dart';
+import 'package:togli_app/core/domain/typedefs.dart';
+import 'package:togli_app/features/projects/domain/model/project.dart';
+import 'package:togli_app/features/projects/domain/port/project_repository.dart';
 
 class CreateProjectUseCase {
   final ProjectRepository _repo;

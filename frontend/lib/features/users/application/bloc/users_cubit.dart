@@ -1,9 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/users/application/bloc/users_state.dart';
-import 'package:feature_toggle_app/features/users/application/usecase/load_users_usecase.dart';
-import 'package:feature_toggle_app/features/users/application/usecase/update_user_usecase.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/users/application/bloc/users_state.dart';
+import 'package:togli_app/features/users/application/usecase/load_users_usecase.dart';
+import 'package:togli_app/features/users/application/usecase/update_user_usecase.dart';
 
 class UsersCubit extends Cubit<UsersState> {
   final LoadUsersUseCase _loadUsers;

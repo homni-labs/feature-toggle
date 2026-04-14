@@ -1,7 +1,7 @@
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/project_role.dart';
-import 'package:feature_toggle_app/features/api_keys/domain/model/api_key.dart';
-import 'package:feature_toggle_app/features/api_keys/infrastructure/dto/api_key_dto.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/core/domain/value_objects/project_role.dart';
+import 'package:togli_app/features/api_keys/domain/model/api_key.dart';
+import 'package:togli_app/features/api_keys/infrastructure/dto/api_key_dto.dart';
 
 class ApiKeyMapper {
   ApiKey toDomain(ApiKeyDto dto) {

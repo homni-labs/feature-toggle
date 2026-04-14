@@ -1,4 +1,4 @@
-import 'package:feature_toggle_app/app/config/runtime_config.dart';
+import 'package:togli_app/app/config/runtime_config.dart';
 
 class OidcConfig {
   static String get issuer => RuntimeConfig.oidcIssuer;

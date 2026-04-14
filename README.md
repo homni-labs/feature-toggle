@@ -1,9 +1,9 @@
 <div align="center">
 
 <table><tr>
-<td><img src="assets/feature_toggle_logo.jpeg" width="80" alt="Homni Feature Toggle"></td>
+<td><img src="assets/feature_toggle_logo.jpeg" width="80" alt="Homni Togli"></td>
 <td>
-<h1>Homni Feature Toggle</h1>
+<h1>Homni Togli</h1>
 <p>Open-source, self-hosted feature flag platform with per-project RBAC, multi-environment control, and built-in observability.</p>
 </td>
 </tr></table>
@@ -19,7 +19,7 @@
 [![Build](https://github.com/homni-labs/feature-toggle/actions/workflows/ci.yml/badge.svg)](https://github.com/homni-labs/feature-toggle/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![GitHub Release](https://img.shields.io/github/v/release/homni-labs/feature-toggle)](https://github.com/homni-labs/feature-toggle/releases)
-[![Docker Pulls](https://img.shields.io/docker/pulls/zaytsevdv/homni-feature-toggle)](https://hub.docker.com/r/zaytsevdv/homni-feature-toggle)
+[![Docker Pulls](https://img.shields.io/docker/pulls/zaytsevdv/homni-togli)](https://hub.docker.com/r/zaytsevdv/homni-togli)
 [![GitHub Stars](https://img.shields.io/github/stars/homni-labs/feature-toggle?style=social)](https://github.com/homni-labs/feature-toggle)
 
 </div>
@@ -233,10 +233,10 @@ All variables have sensible defaults for local development.
 |----------|---------|-------------|
 | `DB_HOST` | `localhost` | PostgreSQL host |
 | `DB_PORT` | `5432` | PostgreSQL port |
-| `DB_NAME` | `homni_feature_toggle` | Database name |
+| `DB_NAME` | `homni_togli` | Database name |
 | `DB_USER` | `homni` | Database user |
 | `DB_PASSWORD` | `homni` | Database password |
-| `OIDC_ISSUER_URI` | `http://localhost:8180/realms/feature-toggle` | OIDC issuer URI |
+| `OIDC_ISSUER_URI` | `http://localhost:8180/realms/togli` | OIDC issuer URI |
 | `OIDC_ADMIN_EMAIL` | `admin@homni.local` | First admin email (bootstrapped on first login) |
 | `APP_DEFAULT_ENVIRONMENTS` | `DEV,TEST,PROD` | Comma-separated default environment names. Each must match `^[A-Z][A-Z0-9_]*$` (max 50 chars). Validated on startup. |
 | `CORS_ORIGINS` | `*` | Allowed CORS origins |
@@ -253,8 +253,8 @@ Runtime configuration loaded from `/config.json` at startup. Defaults work out o
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `apiBaseUrl` | `http://localhost:8081` | Backend API URL |
-| `oidcIssuer` | `http://localhost:8180/realms/feature-toggle` | OIDC issuer |
-| `oidcClientId` | `feature-toggle-frontend` | OIDC client ID |
+| `oidcIssuer` | `http://localhost:8180/realms/togli` | OIDC issuer |
+| `oidcClientId` | `togli-frontend` | OIDC client ID |
 | `oidcRedirectUri` | `http://localhost:3000/callback` | OIDC redirect URI |
 | `oidcPostLogoutRedirectUri` | `http://localhost:3000/` | Post-logout redirect URI |
 
@@ -268,7 +268,7 @@ To use your own provider:
 # docker-compose.yml
 backend:
   environment:
-    OIDC_ISSUER_URI: https://your-sso.example.com/realms/your-realm
+    OIDC_ISSUER_URI: https://sso.example.com/realms/your-realm
     OIDC_ADMIN_EMAIL: your-admin@example.com
 ```
 

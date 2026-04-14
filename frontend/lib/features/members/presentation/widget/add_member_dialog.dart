@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:feature_toggle_app/features/auth/domain/model/user.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/project_role.dart';
-import 'package:feature_toggle_app/app/theme/app_colors.dart';
+import 'package:togli_app/features/auth/domain/model/user.dart';
+import 'package:togli_app/core/domain/value_objects/project_role.dart';
+import 'package:togli_app/app/theme/app_colors.dart';
 
 class AddMemberDialogResult {
   final String userId;

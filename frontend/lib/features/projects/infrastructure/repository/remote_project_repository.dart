@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'package:fpdart/fpdart.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:feature_toggle_app/app/config/app_config.dart';
-import 'package:feature_toggle_app/core/domain/failure.dart';
-import 'package:feature_toggle_app/core/domain/typedefs.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/projects/domain/model/project.dart';
-import 'package:feature_toggle_app/features/projects/domain/port/project_repository.dart';
-import 'package:feature_toggle_app/features/projects/infrastructure/dto/project_dto.dart';
-import 'package:feature_toggle_app/features/projects/infrastructure/mapper/project_mapper.dart';
+import 'package:togli_app/app/config/app_config.dart';
+import 'package:togli_app/core/domain/failure.dart';
+import 'package:togli_app/core/domain/typedefs.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/projects/domain/model/project.dart';
+import 'package:togli_app/features/projects/domain/port/project_repository.dart';
+import 'package:togli_app/features/projects/infrastructure/dto/project_dto.dart';
+import 'package:togli_app/features/projects/infrastructure/mapper/project_mapper.dart';
 
 class RemoteProjectRepository implements ProjectRepository {
   RemoteProjectRepository({ProjectMapper? mapper})

@@ -1,8 +1,8 @@
 <div align="center">
 
-# Homni Feature Toggle &mdash; Frontend
+# Homni Togli &mdash; Frontend
 
-Панель управления для Homni Feature Toggle.
+Панель управления для Homni Togli.
 
 **[English documentation](README.md)** &middot; **[README проекта](../README_RU.md)**
 
@@ -44,7 +44,6 @@ Domain ни от чего не зависит. Infrastructure реализует
 | **Value Objects** | `UserId`, `Email`, `ProjectRole` вместо строк &mdash; невалидное состояние невозможно |
 | **Один use-case = один класс** | Единственная ответственность, инъекция через конструктор, ~15 строк |
 | **UI не знает об инфраструктуре** | Presentation-слой не имеет ни одного импорта HTTP, JSON или хранилища |
-| **Contract-first API** | Контроллеры генерируются из OpenAPI-спецификации, не пишутся вручную |
 
 ---
 
@@ -71,6 +70,35 @@ Sealed-состояния и `Either<Failure, T>` работают вместе:
    - `Loading` &rarr; `Error(failure)` при ошибке
 3. **UI** использует `BlocConsumer` &mdash; `listener` для побочных эффектов (snackbar, навигация), `builder` для рендеринга
 4. **Exhaustive switch** &mdash; компилятор Dart отлавливает необработанные состояния
+
+---
+
+## Обработка ошибок
+
+Ошибки проходят от HTTP-ответа до UI через типизированные значения &mdash; исключения не пересекают границы слоёв.
+
+```
+HTTP status code
+  → Repository._mapError() → подкласс Failure
+    → FutureEither<T> (Either<Failure, T>)
+      → Cubit.fold() → emit(Error(failure))
+        → BlocListener → Snackbar (warning / error)
+        → BlocBuilder  → Страница ошибки с Retry
+```
+
+**Типы ошибок** (sealed class):
+
+| Failure | HTTP | UI |
+|---------|------|----|
+| `AuthFailure` | 401 | Обновление токена / повторный вход |
+| `ForbiddenFailure` | 403 | Полноэкранная страница "Доступ запрещён" |
+| `NotFoundFailure` | 404 | Жёлтый snackbar-предупреждение |
+| `ConflictFailure` | 409 | Жёлтый snackbar-предупреждение |
+| `ValidationFailure` | 4xx | Красный snackbar-ошибка |
+| `ServerFailure` | 5xx | Красный snackbar-ошибка |
+| `NetworkFailure` | timeout / нет соединения | Красный snackbar-ошибка |
+
+Каждый метод репозитория возвращает `FutureEither<T>` &mdash; никаких `try/catch` в cubit-ах или UI.
 
 ---
 

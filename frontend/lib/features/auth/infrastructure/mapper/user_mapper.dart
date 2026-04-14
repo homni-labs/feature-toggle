@@ -1,8 +1,8 @@
-import 'package:feature_toggle_app/core/domain/value_objects/email.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/platform_role.dart';
-import 'package:feature_toggle_app/features/auth/domain/model/user.dart';
-import 'package:feature_toggle_app/features/auth/infrastructure/dto/user_dto.dart';
+import 'package:togli_app/core/domain/value_objects/email.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/core/domain/value_objects/platform_role.dart';
+import 'package:togli_app/features/auth/domain/model/user.dart';
+import 'package:togli_app/features/auth/infrastructure/dto/user_dto.dart';
 
 class UserMapper {
   User toDomain(UserDto dto) {

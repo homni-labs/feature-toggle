@@ -2,7 +2,7 @@ services:
   postgres:
     image: postgres:17-alpine
     environment:
-      POSTGRES_DB: homni_feature_toggle
+      POSTGRES_DB: homni_togli
       POSTGRES_USER: homni
       POSTGRES_PASSWORD: homni
     ports:
@@ -10,7 +10,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U homni -d homni_feature_toggle"]
+      test: ["CMD-SHELL", "pg_isready -U homni -d homni_togli"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -25,23 +25,23 @@ services:
       - "8180:8080"
       - "9000:9000"
     volumes:
-      - ./sso/keycloak/feature-toggle-realm.json:/opt/keycloak/data/import/feature-toggle-realm.json:ro
+      - ./sso/keycloak/togli-realm.json:/opt/keycloak/data/import/togli-realm.json:ro
       - ./sso/keycloak/themes/dark-theme:/opt/keycloak/themes/dark-theme:ro
       - ./sso/keycloak/themes/light-theme:/opt/keycloak/themes/light-theme:ro
     restart: unless-stopped
 
   backend:
     build: ./backend
-    image: zaytsevdv/homni-feature-toggle:latest
+    image: zaytsevdv/homni-togli:latest
     ports:
       - "8080:8080"
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_NAME: homni_feature_toggle
+      DB_NAME: homni_togli
       DB_USER: homni
       DB_PASSWORD: homni
-      OIDC_ISSUER_URI: http://keycloak:8080/realms/feature-toggle
+      OIDC_ISSUER_URI: http://keycloak:8080/realms/togli
       OIDC_ADMIN_EMAIL: admin@homni.local
       CORS_ORIGINS: http://localhost:3000
       APP_DEFAULT_ENVIRONMENTS: DEV,TEST,PROD
@@ -98,7 +98,7 @@ services:
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter:v0.19.0
     environment:
-      DATA_SOURCE_NAME: "postgresql://homni:homni@postgres:5432/homni_feature_toggle?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://homni:homni@postgres:5432/homni_togli?sslmode=disable"
     ports:
       - "9187:9187"
     depends_on:

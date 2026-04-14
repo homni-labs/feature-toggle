@@ -1,5 +1,5 @@
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/project_role.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/core/domain/value_objects/project_role.dart';
 
 class ProjectMembership {
   final MembershipId id;

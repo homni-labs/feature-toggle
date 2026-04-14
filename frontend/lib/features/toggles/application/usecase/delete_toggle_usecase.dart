@@ -1,6 +1,6 @@
-import 'package:feature_toggle_app/core/domain/typedefs.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/toggles/domain/port/toggle_repository.dart';
+import 'package:togli_app/core/domain/typedefs.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/toggles/domain/port/toggle_repository.dart';
 
 class DeleteToggleUseCase {
   final ToggleRepository _repo;

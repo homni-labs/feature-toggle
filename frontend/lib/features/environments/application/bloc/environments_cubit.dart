@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/environments/application/bloc/environments_state.dart';
-import 'package:feature_toggle_app/features/environments/application/usecase/create_environment_usecase.dart';
-import 'package:feature_toggle_app/features/environments/application/usecase/delete_environment_usecase.dart';
-import 'package:feature_toggle_app/features/environments/application/usecase/load_environments_usecase.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/environments/application/bloc/environments_state.dart';
+import 'package:togli_app/features/environments/application/usecase/create_environment_usecase.dart';
+import 'package:togli_app/features/environments/application/usecase/delete_environment_usecase.dart';
+import 'package:togli_app/features/environments/application/usecase/load_environments_usecase.dart';
 
 class EnvironmentsCubit extends Cubit<EnvironmentsState> {
   final LoadEnvironmentsUseCase _loadEnvironments;

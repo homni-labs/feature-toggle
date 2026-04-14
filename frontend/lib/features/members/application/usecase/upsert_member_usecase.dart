@@ -1,7 +1,7 @@
-import 'package:feature_toggle_app/core/domain/typedefs.dart';
-import 'package:feature_toggle_app/core/domain/value_objects/entity_id.dart';
-import 'package:feature_toggle_app/features/members/domain/model/project_membership.dart';
-import 'package:feature_toggle_app/features/members/domain/port/member_repository.dart';
+import 'package:togli_app/core/domain/typedefs.dart';
+import 'package:togli_app/core/domain/value_objects/entity_id.dart';
+import 'package:togli_app/features/members/domain/model/project_membership.dart';
+import 'package:togli_app/features/members/domain/port/member_repository.dart';
 
 class UpsertMemberUseCase {
   final MemberRepository _repo;

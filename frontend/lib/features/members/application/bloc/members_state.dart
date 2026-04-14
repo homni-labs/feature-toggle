@@ -1,5 +1,5 @@
-import 'package:feature_toggle_app/core/domain/failure.dart';
-import 'package:feature_toggle_app/features/members/domain/model/project_membership.dart';
+import 'package:togli_app/core/domain/failure.dart';
+import 'package:togli_app/features/members/domain/model/project_membership.dart';
 
 sealed class MembersState {
   const MembersState();

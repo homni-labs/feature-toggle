@@ -1,8 +1,8 @@
 <div align="center">
 
-# Homni Feature Toggle &mdash; Frontend
+# Homni Togli &mdash; Frontend
 
-Admin dashboard for Homni Feature Toggle.
+Admin dashboard for Homni Togli.
 
 **[Russian documentation](README_RU.md)** &middot; **[Project README](../README.md)**
 
@@ -44,7 +44,6 @@ Domain depends on nothing. Infrastructure implements domain ports. Presentation 
 | **Value Objects** | `UserId`, `Email`, `ProjectRole` instead of raw strings &mdash; invalid state is unrepresentable |
 | **One use-case = one class** | Single-responsibility, constructor-injected, max ~15 lines |
 | **No infrastructure in UI** | Presentation layer has zero knowledge of HTTP, JSON, or storage |
-| **Contract-first API** | Controllers generated from OpenAPI spec, not hand-written |
 
 ---
 
@@ -71,6 +70,35 @@ Sealed states and `Either<Failure, T>` work together:
    - `Loading` &rarr; `Error(failure)` on failure
 3. **UI** uses `BlocConsumer` &mdash; `listener` for side effects (snackbar, navigation), `builder` for rendering
 4. **Exhaustive switch** &mdash; Dart compiler catches any unhandled state
+
+---
+
+## Error Handling
+
+Errors flow from HTTP response to UI through typed values &mdash; no exceptions cross layer boundaries.
+
+```
+HTTP status code
+  → Repository._mapError() → Failure subclass
+    → FutureEither<T> (Either<Failure, T>)
+      → Cubit.fold() → emit(Error(failure))
+        → BlocListener → Snackbar (warning / error)
+        → BlocBuilder  → Error page with Retry
+```
+
+**Failure types** (sealed class):
+
+| Failure | HTTP | UI |
+|---------|------|----|
+| `AuthFailure` | 401 | Token refresh / re-login |
+| `ForbiddenFailure` | 403 | Full-screen "Access Denied" page |
+| `NotFoundFailure` | 404 | Yellow warning snackbar |
+| `ConflictFailure` | 409 | Yellow warning snackbar |
+| `ValidationFailure` | 4xx | Red error snackbar |
+| `ServerFailure` | 5xx | Red error snackbar |
+| `NetworkFailure` | timeout / no connection | Red error snackbar |
+
+Every repository method returns `FutureEither<T>` &mdash; no `try/catch` in cubits or UI.
 
 ---
 
