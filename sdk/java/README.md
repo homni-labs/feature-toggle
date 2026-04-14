@@ -157,6 +157,25 @@ Call `client.refresh()` to force an immediate refresh.
 
 ---
 
+## API Reference
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `isEnabled(name)` | `boolean` | Check toggle in default environment. Returns `false` on any error |
+| `isEnabled(name, env)` | `boolean` | Check toggle in explicit environment. Returns `false` on any error |
+| `toggle(name)` | `Toggle` | Get full toggle details. Throws `TogliNotFoundException` if not found |
+| `allToggles()` | `List<Toggle>` | All toggles in the project |
+| `allEnvironments()` | `List<EnvironmentInfo>` | All environments in the project |
+| `projectInfo()` | `ProjectInfo` | Project metadata (id, name, slug, archived) |
+| `evaluate(name, Runnable, Runnable)` | `void` | Run enabled/disabled action based on toggle state |
+| `evaluate(name, Supplier, Supplier)` | `<T>` | Return enabled/disabled value based on toggle state |
+| `proxy(Class, enabled, disabled)` | `<T>` | Create interface proxy with `@FeatureToggle` routing |
+| `refresh()` | `void` | Force immediate cache refresh |
+
+All `evaluate` and `proxy` methods also have overloads with explicit environment parameter.
+
+---
+
 ## Error Handling
 
 `isEnabled()` **never throws** and **never crashes** your application. On any error (network failure, server 500, timeout) it silently returns `false`.

@@ -10,7 +10,7 @@
 
 <p>
   <a href="#быстрый-старт">Быстрый старт</a> &middot;
-  <a href="#дорожная-карта">Roadmap</a>
+  <a href="#дорожная-карта">Дорожная карта</a>
 </p>
 
 **[English documentation](README.md)**
