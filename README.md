@@ -403,7 +403,6 @@ If you have questions, ideas, or suggestions about the project &mdash; feel free
 
 ## Roadmap
 
-- [x] Java SDK &mdash; zero-dependency client library ([sdk/java](sdk/java/README.md))
 - [ ] Audit log &mdash; track all user actions
 - [ ] Webhooks &mdash; notify external systems on toggle state changes
 - [ ] Scheduled toggles &mdash; auto-enable / disable at a specific time
