@@ -29,6 +29,7 @@
 
 - [Why Togli?](#why-togli)
 - [Features](#features)
+- [Screenshots](#screenshots)
 - [Quick Start](#quick-start)
 - [Architecture](#architecture)
 - [SDK](#sdk)
@@ -76,11 +77,37 @@ Most feature flag tools are SaaS-only, charge per seat, or lock you out of granu
 
 ---
 
+<a id="screenshots"></a>
+
+## 📸 Screenshots
+
+<details>
+<summary>Click to expand</summary>
+
+### Projects Dashboard
+![Projects](assets/screenshots/01-projects.png)
+
+### Toggle Management
+![Toggles](assets/screenshots/02-toggles.png)
+
+### Team Members & RBAC
+![Members](assets/screenshots/03-members.png)
+
+### API Keys & SDK Integration
+![API Keys](assets/screenshots/04-api-keys.png)
+
+### Observability (Grafana)
+![Grafana](assets/screenshots/05-grafana.png)
+
+</details>
+
+---
+
 <a id="quick-start"></a>
 
 ## 🚀 Quick Start
 
-### Option A: Pull from Docker Hub (recommended)
+### Option A: Pull from Docker Hub
 
 Pre-built images are available on Docker Hub — no need to build anything locally:
 
@@ -144,13 +171,13 @@ curl http://localhost:8080/actuator/health
                           │  Browser  │
                           └─────┬─────┘
                                 │
-                   ┌────────────┼────────────┐
+                   ┌────────────┼─────────────┐
                    │            │             │
-            ┌──────┴──────┐    │     ┌───────┴───────┐
-            │  Frontend   │    │     │     SSO       │
-            │  Dashboard  │◄───┘     │  OIDC Provider│
-            └──────┬──────┘          └───────┬───────┘
-                   │                         │
+            ┌──────┴──────┐     │     ┌───────┴───────┐
+            │  Frontend   │     │     │     SSO       │
+            │  Dashboard  │ ◄───┘     │  OIDC Provider│
+            └──────┬──────┘           └───────┬───────┘
+                   │                          │
                    │    REST API + JWT        │
                    └────────────┬─────────────┘
                                 │
@@ -451,8 +478,6 @@ If you have questions, ideas, or suggestions about the project &mdash; feel free
 - [ ] Scheduled toggles &mdash; auto-enable / disable at a specific time
 - [ ] Stale toggle detection &mdash; find toggles that haven't changed in N days
 - [ ] Toggle promotion pipeline &mdash; promote toggle state through environments (DEV &rarr; TEST &rarr; PROD)
-- [ ] REST API tests &mdash; MockMvc tests for backend controllers, presenters, and security filters
-- [ ] Increase backend test coverage &mdash; target 80%+ overall with JDBC adapter integration tests
 - [ ] Increase SDK test coverage &mdash; WireMock-based tests for HttpTogliApiAdapter and TogliClientBuilder
 - [ ] Frontend tests &mdash; widget tests and BLoC/Cubit unit tests with Flutter test framework
 - [ ] Publish Java SDK to Maven Central

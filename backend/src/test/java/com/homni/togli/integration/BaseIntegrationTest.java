@@ -9,6 +9,7 @@
 
 package com.homni.togli.integration;
 
+import com.homni.togli.SharedTestContainer;
 import com.homni.togli.application.port.out.CallerPort;
 import com.homni.togli.application.port.out.CallerProjectAccessPort;
 import com.homni.togli.domain.model.AppUser;
@@ -22,7 +23,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 import java.util.UUID;
 
@@ -33,30 +33,16 @@ import static org.mockito.Mockito.when;
  * Base class for integration tests that use a real PostgreSQL database
  * via Testcontainers.
  *
- * <p>The container is started once via a static initializer and stays alive
- * until the JVM exits (Testcontainers Ryuk takes care of cleanup). Spring
- * context is cached and shared across all subclasses — all tests share the
- * same {@code @SpringBootTest} configuration, so the context boots only once.
+ * <p>The container is started once via {@link SharedTestContainer} and
+ * shared across all test classes. Spring context is cached and shared
+ * across all subclasses.
  *
  * <p>Two infrastructure ports ({@link CallerPort} and {@link CallerProjectAccessPort})
  * are mocked since they depend on Spring Security context.
- *
- * <p>Compatible with GitHub Actions (Ubuntu runners have Docker)
- * and local machines (requires Docker Desktop / colima / orbstack).
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ActiveProfiles("test")
 abstract class BaseIntegrationTest {
-
-    static final PostgreSQLContainer<?> postgres;
-
-    static {
-        postgres = new PostgreSQLContainer<>("postgres:17-alpine")
-                .withDatabaseName("togli_test")
-                .withUsername("test")
-                .withPassword("test");
-        postgres.start();
-    }
 
     @MockitoBean
     CallerPort callerPort;
@@ -66,9 +52,9 @@ abstract class BaseIntegrationTest {
 
     @DynamicPropertySource
     static void configureDatabase(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("spring.datasource.url", SharedTestContainer.PG::getJdbcUrl);
+        registry.add("spring.datasource.username", SharedTestContainer.PG::getUsername);
+        registry.add("spring.datasource.password", SharedTestContainer.PG::getPassword);
     }
 
     /**

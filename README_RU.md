@@ -29,6 +29,7 @@
 
 - [Почему Togli?](#почему-togli)
 - [Возможности](#возможности)
+- [Скриншоты](#скриншоты)
 - [Быстрый старт](#быстрый-старт)
 - [Архитектура](#архитектура)
 - [SDK](#sdk)
@@ -76,11 +77,37 @@
 
 ---
 
+<a id="скриншоты"></a>
+
+## 📸 Скриншоты
+
+<details>
+<summary>Нажмите, чтобы развернуть</summary>
+
+### Дашборд проектов
+![Projects](assets/screenshots/01-projects.png)
+
+### Управление тогглами
+![Toggles](assets/screenshots/02-toggles.png)
+
+### Участники и RBAC
+![Members](assets/screenshots/03-members.png)
+
+### API-ключи и SDK-интеграция
+![API Keys](assets/screenshots/04-api-keys.png)
+
+### Мониторинг (Grafana)
+![Grafana](assets/screenshots/05-grafana.png)
+
+</details>
+
+---
+
 <a id="быстрый-старт"></a>
 
 ## 🚀 Быстрый старт
 
-### Вариант A: Скачать из Docker Hub (рекомендуется)
+### Вариант A: Скачать из Docker Hub
 
 Готовые образы доступны в публичном Docker Hub — ничего собирать не нужно:
 
@@ -144,13 +171,13 @@ curl http://localhost:8080/actuator/health
                           │  Browser  │
                           └─────┬─────┘
                                 │
-                   ┌────────────┼────────────┐
+                   ┌────────────┼─────────────┐
                    │            │             │
-            ┌──────┴──────┐    │     ┌───────┴───────┐
-            │  Frontend   │    │     │     SSO       │
-            │  Dashboard  │◄───┘     │  OIDC Provider│
-            └──────┬──────┘          └───────┬───────┘
-                   │                         │
+            ┌──────┴──────┐     │     ┌───────┴───────┐
+            │  Frontend   │     │     │     SSO       │
+            │  Dashboard  │ ◄───┘     │  OIDC Provider│
+            └──────┬──────┘           └───────┬───────┘
+                   │                          │
                    │    REST API + JWT        │
                    └────────────┬─────────────┘
                                 │
@@ -451,8 +478,6 @@ Grafana будет доступна по адресу [localhost:3001](http://lo
 - [ ] Тогглы по расписанию &mdash; автоматическое включение / выключение в заданное время
 - [ ] Обнаружение устаревших тогглов &mdash; поиск тогглов, не менявшихся N дней
 - [ ] Toggle promotion pipeline &mdash; продвижение тогла по окружениям (DEV &rarr; TEST &rarr; PROD)
-- [ ] REST API тесты &mdash; MockMvc-тесты для контроллеров, презентеров и security-фильтров бэкенда
-- [ ] Увеличить покрытие бэкенда &mdash; цель 80%+, интеграционные тесты JDBC-адаптеров
 - [ ] Увеличить покрытие SDK &mdash; WireMock-тесты для HttpTogliApiAdapter и TogliClientBuilder
 - [ ] Тесты фронтенда &mdash; widget-тесты и unit-тесты BLoC/Cubit на Flutter test framework
 - [ ] Публикация Java SDK в Maven Central
