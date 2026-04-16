@@ -47,12 +47,14 @@ jobs:
 
       - name: Parse JaCoCo coverage
         id: coverage
+        working-directory: ./backend
         run: |
-          TOTAL=$(awk -F',' 'NR>1 { missed += $8; covered += $9 } END { printf "%d", (covered * 100 / (missed + covered)) }' backend/target/site/jacoco/jacoco.csv)
-          TESTS=$(grep -oP 'Tests run: \K[0-9]+' backend/target/surefire-reports/*.txt | awk '{s+=$1} END {print s}')
+          TOTAL=$(awk -F',' 'NR>1 { missed += $8; covered += $9 } END { printf "%d", (covered * 100 / (missed + covered)) }' target/site/jacoco/jacoco.csv)
+          TESTS=$(grep -c 'Tests run: [1-9]' target/surefire-reports/*.txt || echo 0)
+          COUNT=$(grep 'Tests run:' target/surefire-reports/*.txt | sed 's/.*Tests run: \([0-9]*\).*/\1/' | awk '{s+=$1} END {print s}')
           echo "total=$TOTAL" >> $GITHUB_OUTPUT
-          echo "tests=$TESTS" >> $GITHUB_OUTPUT
-          echo "Coverage: ${TOTAL}%, Tests: ${TESTS}"
+          echo "tests=$COUNT" >> $GITHUB_OUTPUT
+          echo "Coverage: ${TOTAL}%, Tests: ${COUNT}"
 
       - name: Update coverage badge
         if: github.ref == 'refs/heads/main' && env.GIST_SECRET != ''

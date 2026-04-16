@@ -451,6 +451,7 @@ If you have questions, ideas, or suggestions about the project &mdash; feel free
 - [ ] Scheduled toggles &mdash; auto-enable / disable at a specific time
 - [ ] Stale toggle detection &mdash; find toggles that haven't changed in N days
 - [ ] Toggle promotion pipeline &mdash; promote toggle state through environments (DEV &rarr; TEST &rarr; PROD)
+- [ ] REST API tests &mdash; MockMvc tests for controllers, presenters, and security filters
 - [ ] Publish Java SDK to Maven Central
 - [ ] Authentik support &mdash; out-of-the-box integration as an alternative OIDC provider
 - [ ] Frontend theming &mdash; customizable colors, logo, and branding via configuration
