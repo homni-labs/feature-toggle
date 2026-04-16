@@ -1,36 +1,23 @@
-name: CI
+name: Manual Build
 
 on:
-  push:
-    branches:
-      - '**'
+  workflow_dispatch:
+    inputs:
+      component:
+        description: Component to build
+        required: true
+        type: choice
+        options:
+          - all
+          - backend
+          - frontend
+          - sdk
 
 jobs:
-  changes:
-    name: Detect changes
-    runs-on: ubuntu-latest
-    outputs:
-      backend: ${{ steps.filter.outputs.backend }}
-      frontend: ${{ steps.filter.outputs.frontend }}
-      sdk: ${{ steps.filter.outputs.sdk }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            backend:
-              - 'backend/**'
-            frontend:
-              - 'frontend/**'
-            sdk:
-              - 'sdk/java/**'
-
   # ── Backend ────────────────────────────────────────────────
   backend-build:
     name: Backend — Build & Test
-    needs: changes
-    if: needs.changes.outputs.backend == 'true'
+    if: inputs.component == 'backend' || inputs.component == 'all'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,37 +38,7 @@ jobs:
         run: |
           TOTAL=$(awk -F',' 'NR>1 { missed += $8; covered += $9 } END { printf "%d", (covered * 100 / (missed + covered)) }' target/site/jacoco/jacoco.csv)
           COUNT=$(grep 'Tests run:' target/surefire-reports/*.txt | sed 's/.*Tests run: \([0-9]*\).*/\1/' | awk '{s+=$1} END {print s}')
-          echo "total=$TOTAL" >> $GITHUB_OUTPUT
-          echo "tests=$COUNT" >> $GITHUB_OUTPUT
           echo "Coverage: ${TOTAL}%, Tests: ${COUNT}"
-
-      - name: Update coverage badge
-        if: github.ref == 'refs/heads/main' && env.GIST_SECRET != ''
-        uses: schneegans/dynamic-badges-action@v1.7.0
-        with:
-          auth: ${{ secrets.GIST_SECRET }}
-          gistID: ${{ secrets.GIST_ID }}
-          filename: togli-backend-coverage.json
-          label: coverage
-          message: ${{ steps.coverage.outputs.total }}%
-          valColorRange: ${{ steps.coverage.outputs.total }}
-          minColorRange: 40
-          maxColorRange: 80
-        env:
-          GIST_SECRET: ${{ secrets.GIST_SECRET }}
-
-      - name: Update tests badge
-        if: github.ref == 'refs/heads/main' && env.GIST_SECRET != ''
-        uses: schneegans/dynamic-badges-action@v1.7.0
-        with:
-          auth: ${{ secrets.GIST_SECRET }}
-          gistID: ${{ secrets.GIST_ID }}
-          filename: togli-tests.json
-          label: tests
-          message: ${{ steps.coverage.outputs.tests }} passed
-          color: brightgreen
-        env:
-          GIST_SECRET: ${{ secrets.GIST_SECRET }}
 
       - name: Docker build check
         uses: docker/build-push-action@v6
@@ -92,8 +49,7 @@ jobs:
   # ── Frontend ───────────────────────────────────────────────
   frontend-build:
     name: Frontend — Build
-    needs: changes
-    if: needs.changes.outputs.frontend == 'true'
+    if: inputs.component == 'frontend' || inputs.component == 'all'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -111,8 +67,7 @@ jobs:
   # ── Java SDK ──────────────────────────────────────────────
   sdk-build:
     name: SDK — Build & Test
-    needs: changes
-    if: needs.changes.outputs.sdk == 'true'
+    if: inputs.component == 'sdk' || inputs.component == 'all'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
