@@ -1,0 +1,23 @@
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri:
+          jwk-set-uri:
+
+app:
+  oidc:
+    default-admin-email: admin@test.local
+  environments:
+    defaults: DEV,TEST,PROD
+  observability:
+    enabled: false
+
+logging:
+  level:
+    com.homni: WARN
+    org.testcontainers: WARN
