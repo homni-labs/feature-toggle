@@ -78,5 +78,13 @@ jobs:
           java-version: '21'
           cache: maven
 
-      - run: mvn clean install -B
+      - name: Run tests with coverage
+        run: mvn clean test -B
         working-directory: ./sdk/java
+
+      - name: Parse SDK coverage
+        working-directory: ./sdk/java
+        run: |
+          TOTAL=$(awk -F',' 'NR>1 { missed += $8; covered += $9 } END { printf "%d", (covered * 100 / (missed + covered)) }' target/site/jacoco/jacoco.csv)
+          COUNT=$(grep 'Tests run:' target/surefire-reports/*.txt | sed 's/.*Tests run: \([0-9]*\).*/\1/' | awk '{s+=$1} END {print s}')
+          echo "Coverage: ${TOTAL}%, Tests: ${COUNT}"

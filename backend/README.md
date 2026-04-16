@@ -4,7 +4,7 @@
 
 REST API powering Homni Togli.
 
-![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/Zaytsev-Dmitry/7c6f1960722beb94058df9aa0559e543/raw/togli-tests.json&label=tests&style=flat)
+![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/Zaytsev-Dmitry/7c6f1960722beb94058df9aa0559e543/raw/togli-backend-tests.json&label=tests&style=flat)
 ![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/Zaytsev-Dmitry/7c6f1960722beb94058df9aa0559e543/raw/togli-backend-coverage.json&label=coverage&style=flat)
 
 **[Russian documentation](README_RU.md)** &middot; **[Project README](../README.md)**
@@ -131,69 +131,6 @@ The backend starts on port **8080**. Liquibase runs migrations automatically.
 API spec: [`src/main/resources/openapi/api.yaml`](src/main/resources/openapi/api.yaml)
 
 Swagger UI: [localhost:8080/docs](http://localhost:8080/docs)
-
----
-
-## 🧪 Testing
-
-Two-layer test suite: **domain unit tests** and **integration tests** (Testcontainers + PostgreSQL).
-
-```bash
-mvn test                                                    # all tests
-mvn test -Dtest="com.homni.togli.domain.model.*Test"        # unit only
-mvn test -Dtest="com.homni.togli.integration.*"             # integration only
-```
-
-### Domain Unit Tests (87 tests)
-
-Pure Java, no Spring context, no mocks. Randomized data on every run.
-
-| Test class | What it covers |
-|------------|----------------|
-| `FeatureToggleTest` | Constructor invariants, env state management, update operations |
-| `ProjectTest` | Archive/unarchive state machine, partial update, ensureNotArchived guard |
-| `AppUserTest` | Role promotion/demotion, active/disabled lifecycle, OIDC binding, access resolution |
-| `ApiKeyTest` | Revoke guard, expiration validation, masked token |
-| `EmailTest` | Format validation, normalization |
-| `ProjectSlugTest` | Length bounds, character format, uppercase normalization |
-| `EnvironmentTest` | `validateAndNormalize` rules (shared across domain) |
-| `EnvironmentDefaultsTest` | Bootstrap modes, override, deduplication |
-| `RoleBasedAccessTest` | ADMIN/EDITOR/READER permission matrix |
-| `ProjectMembershipTest` | Role change, null rejection |
-| `TokenHashTest` | Deterministic hashing, collision resistance |
-| `IssuedApiKeyTest` | Token generation, hash consistency |
-
-### Integration Tests (44 tests)
-
-Full chain: use case &rarr; JDBC adapter &rarr; PostgreSQL. Spring context boots **once** and is shared across all test classes. Requires Docker.
-
-| Test class | What it covers |
-|------------|----------------|
-| `CreateProjectIntegrationTest` | Project + default envs persisted, duplicate slug rejection |
-| `CreateToggleIntegrationTest` | Toggle creation, archived project guard, permission check |
-| `UpdateToggleIntegrationTest` | Enable/disable envs, rename, add/remove environments |
-| `UpdateProjectIntegrationTest` | Rename, archive (bulk-disables toggles), unarchive |
-| `ListProjectsIntegrationTest` | Visibility rules, text search, archived filter, stable counters |
-| `ListTogglesIntegrationTest` | Enabled filter, environment filter, pagination |
-| `DeleteToggleIntegrationTest` | Deletion, not-found, permission check |
-| `DeleteEnvironmentIntegrationTest` | Unused env deletion, in-use guard |
-| `FindOrCreateUserIntegrationTest` | OIDC resolution paths, OIDC binding, admin bootstrap |
-| `UpdateUserIntegrationTest` | Promote, disable, self-modify rejection |
-| `UpsertMemberIntegrationTest` | Add member, role change, permission check |
-| `IssueApiKeyIntegrationTest` | Token generation, hash persistence, expiration |
-
-### Coverage
-
-| Layer | Lines | Covered | Line % |
-|-------|------:|--------:|-------:|
-| Domain model | 457 | 396 | **86%** |
-| Application (use cases) | 399 | 310 | **77%** |
-| Infrastructure (persistence) | 459 | 310 | **67%** |
-| Controllers / presenters | 263 | 52 | 20% |
-| Security | 191 | 56 | 29% |
-| **Total** | **1913** | **1206** | **63%** |
-
-> Controllers, presenters, and security adapters contain no business logic &mdash; they are covered by the OpenAPI contract and manual E2E testing.
 
 ---
 

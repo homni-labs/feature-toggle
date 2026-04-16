@@ -451,7 +451,10 @@ If you have questions, ideas, or suggestions about the project &mdash; feel free
 - [ ] Scheduled toggles &mdash; auto-enable / disable at a specific time
 - [ ] Stale toggle detection &mdash; find toggles that haven't changed in N days
 - [ ] Toggle promotion pipeline &mdash; promote toggle state through environments (DEV &rarr; TEST &rarr; PROD)
-- [ ] REST API tests &mdash; MockMvc tests for controllers, presenters, and security filters
+- [ ] REST API tests &mdash; MockMvc tests for backend controllers, presenters, and security filters
+- [ ] Increase backend test coverage &mdash; target 80%+ overall with JDBC adapter integration tests
+- [ ] Increase SDK test coverage &mdash; WireMock-based tests for HttpTogliApiAdapter and TogliClientBuilder
+- [ ] Frontend tests &mdash; widget tests and BLoC/Cubit unit tests with Flutter test framework
 - [ ] Publish Java SDK to Maven Central
 - [ ] Authentik support &mdash; out-of-the-box integration as an alternative OIDC provider
 - [ ] Frontend theming &mdash; customizable colors, logo, and branding via configuration

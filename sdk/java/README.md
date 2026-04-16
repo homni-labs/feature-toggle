@@ -4,6 +4,9 @@
 
 Zero-dependency Java client for [Togli](../../README.md). No magic, no frameworks — just works.
 
+![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/Zaytsev-Dmitry/7c6f1960722beb94058df9aa0559e543/raw/togli-sdk-tests.json&label=tests&style=flat)
+![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/Zaytsev-Dmitry/7c6f1960722beb94058df9aa0559e543/raw/togli-sdk-coverage.json&label=coverage&style=flat)
+
 **[Russian documentation](README_RU.md)** &middot; **[Project README](../../README.md)**
 
 </div>

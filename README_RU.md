@@ -451,7 +451,10 @@ Grafana будет доступна по адресу [localhost:3001](http://lo
 - [ ] Тогглы по расписанию &mdash; автоматическое включение / выключение в заданное время
 - [ ] Обнаружение устаревших тогглов &mdash; поиск тогглов, не менявшихся N дней
 - [ ] Toggle promotion pipeline &mdash; продвижение тогла по окружениям (DEV &rarr; TEST &rarr; PROD)
-- [ ] REST API тесты &mdash; MockMvc-тесты для контроллеров, презентеров и security-фильтров
+- [ ] REST API тесты &mdash; MockMvc-тесты для контроллеров, презентеров и security-фильтров бэкенда
+- [ ] Увеличить покрытие бэкенда &mdash; цель 80%+, интеграционные тесты JDBC-адаптеров
+- [ ] Увеличить покрытие SDK &mdash; WireMock-тесты для HttpTogliApiAdapter и TogliClientBuilder
+- [ ] Тесты фронтенда &mdash; widget-тесты и unit-тесты BLoC/Cubit на Flutter test framework
 - [ ] Публикация Java SDK в Maven Central
 - [ ] Поддержка Authentik &mdash; готовая интеграция как альтернативный OIDC-провайдер
 - [ ] Кастомизация дизайна &mdash; настройка цветов, логотипа и брендинга через конфигурацию
