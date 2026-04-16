@@ -4,8 +4,8 @@
 
 Zero-dependency Java-клиент для [Togli](../../README_RU.md). Без магии, без фреймворков — просто работает.
 
-![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/Zaytsev-Dmitry/7c6f1960722beb94058df9aa0559e543/raw/togli-sdk-tests.json&label=tests&style=flat)
-![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/Zaytsev-Dmitry/7c6f1960722beb94058df9aa0559e543/raw/togli-sdk-coverage.json&label=coverage&style=flat)
+![Tests](https://img.shields.io/endpoint?url=https%3A%2F%2Fgist.githubusercontent.com%2FZaytsev-Dmitry%2F7c6f1960722beb94058df9aa0559e543%2Fraw%2Ftogli-sdk-tests.json)
+![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fgist.githubusercontent.com%2FZaytsev-Dmitry%2F7c6f1960722beb94058df9aa0559e543%2Fraw%2Ftogli-sdk-coverage.json)
 
 **[English documentation](README.md)** &middot; **[README проекта](../../README_RU.md)**
 

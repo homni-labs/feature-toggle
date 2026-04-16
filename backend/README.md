@@ -4,8 +4,8 @@
 
 REST API powering Homni Togli.
 
-![Tests](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/Zaytsev-Dmitry/7c6f1960722beb94058df9aa0559e543/raw/togli-backend-tests.json&label=tests&style=flat)
-![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/Zaytsev-Dmitry/7c6f1960722beb94058df9aa0559e543/raw/togli-backend-coverage.json&label=coverage&style=flat)
+![Tests](https://img.shields.io/endpoint?url=https%3A%2F%2Fgist.githubusercontent.com%2FZaytsev-Dmitry%2F7c6f1960722beb94058df9aa0559e543%2Fraw%2Ftogli-backend-tests.json)
+![Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fgist.githubusercontent.com%2FZaytsev-Dmitry%2F7c6f1960722beb94058df9aa0559e543%2Fraw%2Ftogli-backend-coverage.json)
 
 **[Russian documentation](README_RU.md)** &middot; **[Project README](../README.md)**
 
